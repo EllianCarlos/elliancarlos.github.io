@@ -21,6 +21,7 @@ const sneakPeak = (postText, imagePostUrl, textBeforeImage, textAfterImage) => {
     imagePost = `<img src="${imagePostUrl}" />`;
   } else {
     const imgReg = new RegExp('<\s*?img\s+[^>]*?\s*src\s*=\s*(["\'])((\\?+.)*?)\1[^>]*?>');
+    // const imgReg = new RegExp('<\\s*?img\\s+[^>]*?\\s*src\\s*=\\s*(["\'])(([\\x3F]+.)*?)\\1[^>]*?>');
     if (postText.match(imgReg)) imagePost = imgReg.exec(postText)[0];
   }
 
@@ -29,6 +30,10 @@ const sneakPeak = (postText, imagePostUrl, textBeforeImage, textAfterImage) => {
 }
 
 module.exports = function (eleventyConfig) {
+
+  // Add watch targets
+  eleventyConfig.addWatchTarget("content/**/*.{svg,webp,png,jpg,jpeg,gif}");
+
   // Add layout alias for posts
   eleventyConfig.addLayoutAlias("post", "layouts/post.njk");
   eleventyConfig.addLayoutAlias("base", "layouts/base.njk");
@@ -37,11 +42,17 @@ module.exports = function (eleventyConfig) {
   //
   // Copy the `styles` directory to the output
   eleventyConfig.addPassthroughCopy("src/styles");
+  eleventyConfig.addPassthroughCopy("src/**/*.png");
+
   // Copy the `public` directory to the output
   eleventyConfig.addPassthroughCopy("public");
 
+  // Plugins
+  // None yet
+
+
   eleventyConfig.addCollection("posts", (collectionApi) => {
-    return collectionApi.getFilteredByGlob("src/posts/*.md");
+    return [ ...collectionApi.getFilteredByGlob("src/posts/**.md"),...collectionApi.getFilteredByGlob("src/posts/*/*.md")].sort((a,b) => b.data.date - a.data.date);
   });
 
   eleventyConfig.addFilter("postDate", date => {
