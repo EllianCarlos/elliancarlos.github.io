@@ -28,7 +28,7 @@ type: index
       rel="stylesheet"
       href="{{relative_path}}/styles/style.css"
       >
-  {% if type == "blog" %}
+  {% if type == "blog" or type == "blogPost" %}
     <link rel="stylesheet" href="{{relative_path}}/styles/blog.css">
   {% endif %}
 </head>
