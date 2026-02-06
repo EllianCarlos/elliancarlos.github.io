@@ -2,3 +2,6 @@ node_modules
 .config
 .upm
 dist
+.devenv*
+devenv.local.nix
+.direnv

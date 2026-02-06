@@ -1,7 +1,7 @@
 {
   "name": "eleventy-website",
   "version": "1.0.0",
-  "description": "An Eleventy website built with pnpm",
+  "description": "An Eleventy website built with bun",
   "scripts": {
     "build": "eleventy",
     "start": "eleventy --serve",
