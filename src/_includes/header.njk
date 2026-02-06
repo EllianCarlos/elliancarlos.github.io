@@ -3,7 +3,12 @@
 <header>
   <div class="container">
     <nav>
-        <ul>
+        <button class="mobile-menu-toggle" aria-label="Toggle menu" aria-expanded="false">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <ul class="nav-menu">
             <li><a href="{{ '/' | i18nUrl(locale) }}">{{ i18n[locale].nav.aboutme }}</a></li>
             <li><a href="/Ellian_Carlos_Resume.pdf">{{ i18n[locale].nav.resume }}</a></li>
             <li><a href="http://lattes.cnpq.br/3423853440338718">{{ i18n[locale].nav.academicCv }}</a></li>
@@ -13,3 +18,28 @@
     </nav>
   </div>
 </header>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const toggle = document.querySelector('.mobile-menu-toggle');
+    const menu = document.querySelector('.nav-menu');
+    
+    if (toggle && menu) {
+      toggle.addEventListener('click', function() {
+        const isExpanded = this.getAttribute('aria-expanded') === 'true';
+        this.setAttribute('aria-expanded', !isExpanded);
+        this.classList.toggle('active');
+        menu.classList.toggle('active');
+      });
+      
+      // Close menu when clicking a link
+      menu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', function() {
+          toggle.classList.remove('active');
+          menu.classList.remove('active');
+          toggle.setAttribute('aria-expanded', 'false');
+        });
+      });
+    }
+  });
+</script>
