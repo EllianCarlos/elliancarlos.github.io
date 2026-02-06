@@ -23,7 +23,9 @@
     "translationWarning": {
       "title": "Automatic Translation",
       "message": "This post was automatically translated from English using a language model (LLM). It may contain inaccuracies or nuances that were lost in translation."
-    }
+    },
+    "publishedOn": "Published",
+    "updatedOn": "Updated"
   },
   "footer": {
     "social": "Social:",

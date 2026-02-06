@@ -7,5 +7,16 @@ ogType: article
 {% include "translationWarning.njk" %}
 <article>
     <h1>{{ title }}</h1>
+    <div class="post-meta">
+        <time datetime="{{ date.toISOString() }}">
+            {{ i18n[locale].post.publishedOn }}: {{ date | postDate }}
+        </time>
+        {% if modified %}
+        <span class="separator">•</span>
+        <time datetime="{{ modified.toISOString() }}">
+            {{ i18n[locale].post.updatedOn }}: {{ modified | postDate }}
+        </time>
+        {% endif %}
+    </div>
     {{ content | safe }}
 </article>

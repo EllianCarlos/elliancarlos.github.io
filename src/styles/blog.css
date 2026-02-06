@@ -23,6 +23,22 @@ article h3 {
   font-size: 1.5rem;
 }
 
+.post-meta {
+  color: var(--pico-muted-color);
+  font-size: 0.9rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--pico-muted-border-color);
+}
+
+.post-meta .separator {
+  margin: 0 0.5rem;
+}
+
+.post-meta time {
+  font-style: italic;
+}
+
 article p {
   line-height: 1.6;
   margin-bottom: 1.5rem;

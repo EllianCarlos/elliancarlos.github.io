@@ -23,7 +23,9 @@
     "translationWarning": {
       "title": "Traducción Automática",
       "message": "Esta publicación fue traducida automáticamente del inglés usando un modelo de lenguaje (LLM). Puede contener imprecisiones o matices que se perdieron en la traducción."
-    }
+    },
+    "publishedOn": "Publicado",
+    "updatedOn": "Actualizado"
   },
   "footer": {
     "social": "Social:",
