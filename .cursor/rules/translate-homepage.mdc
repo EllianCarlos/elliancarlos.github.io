@@ -1,0 +1,41 @@
+---
+description: Automatically prompt for translation when English homepage is updated
+globs: src/en/index.njk
+alwaysApply: false
+---
+
+# Homepage Translation Rule
+
+When the English homepage (`src/en/index.njk`) is updated, **you must translate the changes to all other language versions**:
+
+- **Spanish (LATAM)**: `src/es/index.njk` - Use Latin American Spanish, not European Spanish
+- **Japanese**: `src/ja/index.njk`
+- **Portuguese (Brazilian)**: `src/pt/index.njk` - Use Brazilian Portuguese, not European Portuguese
+
+## Workflow
+
+1. **Identify changes**: Review what was changed in the English version
+2. **Translate content**: Translate the updated content appropriately for each language
+3. **Maintain consistency**: Ensure HTML structure and formatting remain consistent across all versions
+4. **Update all versions**: Apply translations to all three language files
+
+## Translation Quality
+
+- Use natural, idiomatic expressions in each language
+- **Spanish**: Use Latin American Spanish (LATAM) vocabulary and expressions, avoiding Spain-specific terms (e.g., use "computadora" not "ordenador")
+- **Portuguese**: Use Brazilian Portuguese vocabulary, spelling, and expressions (e.g., use "você" not "tu", Brazilian spelling conventions)
+- Maintain the same tone and style across all versions
+- Preserve technical terms appropriately
+- Keep URLs and links properly localized (e.g., `/es/posts`, `/ja/posts`, `/pt/posts`)
+
+## Example
+
+If English text changes from:
+```html
+<p>I'm a Software Engineer at Company X</p>
+```
+
+Update all versions:
+- ES: `<p>Soy Ingeniero de Software en Company X</p>`
+- JA: `<p>私はCompany Xのソフトウェアエンジニアです</p>`
+- PT: `<p>Sou Engenheiro de Software na Company X</p>`
