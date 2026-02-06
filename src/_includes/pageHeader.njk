@@ -1,0 +1,33 @@
+<div class="page-header">
+  <div class="container">
+    <div class="page-header-content">
+      <h1 class="title">
+        <span class="contrast">➜</span> 
+        <span class="primary">~</span>
+        <a href="{{ '/' | i18nUrl(locale) }}" class="maintitle">
+          <span class="maintitle">elliancarlos</span>
+        </a>
+      </h1>
+      <div class="language-selector">
+        <label for="language-select">🌐</label>
+        <select id="language-select" onchange="window.location.href=this.value">
+          {% for lang in languages %}
+            <option value="{{ page.url | switchLanguage(lang) }}" 
+                    {% if lang == locale %}selected{% endif %}
+                    data-lang="{{ lang }}">
+              {{ i18n[lang].language.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Save language choice when user manually switches
+  document.getElementById('language-select')?.addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    localStorage.setItem('preferredLanguage', selectedOption.dataset.lang);
+  });
+</script>

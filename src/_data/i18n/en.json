@@ -1,0 +1,54 @@
+{
+  "language": {
+    "name": "English",
+    "code": "en"
+  },
+  "nav": {
+    "aboutme": "aboutme",
+    "resume": "resume",
+    "academicCv": "academic cv",
+    "blog": "blog",
+    "contact": "contact"
+  },
+  "contact": {
+    "title": "Contact",
+    "email": "Email",
+    "social": "Social Media"
+  },
+  "home": {
+    "title": "About Me",
+    "readBlog": "Read my Blog!"
+  },
+  "post": {
+    "translationWarning": {
+      "title": "Automatic Translation",
+      "message": "This post was automatically translated from English using a language model (LLM). It may contain inaccuracies or nuances that were lost in translation."
+    }
+  },
+  "footer": {
+    "social": "Social:",
+    "inspired": "This page was inspired by",
+    "copyleft": "Copyleft",
+    "sourceCode": "Source Code"
+  },
+  "seo": {
+    "defaultTitle": "Ellian Carlos",
+    "defaultDescription": "Software engineer, problem solver, and student passionate about languages, mathematics, and building scalable systems.",
+    "home": {
+      "title": "Ellian Carlos",
+      "description": "Brazilian software engineer at Amazon, math and information systems student, passionate about languages and problem solving."
+    },
+    "blog": {
+      "title": "Blog",
+      "description": "Thoughts on software engineering, tools, languages, and technology."
+    },
+    "contact": {
+      "title": "Contact",
+      "description": "Get in touch with Ellian Carlos via email or social media."
+    },
+    "404": {
+      "title": "Page Not Found",
+      "description": "The page you're looking for doesn't exist."
+    }
+  }
+}

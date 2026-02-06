@@ -1,0 +1,22 @@
+<script>
+  (function() {
+    // Only run on root English pages
+    const currentLang = '{{ locale }}' || 'en';
+    const currentPath = window.location.pathname;
+    const supportedLangs = {{ languages | dump | safe }};
+    
+    // Check if user has already chosen a language (use localStorage)
+    const userChosenLang = localStorage.getItem('preferredLanguage');
+    
+    if (!userChosenLang && currentLang === 'en') {
+      // First visit - detect browser language
+      const browserLang = navigator.language.split('-')[0];
+      
+      if (browserLang !== 'en' && supportedLangs.includes(browserLang)) {
+        // Redirect to user's browser language
+        const newUrl = `/${browserLang}${currentPath}`;
+        window.location.href = newUrl;
+      }
+    }
+  })();
+</script>

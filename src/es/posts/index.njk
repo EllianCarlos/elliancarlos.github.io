@@ -1,0 +1,18 @@
+---
+layout: layouts/layout.njk
+relative_path: ..
+type: blog
+---
+{% for post in collections.posts_es %}
+  <article>
+    <h2 class="blog">
+      <a class="blog" href="{{ post.url }}">{{post.data.title}}</a> 
+    </h2>
+    <small> {{ post.data.place  + " -"}} {{ post.data.date | postDate}} ( {{post.data.language}} ) </small>
+    <br />
+    <br />
+    <p>
+      {{ post | sneakPeakPost }}
+    </p>
+  </article>
+{% endfor %}

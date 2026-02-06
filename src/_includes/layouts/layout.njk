@@ -3,7 +3,7 @@ relative_path: '.'
 type: index 
 ---
 <!DOCTYPE html>
-<html data-theme="dark" lang="en">
+<html data-theme="dark" lang="{{ locale or 'en' }}">
 
 <head>
 <!-- Google tag (gtag.js) -->
@@ -17,26 +17,68 @@ type: index
 </script>
 
   <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="color-scheme" content="light dark" />
-  <title>elliancarlos</title>
-    <link
-  rel="stylesheet"
-  href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
->
-  <link 
-      rel="stylesheet"
-      href="{{relative_path}}/styles/style.css"
-      >
-  {% if type == "blog" or type == "blogPost" %}
-    <link rel="stylesheet" href="{{relative_path}}/styles/blog.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark" />
+  
+  <!-- SEO Meta Tags -->
+  {% set pageTitle = seoTitle or title or i18n[locale].seo.defaultTitle %}
+  {% if pageTitle != seo.siteName %}
+    <title>{{ pageTitle }} | {{ seo.siteName }}</title>
+  {% else %}
+    <title>{{ seo.siteName }}</title>
   {% endif %}
+  
+  <meta name="description" content="{{ description or i18n[locale].seo.defaultDescription }}">
+  <meta name="author" content="{{ seo.author.name }}">
+  
+  <!-- Canonical URL -->
+  <link rel="canonical" href="{{ seo.baseUrl }}{{ page.url }}">
+  
+  <!-- Open Graph Tags -->
+  <meta property="og:title" content="{{ pageTitle }}">
+  <meta property="og:description" content="{{ description or i18n[locale].seo.defaultDescription }}">
+  <meta property="og:type" content="{{ ogType or 'website' }}">
+  <meta property="og:url" content="{{ seo.baseUrl }}{{ page.url }}">
+  <meta property="og:image" content="{{ ogImage or seo.defaultImage }}">
+  <meta property="og:locale" content="{{ locale or 'en' }}">
+  <meta property="og:site_name" content="{{ seo.siteName }}">
+  
+  <!-- hreflang tags for SEO -->
+  {% for lang in languages %}
+    <link rel="alternate" hreflang="{{ lang }}" href="{{ seo.baseUrl }}{{ page.url | switchLanguage(lang) }}" />
+  {% endfor %}
+  <link rel="alternate" hreflang="x-default" href="{{ seo.baseUrl }}{{ page.url | switchLanguage('en') }}" />
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  
+  <!-- Performance Optimization -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  
+  <!-- Stylesheets -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+  >
+  <link 
+    rel="stylesheet"
+    href="/styles/style.css"
+  >
+  {% if type == "blog" or type == "blogPost" %}
+    <link rel="stylesheet" href="/styles/blog.css">
+  {% endif %}
+  
+  <!-- Structured Data -->
+  {% include "structuredData.njk" %}
 </head>
 <body style="min-height: 100%;">
-    {% include "header.html" %}
+    {% include "header.njk" %}
     <main class="container page">
         {{ content | safe }}
     </main>
-    {% include "footer.html" %}
+    {% include "footer.njk" %}
+    {% include "languageRedirect.njk" %}
 </body>
 </html>

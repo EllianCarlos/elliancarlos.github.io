@@ -1,0 +1,27 @@
+<details class="dropdown">
+  <summary role="button" class="secondary">
+    🌐 {{ locale | upper }}
+  </summary>
+  <ul>
+    {% for lang in languages %}
+      <li>
+        <a href="{{ page.url | switchLanguage(lang) }}" 
+           {% if lang == locale %}aria-current="page"{% endif %}
+           data-lang="{{ lang }}">
+          {{ i18n[lang].language.name }}
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+</details>
+
+<script>
+  // Save language choice when user manually switches
+  document.querySelectorAll('.language-selector-fixed a').forEach(link => {
+    if (link.dataset.lang) {
+      link.addEventListener('click', function() {
+        localStorage.setItem('preferredLanguage', this.dataset.lang);
+      });
+    }
+  });
+</script>

@@ -1,0 +1,15 @@
+{% include "pageHeader.njk" %}
+
+<header>
+  <div class="container">
+    <nav>
+        <ul>
+            <li><a href="{{ '/' | i18nUrl(locale) }}">{{ i18n[locale].nav.aboutme }}</a></li>
+            <li><a href="{{ '/Ellian_Carlos_Resume.pdf' | i18nUrl(locale) }}">{{ i18n[locale].nav.resume }}</a></li>
+            <li><a href="http://lattes.cnpq.br/3423853440338718">{{ i18n[locale].nav.academicCv }}</a></li>
+            <li><a href="{{ '/posts' | i18nUrl(locale) }}">{{ i18n[locale].nav.blog }}</a></li>
+            <li><a href="{{ '/contact' | i18nUrl(locale) }}">{{ i18n[locale].nav.contact }}</a></li>
+        </ul>
+    </nav>
+  </div>
+</header>

@@ -1,0 +1,8 @@
+{% if locale and locale != "en" %}
+<article class="translation-warning" role="alert">
+  <header>
+    <strong>🤖 {{ i18n[locale].post.translationWarning.title }}</strong>
+  </header>
+  <p>{{ i18n[locale].post.translationWarning.message }}</p>
+</article>
+{% endif %}

@@ -1,0 +1,54 @@
+{
+  "language": {
+    "name": "日本語",
+    "code": "ja"
+  },
+  "nav": {
+    "aboutme": "私について",
+    "resume": "履歴書",
+    "academicCv": "学術CV",
+    "blog": "ブログ",
+    "contact": "連絡先"
+  },
+  "contact": {
+    "title": "連絡先",
+    "email": "メール",
+    "social": "ソーシャルメディア"
+  },
+  "home": {
+    "title": "私について",
+    "readBlog": "ブログを読む！"
+  },
+  "post": {
+    "translationWarning": {
+      "title": "自動翻訳",
+      "message": "この投稿は、言語モデル（LLM）を使用して英語から自動的に翻訳されました。不正確な点や、翻訳で失われたニュアンスが含まれている可能性があります。"
+    }
+  },
+  "footer": {
+    "social": "ソーシャル:",
+    "inspired": "このページは次のページにインスパイアされました",
+    "copyleft": "コピーレフト",
+    "sourceCode": "ソースコード"
+  },
+  "seo": {
+    "defaultTitle": "Ellian Carlos",
+    "defaultDescription": "言語、数学、スケーラブルなシステム構築に情熱を注ぐソフトウェアエンジニア、問題解決者、学生。",
+    "home": {
+      "title": "Ellian Carlos",
+      "description": "Amazonのブラジル人ソフトウェアエンジニア、数学と情報システムの学生、言語と問題解決に情熱を注ぐ。"
+    },
+    "blog": {
+      "title": "ブログ",
+      "description": "ソフトウェアエンジニアリング、ツール、言語、テクノロジーについての考察。"
+    },
+    "contact": {
+      "title": "連絡先",
+      "description": "Ellian Carlosにメールまたはソーシャルメディアで連絡してください。"
+    },
+    "404": {
+      "title": "ページが見つかりません",
+      "description": "お探しのページは存在しません。"
+    }
+  }
+}

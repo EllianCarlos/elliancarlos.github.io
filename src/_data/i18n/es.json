@@ -1,0 +1,54 @@
+{
+  "language": {
+    "name": "Español",
+    "code": "es"
+  },
+  "nav": {
+    "aboutme": "sobre mí",
+    "resume": "currículum",
+    "academicCv": "cv académico",
+    "blog": "blog",
+    "contact": "contacto"
+  },
+  "contact": {
+    "title": "Contacto",
+    "email": "Correo electrónico",
+    "social": "Redes Sociales"
+  },
+  "home": {
+    "title": "Sobre Mí",
+    "readBlog": "¡Lee mi Blog!"
+  },
+  "post": {
+    "translationWarning": {
+      "title": "Traducción Automática",
+      "message": "Esta publicación fue traducida automáticamente del inglés usando un modelo de lenguaje (LLM). Puede contener imprecisiones o matices que se perdieron en la traducción."
+    }
+  },
+  "footer": {
+    "social": "Social:",
+    "inspired": "Esta página fue inspirada por",
+    "copyleft": "Copyleft",
+    "sourceCode": "Código Fuente"
+  },
+  "seo": {
+    "defaultTitle": "Ellian Carlos",
+    "defaultDescription": "Ingeniero de software, solucionador de problemas y estudiante apasionado por los idiomas, las matemáticas y la construcción de sistemas escalables.",
+    "home": {
+      "title": "Ellian Carlos",
+      "description": "Ingeniero de software brasileño en Amazon, estudiante de matemáticas y sistemas de información, apasionado por los idiomas y la resolución de problemas."
+    },
+    "blog": {
+      "title": "Blog",
+      "description": "Reflexiones sobre ingeniería de software, herramientas, idiomas y tecnología."
+    },
+    "contact": {
+      "title": "Contacto",
+      "description": "Ponte en contacto con Ellian Carlos por correo electrónico o redes sociales."
+    },
+    "404": {
+      "title": "Página No Encontrada",
+      "description": "La página que buscas no existe."
+    }
+  }
+}

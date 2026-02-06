@@ -1,8 +1,10 @@
 ---
 layout: layouts/layout.njk
 relative_path: '../..'
-type: blogPost 
+type: blogPost
+ogType: article
 ---
+{% include "translationWarning.njk" %}
 <article>
     <h1>{{ title }}</h1>
     {{ content | safe }}

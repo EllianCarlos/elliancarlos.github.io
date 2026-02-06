@@ -1,0 +1,86 @@
+---
+layout: layouts/layout.njk
+title: 404
+seoTitle: Page Not Found
+description: The page you're looking for doesn't exist.
+type: error
+relative_path: .
+eleventyExcludeFromCollections: true
+permalink: /404.html
+---
+<section id="error-404">
+<h1 id="error-title">404 - Page Not Found</h1>
+<p id="error-message">Oops, this page doesn't exist!</p>
+<p><a id="error-link" href="/">Go back home</a></p>
+</section>
+
+<script>
+  // Detect language from URL path and update 404 message
+  (function() {
+    const path = window.location.pathname;
+    const messages = {
+      en: {
+        title: "404 - Page Not Found",
+        message: "Oops, this page doesn't exist!",
+        link: "Go back home",
+        home: "/"
+      },
+      pt: {
+        title: "404 - Página Não Encontrada",
+        message: "Ops, esta página não existe!",
+        link: "Voltar para o início",
+        home: "/pt/"
+      },
+      es: {
+        title: "404 - Página No Encontrada",
+        message: "¡Ups, esta página no existe!",
+        link: "Volver al inicio",
+        home: "/es/"
+      },
+      ja: {
+        title: "404 - ページが見つかりません",
+        message: "このページは存在しません！",
+        link: "ホームに戻る",
+        home: "/ja/"
+      }
+    };
+    
+    // Detect language from path
+    let lang = 'en';
+    if (path.startsWith('/pt/')) lang = 'pt';
+    else if (path.startsWith('/es/')) lang = 'es';
+    else if (path.startsWith('/ja/')) lang = 'ja';
+    
+    // Update content
+    const msg = messages[lang];
+    document.getElementById('error-title').textContent = msg.title;
+    document.getElementById('error-message').textContent = msg.message;
+    const link = document.getElementById('error-link');
+    link.textContent = msg.link;
+    link.href = msg.home;
+    
+    // Update language selector
+    const select = document.getElementById('language-select');
+    if (select) {
+      // Update selected option based on detected language
+      for (let i = 0; i < select.options.length; i++) {
+        if (select.options[i].dataset.lang === lang) {
+          select.selectedIndex = i;
+          break;
+        }
+      }
+      
+      // Update page header locale display
+      const pageHeader = document.querySelector('.page-header-content h1');
+      if (pageHeader) {
+        const localeSpan = pageHeader.querySelector('.maintitle');
+        if (localeSpan) {
+          const link = localeSpan.closest('a');
+          if (link) {
+            link.href = msg.home;
+          }
+        }
+      }
+    }
+  })();
+</script>

@@ -1,0 +1,75 @@
+{% if page.url == '/' or page.url == '/index.html' %}
+<!-- Person Schema for Homepage -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "{{ seo.author.name }}",
+  "url": "{{ seo.author.url }}",
+  "email": "{{ seo.author.email }}",
+  "jobTitle": "Software Development Engineer",
+  "worksFor": {
+    "@type": "Organization",
+    "name": "Amazon"
+  },
+  "alumniOf": {
+    "@type": "EducationalOrganization",
+    "name": "University of São Paulo"
+  },
+  "sameAs": [
+    "{{ seo.social.github }}",
+    "{{ seo.social.linkedin }}",
+    "{{ seo.social.mastodon }}"
+  ],
+  "knowsLanguage": ["en", "pt", "es", "ja"]
+}
+</script>
+{% endif %}
+
+{% if type == "blog" %}
+<!-- Blog Schema for Blog Index -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  "name": "{{ seo.siteName }} Blog",
+  "description": "{{ i18n[locale].seo.blog.description }}",
+  "url": "{{ seo.baseUrl }}{{ page.url }}",
+  "author": {
+    "@type": "Person",
+    "name": "{{ seo.author.name }}",
+    "url": "{{ seo.author.url }}"
+  }
+}
+</script>
+{% endif %}
+
+{% if type == "blogPost" %}
+<!-- BlogPosting Schema for Blog Posts -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "{{ title }}",
+  "description": "{{ description or (content | striptags | truncate(160)) }}",
+  "author": {
+    "@type": "Person",
+    "name": "{{ seo.author.name }}",
+    "url": "{{ seo.author.url }}"
+  },
+  "datePublished": "{{ date.toISOString() }}",
+  {% if modified %}"dateModified": "{{ modified.toISOString() }}",{% endif %}
+  "url": "{{ seo.baseUrl }}{{ page.url }}",
+  "image": "{{ ogImage or seo.defaultImage }}",
+  "publisher": {
+    "@type": "Person",
+    "name": "{{ seo.author.name }}",
+    "url": "{{ seo.author.url }}"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ seo.baseUrl }}{{ page.url }}"
+  }
+}
+</script>
+{% endif %}
