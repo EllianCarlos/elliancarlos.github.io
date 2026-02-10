@@ -90,6 +90,14 @@ module.exports = function (eleventyConfig) {
     },
   });
 
+  // Pretty-print sitemap XML so URL and lastmod are clearly separate when viewed in browser
+  eleventyConfig.addTransform("prettyPrintSitemap", function (content, outputPath) {
+    if (outputPath && outputPath.endsWith("sitemap.xml")) {
+      return content.replace(/></g, ">\n<");
+    }
+    return content;
+  });
+
   // Language-specific post collections
   languages.forEach(lang => {
     eleventyConfig.addCollection(`posts_${lang}`, (collectionApi) => {
