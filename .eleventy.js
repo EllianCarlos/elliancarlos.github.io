@@ -184,7 +184,7 @@ module.exports = function (eleventyConfig) {
   });
 
   eleventyConfig.addFilter("postDate", date => {
-    return `${date.getFullYear()}-${leftPadDate(date.getMonth() + 1)}-${leftPadDate(date.getDay())}`
+    return `${date.getFullYear()}-${leftPadDate(date.getMonth() + 1)}-${leftPadDate(date.getDate())}`
   });
 
   eleventyConfig.addFilter("sneakPeakPost", function (data) {
