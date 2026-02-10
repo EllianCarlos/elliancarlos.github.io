@@ -17,7 +17,7 @@ Since last year, I did not upgrade my setup of tools too much. But I made some i
 - [Intellij](https://www.jetbrains.com/pt-br/idea/) for Kotlin and Java development.
 - [Firefox](https://www.mozilla.org/pt-BR/firefox/new/) and [qutebrowser](https://qutebrowser.org/).
 - [Oh my zsh](https://ohmyz.sh/) on [Kitty](https://sw.kovidgoyal.net/kitty/).
-- [Gemini Pro](gemini.google.com/) as main LLM.
+- [Gemini Pro](https://gemini.google.com/) as main LLM.
 - [Ticker](https://github.com/achannarasappa/ticker) to get updates on stocks.
 - [Cline](https://cline.bot/) as a code agent and [crewai](https://www.crewai.com/) to build multi-agents workflows.
 

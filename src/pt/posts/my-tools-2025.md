@@ -19,7 +19,7 @@ Desde o ano passado, não atualizei muito minha configuração de ferramentas. M
 - [Intellij](https://www.jetbrains.com/pt-br/idea/) para desenvolvimento Kotlin e Java.
 - [Firefox](https://www.mozilla.org/pt-BR/firefox/new/) e [qutebrowser](https://qutebrowser.org/).
 - [Oh my zsh](https://ohmyz.sh/) no [Kitty](https://sw.kovidgoyal.net/kitty/).
-- [Gemini Pro](gemini.google.com/) como LLM principal.
+- [Gemini Pro](https://gemini.google.com/) como LLM principal.
 - [Ticker](https://github.com/achannarasappa/ticker) para obter atualizações sobre ações.
 - [Cline](https://cline.bot/) como agente de código e [crewai](https://www.crewai.com/) para construir fluxos de trabalho multi-agentes.
 

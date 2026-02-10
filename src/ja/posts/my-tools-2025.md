@@ -19,7 +19,7 @@ description: "2025年の開発ツールキットのアップデート。NixOS、
 - [Intellij](https://www.jetbrains.com/pt-br/idea/) - KotlinとJavaの開発用
 - [Firefox](https://www.mozilla.org/pt-BR/firefox/new/)と[qutebrowser](https://qutebrowser.org/)
 - [Kitty](https://sw.kovidgoyal.net/kitty/)上の[Oh my zsh](https://ohmyz.sh/)
-- [Gemini Pro](gemini.google.com/) - メインLLMとして
+- [Gemini Pro](https://gemini.google.com/) - メインLLMとして
 - [Ticker](https://github.com/achannarasappa/ticker) - 株式の最新情報を取得するため
 - [Cline](https://cline.bot/) - コードエージェントとして、[crewai](https://www.crewai.com/) - マルチエージェントワークフローを構築するため
 
