@@ -5,6 +5,17 @@ const leftPadDate = (n) => {
   return `0${n}`
 }
 
+/** Slug for heading IDs: lowercase, spaces to hyphens, remove non-alphanumeric. */
+function slugifyHeading(text) {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 const sneakPeak = (postText, imagePostUrl, textBeforeImage, textAfterImage) => {
   let firstText = postText.replace(/<[^>]+>/g, "").slice(0, 255) + "...";
 
@@ -47,6 +58,14 @@ module.exports = function (eleventyConfig) {
   // Add layout alias for posts
   eleventyConfig.addLayoutAlias("post", "layouts/post.njk");
   eleventyConfig.addLayoutAlias("base", "layouts/base.njk");
+
+  // Add heading IDs for TOC anchor links (same slug as slugifyHeading so links match)
+  eleventyConfig.amendLibrary("md", (mdLib) => {
+    mdLib.use(require("markdown-it-anchor"), {
+      slugify: slugifyHeading,
+      permalink: false,
+    });
+  });
 
   eleventyConfig.addPassthroughCopy("src/Ellian_Carlos_Resume.pdf");
   eleventyConfig.addPassthroughCopy("src/robots.txt");

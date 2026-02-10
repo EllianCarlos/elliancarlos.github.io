@@ -1,0 +1,6 @@
+{
+  "terminal.integrated.fontFamily": "MesloLGS NF, JetBrainsMono Nerd Font, FiraCode Nerd Font, monospace",
+  "[markdown]": {
+    "editor.wordWrap": "on"
+  }
+}
