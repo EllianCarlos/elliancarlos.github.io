@@ -1,3 +1,5 @@
+const fs = require("fs");
+const path = require("path");
 const sitemap = require("@quasibit/eleventy-plugin-sitemap");
 
 const leftPadDate = (n) => {
@@ -156,13 +158,24 @@ module.exports = function (eleventyConfig) {
     eleventyConfig.addCollection(`searchIndex_${lang}`, (collectionApi) => {
       const posts = collectionApi.getFilteredByGlob(`src/${lang}/posts/**/*.md`)
         .sort((a, b) => b.data.date - a.data.date);
-      return posts.map((p, i) => ({
-        id: String(i),
-        title: p.data.title || "",
-        url: p.url || "",
-        description: p.data.description || "",
-        contentExcerpt: contentExcerptForSearch(p.inputContent),
-      }));
+      return posts.map((p, i) => {
+        let rawContent = "";
+        try {
+          const inputPath = p.inputPath && path.isAbsolute(p.inputPath)
+            ? p.inputPath
+            : path.join(process.cwd(), p.inputPath || "");
+          rawContent = fs.readFileSync(inputPath, "utf8");
+        } catch (_) {
+          rawContent = (p.inputContent || p.templateContent) || "";
+        }
+        return {
+          id: String(i),
+          title: p.data.title || "",
+          url: p.url || "",
+          description: p.data.description || "",
+          contentExcerpt: contentExcerptForSearch(rawContent),
+        };
+      });
     });
   });
 

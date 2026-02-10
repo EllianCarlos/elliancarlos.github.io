@@ -108,17 +108,18 @@
       try {
         var raw = searchIndex.search({ query: query, enrich: true });
         var ids = new Set();
-        function flatten(arr) {
-          return Array.isArray(arr) ? arr.reduce(function (acc, x) {
-            return acc.concat(flatten(x));
-          }, []) : [arr];
+        // FlexSearch returns [{ field, result: [{ id, doc }, ...] }, ...]
+        if (Array.isArray(raw)) {
+          raw.forEach(function (fieldResult) {
+            var arr = fieldResult.result || [];
+            arr.forEach(function (item) {
+              if (item && !ids.has(item.id)) {
+                ids.add(item.id);
+                results.push(item.doc !== undefined ? item.doc : item);
+              }
+            });
+          });
         }
-        flatten(raw).forEach(function (item) {
-          if (item && !ids.has(item.id)) {
-            ids.add(item.id);
-            results.push(item.doc !== undefined ? item.doc : item);
-          }
-        });
       } catch (e) {
         results = fallbackSearch(searchData, query);
       }
