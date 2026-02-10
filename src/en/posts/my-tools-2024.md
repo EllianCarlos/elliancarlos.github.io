@@ -5,6 +5,8 @@ layout: layouts/post.njk
 language: en 
 place: brazil
 description: "A look at the development tools and software I've been using in 2024, including NixOS, Hyprland, Neovim, and more."
+tags:
+  - tools
 ---
 
 I love testing and using new tools, in this year I've decided I'm gonna give it a go to many different tools and programs that I've always wanted to try and discover. I've been having an incredible experience and mostly been having fun configuring and setting up my environments.

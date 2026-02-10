@@ -8,6 +8,9 @@ locale: en
 translationKey: how-to-succeed-in-ai-assisted-coding-interviews
 description:
   "What they are, how to nail them, and how to behave in AI-assisted interviews."
+tags:
+  - ai
+  - career
 ---
 
 Over the last year many companies have started evaluating candidates' Agentic AI and GenAI proficiency, for example Meta, Brex, and Canva. These new interviews assess competency in developing software with LLMs and Agentic AI. See: [Meta's AI-enabled coding interview](https://www.metacareers.com/hiring-process), [Brex's AI-assisted coding interview](https://www.youtube.com/watch?v=U3JHxXYBQXQ), and [Canva's AI-assisted coding interviews](https://www.canva.dev/blog/engineering/yes-you-can-use-ai-in-our-interviews/).

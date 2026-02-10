@@ -19,6 +19,14 @@
     "title": "Sobre Mí",
     "readBlog": "¡Lee mi Blog!"
   },
+  "blog": {
+    "allPosts": "Todos los posts",
+    "postsTagged": "Posts con la etiqueta:",
+    "noPostsWithTag": "No hay posts con esta etiqueta.",
+    "tagged": "Etiquetado:",
+    "searchPlaceholder": "Buscar posts",
+    "noResults": "Sin resultados"
+  },
   "post": {
     "translationWarning": {
       "title": "Traducción Automática",

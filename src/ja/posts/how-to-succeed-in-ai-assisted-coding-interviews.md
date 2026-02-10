@@ -7,6 +7,9 @@ place: ブラジル
 locale: ja
 translationKey: how-to-succeed-in-ai-assisted-coding-interviews
 description: "AI支援面接とは何か、どう攻略するか、そしてAI支援面接での振る舞い方。"
+tags:
+  - ai
+  - career
 ---
 
 この1年で、Meta、Brex、Canvaなど多くの企業が、候補者のエージェントAIやGenAIの習熟度を評価し始めています。こうした新しい面接では、LLMやエージェントAIを使ったソフトウェア開発の能力が問われます。参照：[MetaのAI対応コーディング面接](https://www.metacareers.com/hiring-process)、[BrexのAI支援コーディング面接](https://www.youtube.com/watch?v=U3JHxXYBQXQ)、[CanvaのAI支援コーディング面接](https://www.canva.dev/blog/engineering/yes-you-can-use-ai-in-our-interviews/)。

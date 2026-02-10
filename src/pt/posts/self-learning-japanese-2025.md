@@ -7,6 +7,8 @@ place: brasil
 locale: pt
 translationKey: self-learning-japanese-2025
 description: "Minha jornada aprendendo japonês através de autoestudo usando Wanikani, Anki, Duolingo e outras ferramentas eficazes para dominar uma língua não indo-europeia."
+tags:
+  - japanese
 ---
 
 Tenho tentado aprender uma nova língua com uma escrita e gramática diferentes, algo diferente de qualquer língua Proto-Indo-Europeia.

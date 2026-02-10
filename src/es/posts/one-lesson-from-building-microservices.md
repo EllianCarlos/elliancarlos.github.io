@@ -7,6 +7,8 @@ place: brasil
 locale: es
 translationKey: one-lesson-from-building-microservices
 description: "Por qué los microservicios son una decisión organizacional, no solo arquitectónica. Lecciones clave del libro Building Microservices de Sam Newman y la Ley de Conway."
+tags:
+  - microservices
 ---
 
 ¡Feliz 2026!

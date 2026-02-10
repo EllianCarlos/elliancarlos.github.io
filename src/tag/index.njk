@@ -1,0 +1,33 @@
+---
+layout: layouts/layout.njk
+relative_path: ../..
+type: blog
+pagination:
+  data: collections.tagPages
+  size: 1
+  alias: tagPage
+---
+{% set postsInTag = collections['posts_' + tagPage.lang] | filterByTag(tagPage.tag) %}
+<p><a href="{% if locale == 'en' %}/posts/{% else %}/{{ locale }}/posts/{% endif %}">{{ i18n[locale].blog.allPosts }}</a></p>
+<h1>{{ i18n[locale].blog.postsTagged }} {{ tagPage.tag }}</h1>
+{% if postsInTag.length == 0 %}
+<p>{{ i18n[locale].blog.noPostsWithTag }}</p>
+{% else %}
+{% for post in postsInTag %}
+<article>
+  <h2 class="blog">
+    <a class="blog" href="{{ post.url }}">{{ post.data.title }}</a>
+  </h2>
+  <small>{{ post.data.place + " -" }} {{ post.data.date | postDate }} ( {{ post.data.language }} ) </small>
+  {% if post.data.tags and post.data.tags.length %}
+  <div class="post-tags">
+    {% for tag in post.data.tags %}
+    <a href="{% if locale == 'en' %}/posts/tag/{% else %}/{{ locale }}/posts/tag/{% endif %}{{ tag }}/" class="tag-pill">{{ tag }}</a>
+    {% endfor %}
+  </div>
+  {% endif %}
+  <br />
+  <p>{{ post | sneakPeakPost }}</p>
+</article>
+{% endfor %}
+{% endif %}

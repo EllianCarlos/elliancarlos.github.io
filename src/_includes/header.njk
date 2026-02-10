@@ -3,6 +3,11 @@
 <header>
   <div class="container">
     <nav>
+        {% if type == "blog" %}
+        <div class="blog-search-header">
+          <input type="search" id="blog-search-input-mobile" name="q" placeholder="{{ i18n[locale].blog.searchPlaceholder }}" aria-label="{{ i18n[locale].blog.searchPlaceholder }}">
+        </div>
+        {% endif %}
         <button class="mobile-menu-toggle" aria-label="Toggle menu" aria-expanded="false">
             <span></span>
             <span></span>

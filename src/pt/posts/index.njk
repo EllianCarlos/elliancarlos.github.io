@@ -2,17 +2,34 @@
 layout: layouts/layout.njk
 relative_path: ..
 type: blog
+title: Blog
 ---
+<div id="blog-search-root" data-locale="pt" data-no-results="{{ i18n.pt.blog.noResults }}">
+  <div class="blog-search-in-content">
+    <input type="search" id="blog-search-input" name="q" placeholder="{{ i18n.pt.blog.searchPlaceholder }}" aria-label="{{ i18n.pt.blog.searchPlaceholder }}">
+  </div>
+  <div id="blog-search-results" hidden>
+    <div id="blog-search-results-list"></div>
+  </div>
+  <div id="blog-posts-list">
 {% for post in collections.posts_pt %}
   <article>
     <h2 class="blog">
-      <a class="blog" href="{{ post.url }}">{{post.data.title}}</a> 
+      <a class="blog" href="{{ post.url }}">{{ post.data.title }}</a>
     </h2>
-    <small> {{ post.data.place  + " -"}} {{ post.data.date | postDate}} ( {{post.data.language}} ) </small>
+    <small>{{ post.data.place + " -" }} {{ post.data.date | postDate }} ( {{ post.data.language }} )</small>
+    {% if post.data.tags and post.data.tags.length %}
+    <div class="post-tags">
+      {% for tag in post.data.tags %}
+      <a href="/pt/posts/tag/{{ tag }}/" class="tag-pill">{{ tag }}</a>
+      {% endfor %}
+    </div>
+    {% endif %}
     <br />
-    <br />
-    <p>
-      {{ post | sneakPeakPost }}
-    </p>
+    <p>{{ post | sneakPeakPost }}</p>
   </article>
 {% endfor %}
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/flexsearch@0.7.31/dist/flexsearch.bundle.js"></script>
+<script src="/scripts/search.js"></script>

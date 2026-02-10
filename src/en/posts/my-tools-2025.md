@@ -5,6 +5,8 @@ layout: layouts/post.njk
 language: en 
 place: brazil
 description: "An updated look at my 2025 development toolkit, including improvements to my setup with NixOS, Hyprland, Neovim, and new AI tools."
+tags:
+  - tools
 ---
 
 Since last year, I did not upgrade my setup of tools too much. But I made some improvements.

@@ -5,6 +5,8 @@ layout: layouts/post.njk
 language: en 
 place: brazil
 description: "Why microservices are an organizational decision, not just an architectural one. Key lessons from Sam Newman's Building Microservices and Conway's Law."
+tags:
+  - microservices
 ---
 
 Happy 2026!

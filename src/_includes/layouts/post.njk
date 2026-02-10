@@ -19,4 +19,11 @@ ogType: article
         {% endif %}
     </div>
     {{ content | safe }}
+    {% if tags and tags.length %}
+    <p class="post-tags-label">{{ i18n[locale].blog.tagged }}
+      {% for tag in tags %}
+      <a href="{% if locale == 'en' %}/posts/tag/{% else %}/{{ locale }}/posts/tag/{% endif %}{{ tag }}/" class="tag-pill">{{ tag }}</a>{% if not loop.last %} {% endif %}
+      {% endfor %}
+    </p>
+    {% endif %}
 </article>

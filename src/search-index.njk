@@ -1,0 +1,9 @@
+---
+layout: null
+pagination:
+  data: languages
+  size: 1
+  alias: locale
+permalink: "/search-index-{{ locale }}.json"
+---
+{{ collections['searchIndex_' + locale] | json | safe }}

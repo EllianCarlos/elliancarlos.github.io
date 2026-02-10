@@ -19,6 +19,14 @@
     "title": "私について",
     "readBlog": "ブログを読む！"
   },
+  "blog": {
+    "allPosts": "すべての投稿",
+    "postsTagged": "タグ付き投稿:",
+    "noPostsWithTag": "このタグの投稿はありません。",
+    "tagged": "タグ:",
+    "searchPlaceholder": "投稿を検索",
+    "noResults": "結果がありません"
+  },
   "post": {
     "translationWarning": {
       "title": "自動翻訳",

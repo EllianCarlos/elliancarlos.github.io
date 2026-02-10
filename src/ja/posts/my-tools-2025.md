@@ -7,6 +7,8 @@ place: ブラジル
 locale: ja
 translationKey: my-tools-2025
 description: "2025年の開発ツールキットのアップデート。NixOS、Hyprland、Neovim、新しいAIツールを使った改善点を紹介します。"
+tags:
+  - tools
 ---
 
 昨年以来、ツールのセットアップをそれほど更新していません。しかし、いくつかの改善を行いました。

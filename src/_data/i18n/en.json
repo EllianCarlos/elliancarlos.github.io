@@ -19,6 +19,14 @@
     "title": "About Me",
     "readBlog": "Read my Blog!"
   },
+  "blog": {
+    "allPosts": "All posts",
+    "postsTagged": "Posts tagged:",
+    "noPostsWithTag": "No posts with this tag.",
+    "tagged": "Tagged:",
+    "searchPlaceholder": "Search posts",
+    "noResults": "No results"
+  },
   "post": {
     "translationWarning": {
       "title": "Automatic Translation",

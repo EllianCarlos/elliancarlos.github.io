@@ -16,6 +16,18 @@ function slugifyHeading(text) {
     .replace(/^-|-$/g, "");
 }
 
+/** Strip HTML or Markdown and truncate for search index contentExcerpt (max length in chars). */
+function contentExcerptForSearch(raw, maxLength = 2500) {
+  if (!raw || typeof raw !== "string") return "";
+  const text = raw
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/[#*_`~]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return text.length <= maxLength ? text : text.slice(0, maxLength);
+}
+
 const sneakPeak = (postText, imagePostUrl, textBeforeImage, textAfterImage) => {
   let firstText = postText.replace(/<[^>]+>/g, "").slice(0, 255) + "...";
 
@@ -72,6 +84,7 @@ module.exports = function (eleventyConfig) {
   //
   // Copy the `styles` directory to the output
   eleventyConfig.addPassthroughCopy("src/styles");
+  eleventyConfig.addPassthroughCopy("src/scripts");
   eleventyConfig.addPassthroughCopy("src/**/*.png");
 
   // Copy the `public` directory to the output
@@ -110,6 +123,56 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addCollection("posts", (collectionApi) => {
     return collectionApi.getFilteredByGlob("src/en/posts/**/*.md")
       .sort((a, b) => b.data.date - a.data.date);
+  });
+
+  // Unique tags per language (from posts' frontmatter)
+  languages.forEach(lang => {
+    eleventyConfig.addCollection(`tags_${lang}`, (collectionApi) => {
+      const posts = collectionApi.getFilteredByGlob(`src/${lang}/posts/**/*.md`);
+      const tagSet = new Set();
+      posts.forEach((p) => {
+        (p.data.tags || []).forEach((t) => tagSet.add(t));
+      });
+      return [...tagSet].sort();
+    });
+  });
+
+  // All (lang, tag) pairs for generating tag index pages
+  eleventyConfig.addCollection("tagPages", (collectionApi) => {
+    const pairs = [];
+    languages.forEach((lang) => {
+      const tags = collectionApi.getFilteredByGlob(`src/${lang}/posts/**/*.md`)
+        .reduce((set, p) => {
+          (p.data.tags || []).forEach((t) => set.add(t));
+          return set;
+        }, new Set());
+      [...tags].sort().forEach((tag) => pairs.push({ lang, tag }));
+    });
+    return pairs;
+  });
+
+  // Search index per language: array of { id, title, url, description, contentExcerpt }
+  languages.forEach((lang) => {
+    eleventyConfig.addCollection(`searchIndex_${lang}`, (collectionApi) => {
+      const posts = collectionApi.getFilteredByGlob(`src/${lang}/posts/**/*.md`)
+        .sort((a, b) => b.data.date - a.data.date);
+      return posts.map((p, i) => ({
+        id: String(i),
+        title: p.data.title || "",
+        url: p.url || "",
+        description: p.data.description || "",
+        contentExcerpt: contentExcerptForSearch(p.inputContent),
+      }));
+    });
+  });
+
+  // JSON stringify filter for search index output
+  eleventyConfig.addFilter("json", (obj) => JSON.stringify(obj));
+
+  // Filter posts that have a given tag
+  eleventyConfig.addFilter("filterByTag", (posts, tag) => {
+    if (!Array.isArray(posts) || !tag) return [];
+    return posts.filter((p) => (p.data.tags || []).includes(tag));
   });
 
   // i18n URL filter

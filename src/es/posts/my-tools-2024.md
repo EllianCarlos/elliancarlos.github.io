@@ -7,6 +7,8 @@ place: brasil
 locale: es
 translationKey: my-tools-2024
 description: "Una mirada a las herramientas de desarrollo y software que he estado usando en 2024, incluyendo NixOS, Hyprland, Neovim y más."
+tags:
+  - tools
 ---
 
 Me encanta probar y usar nuevas herramientas, este año he decidido probar muchas herramientas y programas diferentes que siempre he querido probar y descubrir. He tenido una experiencia increíble y principalmente me he divertido configurando y preparando mis entornos.

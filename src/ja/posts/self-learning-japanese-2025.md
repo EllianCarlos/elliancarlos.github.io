@@ -7,6 +7,8 @@ place: ブラジル
 locale: ja
 translationKey: self-learning-japanese-2025
 description: "Wanikani、Anki、Duolingoなどの効果的なツールを使用した独学による日本語学習の旅。非印欧語族の言語をマスターするための方法。"
+tags:
+  - japanese
 ---
 
 私は、異なる文字と文法を持つ新しい言語、つまり印欧語族の言語とは異なる何かを学ぼうとしています。

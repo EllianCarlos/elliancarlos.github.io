@@ -7,6 +7,8 @@ place: brasil
 locale: pt
 translationKey: my-tools-2025
 description: "Uma atualização do meu kit de ferramentas de desenvolvimento 2025, incluindo melhorias na minha configuração com NixOS, Hyprland, Neovim e novas ferramentas de IA."
+tags:
+  - tools
 ---
 
 Desde o ano passado, não atualizei muito minha configuração de ferramentas. Mas fiz algumas melhorias.

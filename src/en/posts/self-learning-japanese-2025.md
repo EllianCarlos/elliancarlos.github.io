@@ -5,6 +5,8 @@ layout: layouts/post.njk
 language: en 
 place: brazil
 description: "My journey learning Japanese through self-study using Wanikani, Anki, Duolingo, and other effective tools for mastering a non-Indo-European language."
+tags:
+  - japanese
 ---
 
 I've been trying to learn a new language with a different writing and grammar, something different than any Proto-Indo-European languages. 

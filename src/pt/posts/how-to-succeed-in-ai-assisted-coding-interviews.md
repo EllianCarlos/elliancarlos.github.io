@@ -7,6 +7,9 @@ place: brasil
 locale: pt
 translationKey: how-to-succeed-in-ai-assisted-coding-interviews
 description: "O que são, como se sair bem nelas e como se comportar em entrevistas assistidas por IA."
+tags:
+  - ai
+  - career
 ---
 
 No último ano, muitas empresas começaram a avaliar a proficiência dos candidatos em IA Agêntica e GenAI, por exemplo Meta, Brex e Canva. Essas novas entrevistas avaliam a competência em desenvolver software com LLMs e IA Agêntica. Veja: [entrevista de programação habilitada por IA da Meta](https://www.metacareers.com/hiring-process), [entrevista de programação assistida por IA da Brex](https://www.youtube.com/watch?v=U3JHxXYBQXQ) e [entrevistas de programação assistidas por IA da Canva](https://www.canva.dev/blog/engineering/yes-you-can-use-ai-in-our-interviews/).

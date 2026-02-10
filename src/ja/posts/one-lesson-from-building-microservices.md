@@ -7,6 +7,8 @@ place: ブラジル
 locale: ja
 translationKey: one-lesson-from-building-microservices
 description: "マイクロサービスは単なるアーキテクチャの決定ではなく、組織的な決定である理由。Sam NewmanのBuilding Microservicesとコンウェイの法則から学んだ重要な教訓。"
+tags:
+  - microservices
 ---
 
 2026年おめでとうございます！
