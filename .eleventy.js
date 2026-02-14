@@ -91,6 +91,8 @@ module.exports = function (eleventyConfig) {
 
   // Copy the `public` directory to the output
   eleventyConfig.addPassthroughCopy("public");
+  // Explicit passthrough for _headers (underscore-prefixed files are ignored by default)
+  eleventyConfig.addPassthroughCopy({"public/_headers": "_headers"});
   
   // Copy favicon files to root
   eleventyConfig.addPassthroughCopy({"public/favicon-16x16.png": "favicon-16x16.png"});
