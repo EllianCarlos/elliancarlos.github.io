@@ -54,24 +54,47 @@ article a:hover {
   text-decoration: underline;
 }
 
-article pre {
-  background-color: #2d2d2d;
-  padding: 1rem;
+article pre,
+article pre[class*="language-"] {
+  --pico-spacing: 0.0rem !important;
   border-radius: 0.25rem;
   overflow-x: auto;
-  font-size: 1rem;
+  font-size: 0.875rem;
 }
 
 article code {
   font-family: monospace;
-  font-size: 1rem;
-  color: #ccc;
+  font-size: 0.875rem;
+}
+
+/* Prism toolbar: language badge + copy button */
+div.code-toolbar > .toolbar {
+  opacity: 1;
+}
+
+article div.code-toolbar > .toolbar > .toolbar-item > a,
+article div.code-toolbar > .toolbar > .toolbar-item > button,
+article div.code-toolbar > .toolbar > .toolbar-item > span {
+  color: var(--pico-muted-color);
+  background: rgba(0, 0, 0, 0.35);
+  box-shadow: none;
+  border-radius: 0.2rem;
+  border: none;
+  font-size: 0.7rem;
+  padding: 0.3rem 0.75rem;
+}
+
+article div.code-toolbar > .toolbar > .toolbar-item > a:hover,
+article div.code-toolbar > .toolbar > .toolbar-item > button:hover {
+  color: var(--pico-color);
+  background: rgba(0, 0, 0, 0.55);
 }
 
 article img {
+  display: block;
   max-width: 100%;
   height: auto;
-  margin: 1rem 0;
+  margin: 1rem auto;
 }
 
 /* Tag pills (blog index, tag pages, post footer) */

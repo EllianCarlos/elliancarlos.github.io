@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const sitemap = require("@quasibit/eleventy-plugin-sitemap");
+const syntaxHighlight = require("@11ty/eleventy-plugin-syntaxhighlight");
 
 const leftPadDate = (n) => {
   if (n > 9) return `${n}`;
@@ -101,6 +102,8 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({"public/og-image.png": "og-image.png"});
 
   // Plugins
+  eleventyConfig.addPlugin(syntaxHighlight);
+
   eleventyConfig.addPlugin(sitemap, {
     sitemap: {
       hostname: "https://www.elliancarlos.com.br",
@@ -111,6 +114,28 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addTransform("prettyPrintSitemap", function (content, outputPath) {
     if (outputPath && outputPath.endsWith("sitemap.xml")) {
       return content.replace(/></g, ">\n<");
+    }
+    return content;
+  });
+
+  const PRISM_PLUGIN_BLOCK = `
+<script>window.Prism = window.Prism || {}; Prism.manual = true;</script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1/plugins/toolbar/prism-toolbar.min.css">
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/plugins/toolbar/prism-toolbar.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/plugins/show-language/prism-show-language.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script>
+<script>
+  document.querySelectorAll('pre[class*="language-"] > code').forEach(function(code) {
+    var lang = (code.className.match(/language-(\S+)/) || [])[1] || '';
+    Prism.hooks.run('complete', { element: code, language: lang, grammar: Prism.languages[lang], code: code.textContent });
+  });
+</script>
+`;
+
+  eleventyConfig.addTransform("injectPrismPlugins", function (content, outputPath) {
+    if (outputPath && outputPath.endsWith(".html") && content.includes('<code class="language-')) {
+      return content.replace("</body>", PRISM_PLUGIN_BLOCK + "</body>");
     }
     return content;
   });
