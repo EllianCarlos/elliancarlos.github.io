@@ -1,5 +1,5 @@
 ---
-title: "Notes on how to set up a Linux kernel development environment"
+title: "LKD - #1 Notes on how to set up a Linux kernel development environment"
 date: 2026-03-17
 layout: layouts/post.njk
 language: en
