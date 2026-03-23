@@ -7,9 +7,9 @@ layout: layouts/post.njk
 language: en
 place: brazil
 description:
-  "A personal log of setting up a Linux kernel development environment using
-  QEMU and libvirt, with notes on NixOS-specific hurdles and workarounds from my
-  Open Source Software class at USP."
+  "A personal log of building and booting a custom ARM Linux kernel using Kernel
+  Workflow (kw), with notes on NixOS cross-compilation setup and VM networking
+  issues from my Open Source Software class at USP."
 tags:
   - linux
   - kernel development
