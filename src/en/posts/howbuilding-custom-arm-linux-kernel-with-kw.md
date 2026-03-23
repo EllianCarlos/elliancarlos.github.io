@@ -21,6 +21,11 @@ tags:
   - kernel workflow
 ---
 
+> **Note:** This post is a companion to the
+> [Building and booting a custom Linux kernel for ARM using kw](https://flusp.ime.usp.br/kernel/build-linux-for-arm-kw/)
+> tutorial from FLUSP. I recommend following the tutorial first and then coming
+> back here for my notes and troubleshooting tips.
+
 As part of my classes on [Open Source Software (OSS)](https://opensource.org/)
 my whole class is starting to work on Linux Kernel Development. This post is a
 series of my experiences throughout the class related to kernel development.
@@ -105,8 +110,8 @@ use kw.
 
 ## The build and deploy process
 
-Similar to the previous post, on this one we will follow this post from FLUSP:
-[https://flusp.ime.usp.br/kernel/build-linux-for-arm-kw/](https://flusp.ime.usp.br/kernel/build-linux-for-arm-kw/).
+Similar to the previous post, on this one we will follow the tutorial linked
+above from FLUSP.
 
 The tutorial is pretty straightforward and I had only one issue related to the
 installation of KW in NixOS.

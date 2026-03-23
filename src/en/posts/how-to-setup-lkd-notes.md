@@ -17,6 +17,11 @@ tags:
   - open source software
 ---
 
+> **Note:** This post is a companion to the
+> [Setting up a test environment for Linux Kernel Dev using QEMU and libvirt](https://flusp.ime.usp.br/kernel/qemu-libvirt-setup/)
+> tutorial from FLUSP. I recommend following the tutorial first and then coming
+> back here for my notes and troubleshooting tips.
+
 As part of my classes on [Open Source Software (OSS)](https://opensource.org/)
 my whole class (not shy of 50 students) is going to start working on Linux
 Kernel Development. This post is a series of my experiences throughout the class
