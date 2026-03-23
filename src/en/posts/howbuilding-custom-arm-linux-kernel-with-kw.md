@@ -94,10 +94,10 @@ changes can be summarized with:
 
 Which seems simple, but working with a codebase as large and complex as the
 Linux kernel will require some steps which will be repeated for every single
-code change. The
-[Kernel Workflow (kw)](https://kworkflow.org/) tools try to bring ease to
-this development process by setting up usual kernel commands directly connected
-to your environment so that changes and deployment are easier.
+code change. The [Kernel Workflow (kw)](https://kworkflow.org/) tools try to
+bring ease to this development process by setting up usual kernel commands
+directly connected to your environment so that changes and deployment are
+easier.
 
 Of course, kw is not a required tool, since Makefiles on the linux kernel are
 matured and are enough for development, but when we follow the tutorial, we will
@@ -218,8 +218,8 @@ in
 }
 ```
 
-Of course, I also needed to add support for nixpkgs-python, since I don't have
-a channel for python packages natively setup.
+Of course, I also needed to add support for nixpkgs-python, since I don't have a
+channel for python packages natively setup.
 
 ```yaml
 # devenv.yaml
@@ -293,9 +293,9 @@ network lost all connection and was not showing in the `virsh` network, so
 `kw ssh` was not working.
 
 Before resorting to static IP, you can try checking if the network is active
-with `virsh net-list` and `virsh net-info default`. If the default network
-isn't running, `virsh net-start default` might bring it back. If that doesn't
-work, what I needed to do was to deactivate the
+with `virsh net-list` and `virsh net-info default`. If the default network isn't
+running, `virsh net-start default` might bring it back. If that doesn't work,
+what I needed to do was to deactivate the
 [DHCP](https://wiki.debian.org/DHCP_Client) and statically assign an IP to the
 VM:
 
