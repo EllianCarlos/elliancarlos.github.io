@@ -29,7 +29,7 @@ This post is a follow-up of
 > [Sending patches by email with git](https://flusp.ime.usp.br/git/sending-patches-by-email-with-git/)
 > and
 > [Sending patches with git and USP email](https://flusp.ime.usp.br/git/sending-patches-with-git-and-a-usp-email/)
-> tutorial from FLUSP. For specificly this post, you don't need to check the
+> tutorial from FLUSP. For specifically this post, you don't need to check the
 > companion ones unless you want.
 
 In the last post we created and deployed a custom module to our VM. In this post
@@ -48,7 +48,7 @@ sent by e-mail.
 
 All of the changes made in the kernel are actually kept public in the
 [lore](https://lore.kernel.org/), so you can actually see what a code submission
-looks like, for example one patch example is
+looks like, one patch example is
 [this one](https://lore.kernel.org/all/20260418043837.721045-1-ricardo.kojo@ime.usp.br/):
 
 ```
@@ -295,16 +295,15 @@ index 6c4c4bbe7dad..c2bb085d3582 100644
         blk_status_t error;
 ```
 
-This might seem weird at first, but for kernel development is specially
-excellent. It makes long diffs impossible to review and makes use of a more
-democratic tool which is the e-mail, of course seeing non-trivial diffs is
-harder and getting used to this way of reviewing changes takes some time.
+This might seem weird at first, but it discourages huge diffs, which are a pain
+to review, and makes use of a more democratic tool which is the e-mail, that's
+why maintainers like it a lot.
 
 ### What is a patch?
 
 ```
 > git format-patch
-GIT-FORMAT-PATCH(1)                                                                                 Git Manual                                                                                GIT-FORMAT-PATCH(1)
+GIT-FORMAT-PATCH(1) Manual GIT-FORMAT-PATCH(1)
 
 NAME
        git-format-patch - Prepare patches for e-mail submission
@@ -322,19 +321,17 @@ open process, as shown before you can access
 [lore.kernel.org](https://lore.kernel.org) and see all previous e-mails,
 discussions and patches. With solely e-mail this is hard, if everybody needs to
 be able to participate who do you send the patch to? Linux solves this problem
-with mailing lists, the different modules and subtrees of linux have each one
-their mailing list, which anyone can answer to join and add something to the
-discussion. The mailing lists are available in the home of the lore kernel
-website.
+with mailing lists, each Linux subsystem has its own mailing list, which anyone
+can subscribe to join and add something to the discussion. The mailing lists are
+available in the [lore.kernel.org](https://lore.kernel.org) home.
 
 ### How to submit your patch by git e-mail
 
-To submit your patch you firs need to configure git:
+To submit your patch you first need to configure git:
 
 ```sh
 git config --global user.name "<your name>"
 git config --global user.email "<your email>"
-git config --global sendemail.smtpencryption tls
 ```
 
 And then configure the smtp variables needed to actually send the e-mail:
@@ -356,28 +353,37 @@ For any other provider just look into the documentation.
 After this you can use `git send-email` to send your patch, for example:
 
 ```
-git send-email --annotate --cover-letter --thread --no-chain-reply-to --to="teste@email.com" --cc="mailing@list.com" -3
+git send-email --annotate --cover-letter --thread --no-chain-reply-to --to="test@example.com" --cc="mailing@list.com" -3
 ```
 
 You of course need to check for the mailing list you need. This usually can be
-found in a .md file in the submodule you're making changes to. If that's not
-possible just look at the last commits in a file you touched and search which
-mailing list it was sent to.
+found in a `MAINTAINERS` file in the root on by running the script inside
+`scripts/get_maintainer.pl <file>` against the `<file>` you made changes to. If
+that's not possible just look at the last commits in a file you touched and
+search which mailing list it was sent to.
 
-Some tips to use git-email are:
+Some tips to use `git send-email` are:
 
-- Use --dry-run to not really send the e-mail and actually just see output
-- For changes made in multiple commits, you need to number then as \[PATCH 1\N\]
+- Always run the `scripts/checkpatch.pl` before sending your patch to make sure
+  it is ready for submission.
+- Use `--dry-run` to not really send the e-mail and actually just see output
+- For changes made in multiple commits, you need to number them as \[PATCH 1/N\]
   and etc
-- When submitting a new version you need to add a v2 like \[PATCH v2 1\N\] or v3
+- When submitting a new version you need to add a v2 like \[PATCH v2 1/N\] or v3
   and so on.
-- If you patch has multiple pages, it is common courtesy to send a 0\N cover
+- v2/v3 patches and so on, usually include a changelog attached to it. You can
+  use the `--annotate` flag for this or manually edit it after the
+  `git format-patch` creation.
+- If your change has multiple patches, it is common courtesy to send a 0/N cover
   letter patch explaining your changes.
+- If you want to use git to answer an existing thread you need to use the flag:
+  `--in-reply-to=<message-id>`. The flag `--no-chain-reply-to` makes every patch
+  in the series reply to the cover letter instead of chaining patch-to-patch.
 
 ### Conclusion
 
-Linux kernel as always has it's own ways of doing things and reviewing is one of
-them, but it is a different experience and nice to see a huge project which
+Linux kernel as always has its own ways of doing things and reviewing is one of
+them, but it's a refreshing experience, and nice to see a huge project which
 differs from moderns standards while still keeping the bar high.
 
 ## References
