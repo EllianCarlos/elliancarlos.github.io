@@ -357,7 +357,7 @@ git send-email --annotate --cover-letter --thread --no-chain-reply-to --to="test
 ```
 
 You of course need to check for the mailing list you need. This usually can be
-found in a `MAINTAINERS` file in the root on by running the script inside
+found in a `MAINTAINERS` file in the root or by running the script inside
 `scripts/get_maintainer.pl <file>` against the `<file>` you made changes to. If
 that's not possible just look at the last commits in a file you touched and
 search which mailing list it was sent to.
