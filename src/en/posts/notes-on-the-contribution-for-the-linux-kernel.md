@@ -27,7 +27,8 @@ This post is a follow-up of
 
 Throughout the whole series of posts we were learning how the kernel works and
 understanding how we could make smart changes to the Linux kernel. In this post
-we will talk about what we submitted, how and the process until today.
+we will talk about what we submitted, how and the statuses of the submissions
+until today.
 
 ### My group
 
@@ -63,7 +64,7 @@ work, they were:
 6. The possibility to change from bitfield operations of hexadecimal numbers to
    use the `FIELD_GET()`, `FIELD_PREP()` and `FIELD_MODIFY()`.
 7. Improvements in the IIO area of staging.
-8. Update IIO drivers to be Include-What-You-Use complianct (IWYU)
+8. Update IIO drivers to be Include-What-You-Use compliant (IWYU)
 9. Convert logging to drm\_\* functions with drm_device parameter
 10. Read and expand the subsystem documentation
 
@@ -99,7 +100,7 @@ The major suggestions were to use pointers instead of values in the init
 function, removing unnecessary `const` modifiers and variable naming to follow
 iio subsystems kernel conventions (e.g. `cfg` instead of `config` for sensors).
 I also reviewed the changes made by Ricardo and pointed out just two minor
-stylistics problems, one yield by the `checkpatch` script and another one which
+stylistic problems, one yield by the `checkpatch` script and another one which
 was just a weird double empty line.
 
 These changes allowed us to totally remove the duplication, resulting in a delta
@@ -123,7 +124,7 @@ keep just veml6030; Add the different information needed to call `hw_init` in
 the chip info instead of creating new structs and drop the wrapper functions;
 And move the comments directly to the `hw_init` calls instead of above the
 structs. You can check his full answer
-[ here ](https://lore.kernel.org/all/26330121-79bd-4273-b8e4-17efa19454eb@baylibre.com/).
+[here](https://lore.kernel.org/all/26330121-79bd-4273-b8e4-17efa19454eb@baylibre.com/).
 
 Until today (one day later) we still couldn't work on his comments, but we
 already talked about it and how to implement.
@@ -142,10 +143,14 @@ We quickly got a feedback from a reviewer about a simplification route that we
 did not take, so we sent a v2 pretty fast after that, the 0/2 of the V2 can be
 found
 [here](https://lore.kernel.org/all/20260419051009.796491-1-ricardo.kojo@ime.usp.br/).
+His phrasing was a bit harsh, but it was definitely a miss on our part which we
+should have been caught in our internal review. This also led us to believe that
+he will ignore subsequent patches and versions.
 
 ##### Current Review
 
-We are still awaiting feedback from the v2 from any reviewer.
+We are still awaiting feedback from the v2 from any reviewer, right now we are 2
+days without any response to the patch.
 
 ## Conclusion
 
