@@ -66,12 +66,8 @@ Aside from this, the module was built, deployed and tested successfully.
 
 ## Conclusion
 
-The experience was pretty good and now we can create our own kernel modules, so
-if in the future you need to connect with something that does not have Linux
-support, just build it :P.
-
-Jokes aside, this was a pretty great experience and by far the most NixOS
-friendly tutorial.
+The experience was pretty good and now we can create our own kernel modules.
+This was a pretty great experience and by far the most NixOS friendly tutorial.
 
 ## References
 

@@ -1,5 +1,5 @@
 ---
-title: "LKD - #4 Notes on how the linux patch submission works"
+title: "LKD - #5 Notes on how the linux patch submission works"
 date: 2026-04-12
 layout: layouts/post.njk
 language: en

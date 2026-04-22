@@ -1,5 +1,5 @@
 ---
-title: "LKD - #5 Notes on how the iio subsystems work"
+title: "LKD - #6 Notes on how the iio subsystems work"
 date: 2026-04-17
 layout: layouts/post.njk
 language: en
@@ -30,8 +30,8 @@ and part of [this series](/posts/tag/MAC5856).
 > [The iio_simple_dummy Anatomy](https://flusp.ime.usp.br/iio/iio-dummy-anatomy/)
 > and
 > [IIO Dummy module Experiment One: Play with iio_dummy](https://flusp.ime.usp.br/iio/experiment-one-iio-dummy/)
-> tutorials from FLUSP. I recommend following the tutorials first and then coming
-> back here for my notes and troubleshooting tips.
+> tutorials from FLUSP. I recommend following the tutorials first and then
+> coming back here for my notes and troubleshooting tips.
 
 In the last post we discussed how to submit linux patches. In today's post we
 will investigate and dive deep into the IIO subsystem.
@@ -69,8 +69,8 @@ This excerpt was extracted from
 [Industrial I/O Introduction](https://docs.kernel.org/driver-api/iio/intro.html).
 
 That's what the IIO subsystem is for, supporting real hardware related to
-Industrial Input Output devices. This ranges from Raspberry Pi all the way to Linux
-servers which depend on these services.
+Industrial Input Output devices. This ranges from Raspberry Pi all the way to
+Linux servers which depend on these services.
 
 ### On the IIO dummy Anatomy
 
@@ -87,13 +87,14 @@ out which piece of state to access.
 
 We also dove deep into how the `probe` function works, that's the function
 responsible for allocating memory, initializing device fields and register the
-device. The highlight for me was the use of `kzalloc`, the kernel variant
-of allocating a memory and setting it to zero, it is similar to calloc, but it
+device. The highlight for me was the use of `kzalloc`, the kernel variant of
+allocating a memory and setting it to zero, it is similar to calloc, but it
 handles under the hood
 [some kernel magic](https://github.com/torvalds/linux/blob/master/include/linux/slab.h)
-(which contains many hard-to-navigate macros). It was also interesting to see how the
-error handling works, with "gotos" to the specific error handling scope and
-not some fancy throw catch manipulation which is used by more modern languages.
+(which contains many hard-to-navigate macros). It was also interesting to see
+how the error handling works, with "gotos" to the specific error handling scope
+and not some fancy throw catch manipulation which is used by more modern
+languages.
 
 ### On the creation of a Driver
 
@@ -111,8 +112,8 @@ does not seem like the usual "user space" I thought it was made to.
 ### Conclusion
 
 Both posts were very useful for understanding the IIO structure and during the
-contribution this deep dive will be very useful for understanding what we are actually
-changing and to not break anything
+contribution this deep dive will be very useful for understanding what we are
+actually changing and to not break anything
 ([mainly user space](https://lkml.org/lkml/2012/12/23/75)).
 
 ## References

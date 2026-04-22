@@ -1,5 +1,5 @@
 ---
-title: "LKD - #6 Notes on our contribution to the Linux Kernel"
+title: "LKD - #7 Notes on our contribution to the Linux Kernel"
 date: 2026-04-21
 layout: layouts/post.njk
 language: en
