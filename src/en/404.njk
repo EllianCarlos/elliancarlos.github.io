@@ -15,6 +15,21 @@ permalink: /404.html
 </section>
 
 <script>
+  // If a user lands here via a language-prefixed URL that doesn't exist
+  // (e.g. /pt/posts/xxx where only the English version was written),
+  // bounce them to the English equivalent instead of showing a 404.
+  (function() {
+    const path = window.location.pathname;
+    const langPrefix = path.match(/^\/(pt|es|ja)\/(.*)$/);
+    if (langPrefix) {
+      const strippedPath = '/' + langPrefix[2];
+      if (strippedPath !== path) {
+        window.location.replace(strippedPath);
+        return;
+      }
+    }
+  })();
+
   // Detect language from URL path and update 404 message
   (function() {
     const path = window.location.pathname;

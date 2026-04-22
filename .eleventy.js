@@ -148,6 +148,23 @@ module.exports = function (eleventyConfig) {
     });
   });
 
+  // Map of language -> list of available HTML page URLs.
+  // Consumed by languageRedirect.njk so we only auto-redirect when the
+  // translated page actually exists, avoiding the /pt/pt/pt/... loop
+  // that used to happen when a user's browser language had no translation.
+  eleventyConfig.addCollection("availableUrls", (collectionApi) => {
+    const result = {};
+    languages.forEach((lang) => { result[lang] = []; });
+    collectionApi.getAll().forEach((item) => {
+      const lang = item.data && item.data.locale;
+      if (!lang || !result[lang]) return;
+      if (!item.url) return;
+      if (!item.outputPath || !item.outputPath.endsWith(".html")) return;
+      result[lang].push(item.url);
+    });
+    return result;
+  });
+
   // Keep original posts collection for backward compatibility (English posts)
   eleventyConfig.addCollection("posts", (collectionApi) => {
     return collectionApi.getFilteredByGlob("src/en/posts/**/*.md")

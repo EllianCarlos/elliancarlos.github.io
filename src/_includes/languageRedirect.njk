@@ -1,22 +1,35 @@
 <script>
   (function() {
-    // Only run on root English pages
     const currentLang = '{{ locale }}' || 'en';
-    const currentPath = window.location.pathname;
+    const defaultLang = '{{ defaultLanguage }}';
     const supportedLangs = {{ languages | dump | safe }};
-    
-    // Check if user has already chosen a language (use localStorage)
-    const userChosenLang = localStorage.getItem('preferredLanguage');
-    
-    if (!userChosenLang && currentLang === 'en') {
-      // First visit - detect browser language
-      const browserLang = navigator.language.split('-')[0];
-      
-      if (browserLang !== 'en' && supportedLangs.includes(browserLang)) {
-        // Redirect to user's browser language
-        const newUrl = `/${browserLang}${currentPath}`;
-        window.location.href = newUrl;
-      }
+    const availableUrls = {{ collections.availableUrls | dump | safe }};
+    const currentPath = window.location.pathname;
+
+    // Never auto-redirect on error pages — the URL in the address bar may
+    // already be for a missing translation (e.g. /pt/posts/xxx served via
+    // /404.html), and redirecting would just prepend another /pt/ segment.
+    if (document.getElementById('error-404')) return;
+
+    // If the path already has a non-default language prefix, the user is
+    // where they asked to be. Don't re-redirect.
+    for (let i = 0; i < supportedLangs.length; i++) {
+      const lang = supportedLangs[i];
+      if (lang === defaultLang) continue;
+      if (currentPath === '/' + lang || currentPath.indexOf('/' + lang + '/') === 0) return;
     }
+
+    if (localStorage.getItem('preferredLanguage')) return;
+    if (currentLang !== defaultLang) return;
+
+    const browserLang = (navigator.language || '').split('-')[0];
+    if (!browserLang || browserLang === defaultLang) return;
+    if (supportedLangs.indexOf(browserLang) === -1) return;
+
+    const targetUrl = '/' + browserLang + currentPath;
+    const urlsForLang = availableUrls[browserLang] || [];
+    if (urlsForLang.indexOf(targetUrl) === -1) return;
+
+    window.location.replace(targetUrl);
   })();
 </script>
