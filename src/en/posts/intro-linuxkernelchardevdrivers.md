@@ -1,6 +1,6 @@
 ---
 title: "LKD - #4 Notes on char device drivers"
-date: 2026-03-23
+date: 2026-03-24
 layout: layouts/post.njk
 language: en
 place: brazil
@@ -37,14 +37,13 @@ This time we are writing a char device driver!
 ## Tutorial
 
 This tutorial is about writing an actual char device driver and exercising it
-from user-space. The driver, `simple_char`, implements the basic file
-operations (`open`, `release`, `read`, `write`) through a `struct
-file_operations`, allocates a major number, and registers a `cdev` so that once
-the module is loaded it shows up in `/proc/devices`. From there you create a
-device node with `mknod` and read/write to it like any other file. So the
-tutorial is pretty good to get a grasp of how a `read`/`write` syscall actually
-gets routed to a driver, and on how `file_operations`, `cdev`, and major/minor
-numbers fit together.
+from user-space. The driver, `simple_char`, implements the basic file operations
+(`open`, `release`, `read`, `write`) through a `struct file_operations`,
+allocates a major number, and registers a `cdev` so that once the module is
+loaded it shows up in `/proc/devices`. From there you create a device node with
+`mknod` and read/write to it like any other file. So the tutorial is pretty good
+to get a grasp of how a `read`/`write` syscall actually gets routed to a driver,
+and on how `file_operations`, `cdev`, and major/minor numbers fit together.
 
 ## Problems
 
