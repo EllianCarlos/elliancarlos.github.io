@@ -360,20 +360,26 @@ the direction is consistent everywhere I look: the firm is what endures.
 
 ## Where this goes next
 
-The measurement pipeline exists and the correctness work is done. What is left
-is depth and scale: a sensitivity sweep on the authorship threshold, better
-affiliation coverage for `net`, and then extending the case set toward
-subsystems that test new predictions, a vendor handoff (btrfs), a second
-single-vendor case (s390), and an individual-dominated extreme (bcachefs). The
-turnover results above also point to their own next steps: turning that
-survivorship view of durability into a true year-by-year decay half-life, and
-testing whether corporate dominance actively crowds newcomers out rather than
-merely coexisting with them.
+This is the start of my master's at IME-USP, and it points at one clear paper:
+**a firm-level truck factor for the Linux kernel** that measures corporate
+_knowledge_ concentration, shows it diverges from _activity_, and demonstrates
+that knowledge, not activity, predicts what happens when a company leaves, asking
+which firms actually _understand_ a subsystem, not just which are busy in it.
+Everything in this post is its evidence; the work left is to harden it (sweep the
+threshold, lift `net`'s coverage, a true decay half-life) and widen the case set
+beyond three subsystems (btrfs, s390, bcachefs). I am aiming it at SBES or MSR.
 
-Coming to this from the contributor side first, having actually sent patches and
-watched the review process up close, changed how I read these numbers. A truck
-factor of 1 is not a doomsday counter. It is a map of where a project has
-quietly made a strategic bet on a single company, and open source is full of
-those bets. Being able to point at them, and to say which ones the community
-would absorb and which ones it would not, feels like a useful thing to be able
-to do. I will keep writing here as the research develops.
+A natural second paper is **AI**. Every number here rests on git authorship, and
+generative AI breaks that: when a developer commits code an LLM largely wrote,
+whose knowledge is that? Disclosure trailers like `Assisted-by:` exist but lag
+usage. Re-running these measurements while treating a growing share of tokens as
+machine-authored would show whether AI dilutes corporate concentration, entrenches
+it (most compute writes the most code), or just hides it, a study of its own.
+
+Coming to this from the contributor side first changed how I read these numbers.
+The through-line is one claim: **corporate influence in open source is not one
+thing but three that move together, and it is the concentration of _knowledge_,
+not activity, that says how fragile a project really is.** A truck factor of 1 is
+not a doomsday counter; it is a map of where a project has quietly bet on a single
+company, and open source is full of those bets. I will keep writing here as the
+research develops.
