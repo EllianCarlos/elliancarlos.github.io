@@ -42,10 +42,12 @@ type: index
   <meta name="twitter:image" content="{{ ogImage or seo.defaultImage }}">
   
   <!-- hreflang tags for SEO -->
+  {% if i18nEnabled %}
   {% for lang in languages %}
     <link rel="alternate" hreflang="{{ lang }}" href="{{ seo.baseUrl }}{{ page.url | switchLanguage(lang) }}" />
   {% endfor %}
   <link rel="alternate" hreflang="x-default" href="{{ seo.baseUrl }}{{ page.url | switchLanguage('en') }}" />
+  {% endif %}
   
   <!-- Favicon -->
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -78,7 +80,7 @@ type: index
         {{ content | safe }}
     </main>
     {% include "footer.njk" %}
-    {% include "languageRedirect.njk" %}
+    {% if i18nEnabled %}{% include "languageRedirect.njk" %}{% endif %}
     
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-2GHK298WZ2"></script>

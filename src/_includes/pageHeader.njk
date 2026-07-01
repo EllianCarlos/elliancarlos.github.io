@@ -8,11 +8,12 @@
           <span class="maintitle">elliancarlos</span>
         </a>
       </h1>
+      {% if i18nEnabled %}
       <div class="language-selector">
         <label for="language-select">🌐</label>
         <select id="language-select" onchange="window.location.href=this.value">
           {% for lang in languages %}
-            <option value="{{ page.url | switchLanguage(lang) }}" 
+            <option value="{{ page.url | switchLanguage(lang) }}"
                     {% if lang == locale %}selected{% endif %}
                     data-lang="{{ lang }}">
               {{ i18n[lang].language.name }}
@@ -20,6 +21,7 @@
           {% endfor %}
         </select>
       </div>
+      {% endif %}
     </div>
   </div>
 </div>

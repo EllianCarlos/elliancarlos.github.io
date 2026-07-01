@@ -60,12 +60,17 @@ const sneakPeak = (postText, imagePostUrl, textBeforeImage, textAfterImage) => {
 module.exports = function (eleventyConfig) {
 
   // i18n Configuration
-  const languages = ["en", "pt", "es", "ja"];
+  // Feature flag: flip to true to re-enable the multilingual (i18n) site.
+  // When false, the site builds English-only and all language UI is hidden.
+  const I18N_ENABLED = false;
+  const ALL_LANGUAGES = ["en", "pt", "es", "ja"];
+  const languages = I18N_ENABLED ? ALL_LANGUAGES : ["en"];
   const defaultLanguage = "en";
 
   // Add global data for languages
   eleventyConfig.addGlobalData("languages", languages);
   eleventyConfig.addGlobalData("defaultLanguage", defaultLanguage);
+  eleventyConfig.addGlobalData("i18nEnabled", I18N_ENABLED);
 
   // Add watch targets
   eleventyConfig.addWatchTarget("content/**/*.{svg,webp,png,jpg,jpeg,gif}");
