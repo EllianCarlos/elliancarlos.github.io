@@ -66,11 +66,14 @@ The proposal organizes this into four questions:
 ## Measuring knowledge with cregit
 
 To measure knowledge rather than activity, I build on
-[cregit](https://github.com/cregit-codev/cregit). Instead of attributing whole
-commits, cregit works at the level of individual **tokens** of surviving source
-code, and traces each token back to the author who introduced it. That gives a
-much more honest answer to "who holds the knowledge of this code as it exists
-today" than commit-level `git blame` does.
+[cregit](https://github.com/cregit-codev/cregit), a tool that had been dormant
+since 2023, so getting it to run again was a project in itself, which I wrote
+about in
+[my notes on contributing to cregit](/posts/cregit-open-source-contributions).
+Instead of attributing whole commits, cregit works at the level of individual
+**tokens** of surviving source code, and traces each token back to the author
+who introduced it. That gives a much more honest answer to "who holds the
+knowledge of this code as it exists today" than commit-level `git blame` does.
 
 The pipeline then joins three independent sources for each subsystem:
 
