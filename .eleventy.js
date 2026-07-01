@@ -85,6 +85,8 @@ module.exports = function (eleventyConfig) {
       slugify: slugifyHeading,
       permalink: false,
     });
+    // Server-side LaTeX math rendering ($inline$ and $$display$$) via KaTeX
+    mdLib.use(require("@vscode/markdown-it-katex").default);
   });
 
   eleventyConfig.addPassthroughCopy("src/Ellian_Carlos_Resume.pdf");
