@@ -219,11 +219,10 @@ I enumerated **fifteen** firm-exit events across the three subsystems and
 classified every predicted-fragile file as orphaned, absorbed by another
 company, or retained.
 
-The aggregate result is across the genuine firm disengagements, of the files the
-metric flagged as at-risk, only about **5% were actually orphaned**; roughly
-**93% were absorbed** by other companies and the rest retained. The truck factor
-reliably points at the files that depend on one firm, but the community, most of
-the time, catches them.
+Across the genuine firm disengagements, only about **5%** of the flagged files
+were actually orphaned; roughly **93%** were absorbed by other companies and the
+rest retained. The truck factor reliably points at the files that depend on one
+firm, but the community, most of the time, catches them.
 
 <div style="display: flex; justify-content: center;">
   <img src="/public/kc-withdrawal-outcomes.png" alt="Bar charts of firm-withdrawal outcomes. Across true firm disengagements, about 93 percent of predicted-fragile files are absorbed by other firms, about 5 percent orphaned, and a few retained. A second panel shows acquisitions are almost entirely retained.">
@@ -244,12 +243,12 @@ explain what decides the outcome:
 - **Mellanox in `net`, acquired by NVIDIA.** The Mellanox networking team, led
   in the data by Jiri Pirko, one of netdev's most prolific contributors, simply
   kept working after the acquisition. Their dominated files show NVIDIA as the
-  top post-exit contributor: the same people, a new email domain. An acquisition
-  is not a withdrawal, and a naive method that missed the
-  `mellanox.com → nvidia.com` rename would have scored this as a catastrophic
-  100% loss instead of business as usual. This lines up with
+  top post-exit contributor: the same people, a new email domain. A naive method
+  that missed the `mellanox.com → nvidia.com` rename would have scored this as a
+  catastrophic 100% loss.
 
-[Rigby et al.](https://doi.org/10.1145/2884781.2884851)'s alerts that naive
+This lines up with
+[Rigby et al.](https://doi.org/10.1145/2884781.2884851)'s caution that naive
 truck-factor estimates exaggerate loss: a firm has many engineers, its departure
 is a decision rather than an accident, and knowledge can transfer intact. A
 truck factor of 1 is a map of _strategic dependency_, not a forecast of loss.
@@ -273,6 +272,11 @@ rebrands back together, you will mistake an acquisition for a talent exodus,
 which is why every mobility number I quote is corrected for known renames before
 anything is counted.
 
+<div style="display: flex; justify-content: center;">
+  <img src="/public/kc-mobility.png" alt="Two bar charts of knowledge held by developers who worked for more than one firm, and knowledge that changed corporate hands, for iio, amd, and net. Each shows a raw bar and a lower rebrand-corrected bar; net is highest at 25 percent corrected, amd near zero.">
+</div>
+<p style="text-align: center;"><em>Developer mobility, raw versus rebrand-corrected. net is the mobile case (~25% of known knowledge held by multi-firm developers); amd is almost immobile. The gap between the grey and coloured bars is the acquisition-rename correction.</em></p>
+
 ## Code, governance, and conversation point the same way
 
 The last piece is a convergent-validity check. If corporate influence is real,
@@ -288,6 +292,11 @@ mirroring its distributed code. `iio` sits in between, led by Analog Devices on
 both axes. Code, governance, and conversation telling the same story in each
 case is, to me, the strongest sign that the instrument is measuring something
 real and not an artifact of one data source.
+
+<div style="display: flex; justify-content: center;">
+  <img src="/public/kc-code-vs-governance.png" alt="Left: grouped bars comparing code-ownership HHI and governance HHI for iio, amd, and net; the two bars are nearly equal within each subsystem. Right: a scatter of code HHI against governance HHI with all three subsystems sitting on the perfect-agreement diagonal, amd at the top corner near 1.0.">
+</div>
+<p style="text-align: center;"><em>Two independent axes, one verdict. Code-ownership concentration and maintainer-governance concentration are near-identical per subsystem (amd ≈ 1.0 on both, net ≈ 0.08), landing on the agreement diagonal. The mailing-list axis points the same way but is left out of the plot, as it currently rests on a review-trailer proxy rather than full list data.</em></p>
 
 ## The firm outlives its people
 
@@ -328,15 +337,9 @@ subsystems.
 
 So the people churn, but the _firm_ stays the durable unit that holds the
 knowledge. And when developers genuinely do switch employers, the effect is the
-opposite of what you might guess: it **spreads** knowledge rather than
-concentrating it. In net, the most mobile of the three, about a quarter of the
-attributable code is held by people who have worked for more than one company,
-but reassigning each of them to a single employer actually _lowers_ the measured
-concentration. Mobility disperses; it does not enclose. (I had to be careful
-here, because an acquisition looks exactly like a job change to an email-domain
-based method: Mellanox becoming NVIDIA, or InvenSense and TDK, are the same
-people under a new name, not real moves. Correcting for those rebrands removed
-roughly a third of net's apparent mobility.)
+opposite of what you might guess: reassigning each multi-firm developer to a
+single employer actually _lowers_ the measured concentration. Mobility disperses
+knowledge; it does not enclose it.
 
 Knowledge also outlives the people who wrote it. Around **12 to 15%** of the
 attributable code in iio and net was authored by companies whose developers
@@ -349,6 +352,11 @@ _survivorship_ view, since I can only see the tokens that are still alive today,
 so it describes how persistent surviving knowledge is rather than a true decay
 half-life, which would need a full year-by-year replay I have not run yet. But
 the direction is consistent everywhere I look: the firm is what endures.
+
+<div style="display: flex; justify-content: center;">
+  <img src="/public/kc-durability.png" alt="Left: bars showing the share of surviving knowledge held by firms whose developers stopped committing at least 3, 5, and 8 years ago; iio and net sit near 12 to 15 percent at 3 years while amd is zero. Right: vintage-survival curves showing net's living code is by far the oldest, with a median age around a decade.">
+</div>
+<p style="text-align: center;"><em>Knowledge durability. Left: 12–15% of iio/net code is still held by firms whose people left 3+ years ago (amd is ~0%, because its one vendor never leaves). Right: how old the living code is; net's median surviving token is about a decade old.</em></p>
 
 ## Where this goes next
 
