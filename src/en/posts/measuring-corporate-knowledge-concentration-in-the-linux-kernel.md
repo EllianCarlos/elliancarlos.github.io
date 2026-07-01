@@ -247,11 +247,11 @@ explain what decides the outcome:
   that missed the `mellanox.com → nvidia.com` rename would have scored this as a
   catastrophic 100% loss.
 
-This lines up with
-[Rigby et al.](https://doi.org/10.1145/2884781.2884851)'s caution that naive
-truck-factor estimates exaggerate loss: a firm has many engineers, its departure
-is a decision rather than an accident, and knowledge can transfer intact. A
-truck factor of 1 is a map of _strategic dependency_, not a forecast of loss.
+This lines up with [Rigby et al.](https://doi.org/10.1145/2884781.2884851)'s
+caution that naive truck-factor estimates exaggerate loss: a firm has many
+engineers, its departure is a decision rather than an accident, and knowledge
+can transfer intact. A truck factor of 1 is a map of _strategic dependency_, not
+a forecast of loss.
 
 Following the people rather than the files tells the same story from the other
 direction. Some engineers carry a large body of knowledge with them when they
@@ -363,23 +363,25 @@ the direction is consistent everywhere I look: the firm is what endures.
 This is the start of my master's at IME-USP, and it points at one clear paper:
 **a firm-level truck factor for the Linux kernel** that measures corporate
 _knowledge_ concentration, shows it diverges from _activity_, and demonstrates
-that knowledge, not activity, predicts what happens when a company leaves, asking
-which firms actually _understand_ a subsystem, not just which are busy in it.
-Everything in this post is its evidence; the work left is to harden it (sweep the
-threshold, lift `net`'s coverage, a true decay half-life) and widen the case set
-beyond three subsystems (btrfs, s390, bcachefs). I am aiming it at SBES or MSR.
+that knowledge, not activity, predicts what happens when a company leaves,
+asking which firms actually _understand_ a subsystem, not just which are busy in
+it. Everything in this post is its evidence; the work left is to harden it
+(sweep the threshold, lift `net`'s coverage, a true decay half-life) and widen
+the case set beyond three subsystems (btrfs, s390, bcachefs). I am aiming it at
+SBES or MSR.
 
-A natural second paper is **AI**. Every number here rests on git authorship, and
-generative AI breaks that: when a developer commits code an LLM largely wrote,
-whose knowledge is that? Disclosure trailers like `Assisted-by:` exist but lag
-usage. Re-running these measurements while treating a growing share of tokens as
-machine-authored would show whether AI dilutes corporate concentration, entrenches
-it (most compute writes the most code), or just hides it, a study of its own.
+A natural second paper about how AI influences corporate knowledge. Every number
+here rests on git authorship, and generative AI breaks that: when a developer
+commits code an LLM largely wrote, whose knowledge is that? Disclosure trailers
+like `Assisted-by:` exist but lag usage. Re-running these measurements while
+treating a growing share of tokens as machine-authored would show whether AI
+dilutes corporate concentration, entrenches it (most compute writes the most
+code), or just hides it, a study of its own.
 
 Coming to this from the contributor side first changed how I read these numbers.
 The through-line is one claim: **corporate influence in open source is not one
 thing but three that move together, and it is the concentration of _knowledge_,
-not activity, that says how fragile a project really is.** A truck factor of 1 is
-not a doomsday counter; it is a map of where a project has quietly bet on a single
-company, and open source is full of those bets. I will keep writing here as the
-research develops.
+not activity, that says how fragile a project really is.** A truck factor of 1
+is not a doomsday counter; it is a map of where a project has quietly bet on a
+single company, and open source is full of those bets. I will keep writing here
+as the research develops.
