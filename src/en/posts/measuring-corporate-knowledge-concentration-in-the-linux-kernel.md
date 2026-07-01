@@ -193,21 +193,29 @@ stays far above iio.
 The reason amd is almost fully resolved is the same reason it is so
 concentrated: it is a corporate monoculture where nearly everyone commits from
 `@amd.com`. So the net and iio **corporate percentages are best read as lower
-bounds**: when I actually resolve part of that tail with a few extra signals,
-the corporate share climbs substantially (by roughly 11 points in iio and 17 in
-net), because a lot of those personal-email commits do come from company
-engineers.
+bounds**. When I resolve that tail properly — using the kernel's `.mailmap`,
+cross-subsystem identities, and a hand-audited set of employer domains, each one
+checkable against the commit data itself — coverage climbs from **62% to 76%**
+in `iio` and **59% to 82%** in `net`, and the corporate share rises with it
+(**+12 points in iio, +21 in net**), because a lot of those personal-email
+commits really do come from company engineers.
+
+<div style="display: flex; justify-content: center;">
+  <img src="/public/kc-coverage-lift.png" alt="Two bar charts. Left: affiliation coverage before and after resolving the unattributed tail, rising from 62 to 76 percent in iio and 59 to 82 percent in net, while amd barely moves near 98 percent. Right: corporate share of all tokens rising by 12 points in iio and 21 in net.">
+</div>
+<p style="text-align: center;"><em>Resolving the unattributed tail. Where the tail is large (iio, net), attributing it to firms lifts both coverage and the corporate share substantially; amd was already near-complete. This is the lower bound made concrete: the corporate share is provably higher than the raw email-domain view shows.</em></p>
 
 But I have to be careful about what that does _not_ say. My first instinct was
 that resolving the tail would also make each subsystem look _more concentrated_,
 fewer firms, each with a bigger share. It does not, at least not reliably: once
 the tail is attributed, the concentration indices barely move, and the change is
 not statistically distinguishable from zero. What the tail hides is not one more
-giant but a mix, some of it genuinely diverse and some of it, in `net`, actually
-more Red Hat than the visible head suggested. So the honest reading is narrow:
-the corporate _share_ is a firm lower bound, but the _concentration_ number is
-about where it looks, not obviously higher or lower once the unknowns are filled
-in.
+giant but a mix. In `net` it is more Red Hat than the visible head suggested —
+Red Hat is the single largest destination of the resolved tokens and jumps from
+the fourth-largest firm to the second — but the rest is spread widely enough
+that overall concentration is unchanged. So the honest reading is narrow: the
+corporate _share_ is a firm lower bound, but the _concentration_ number is about
+where it looks, not obviously higher or lower once the unknowns are filled in.
 
 <div style="display: flex; justify-content: center;">
   <img src="/public/kc-concentration-coverage-over-time.png" alt="Three panels over time for iio, amd, and net: firm HHI, effective number of firms, and organization-attribution coverage percentage. amd sits near an HHI of 1 with ~98 percent coverage; iio and net trend toward dispersion with coverage stuck around 60 percent.">
@@ -300,7 +308,58 @@ real and not an artifact of one data source.
 <div style="display: flex; justify-content: center;">
   <img src="/public/kc-code-vs-governance.png" alt="Left: grouped bars comparing code-ownership HHI and governance HHI for iio, amd, and net; the two bars are nearly equal within each subsystem. Right: a scatter of code HHI against governance HHI with all three subsystems sitting on the perfect-agreement diagonal, amd at the top corner near 1.0.">
 </div>
-<p style="text-align: center;"><em>Two independent axes, one verdict. Code-ownership concentration and maintainer-governance concentration are near-identical per subsystem (amd ≈ 1.0 on both, net ≈ 0.08), landing on the agreement diagonal. The mailing-list axis points the same way but is left out of the plot, as it currently rests on a review-trailer proxy rather than full list data.</em></p>
+<p style="text-align: center;"><em>Two independent axes, one verdict. Code-ownership concentration and maintainer-governance concentration are near-identical per subsystem (amd ≈ 1.0 on both, net ≈ 0.08), landing on the agreement diagonal. The third axis — participation — needs unpacking rather than a single number, which is the next section.</em></p>
+
+## Not all participation is the same participation
+
+Collapsing "participation" into one number was hiding the most interesting
+structure in it. A patch carries different kinds of credit, and each is a
+different corporate signal: **Signed-off-by** is the maintainer's stamp that a
+patch may enter the tree (a _gatekeeping_ act), **Co-developed-by** credits a
+second author who actually helped write it (_collaboration_), and **Tested-by**
+records who validated it (_validation_). I split each subsystem's trailers into
+those three channels and measured concentration in each separately.
+
+They are three genuinely different maps, and none of them is the map of who owns
+the code. Signed-off-by is the _most_ concentrated — often more concentrated than
+code ownership — because it flows through a handful of maintainers. Tested-by is
+the _most_ distributed signal in the whole study: validation is a broad-ecosystem
+activity, spread across roughly **15 firms in iio and 18 in net**, including
+distros and test shops that own essentially no code. Co-developed-by sits in
+between, and is the trailer that diverges most from ownership everywhere (its rank
+correlation with code ownership is only **0.25–0.40**, against **0.58–0.90** for
+Signed-off-by).
+
+<div style="display: flex; justify-content: center;">
+  <img src="/public/kc-trailer-types.png" alt="Top row: effective number of firms for Signed-off-by, Co-developed-by, Tested-by, and code tokens in each subsystem; Tested-by is by far the most distributed in iio and net, while amd is saturated by AMD across all of them. Bottom row: iio Huawei holds 53 percent of Signed-off-by but 2 percent of code; iio co-development is led by Analog Devices and a USP student cohort; net co-development is led by Red Hat, Qualcomm, and Arista, all far above their code shares.">
+</div>
+<p style="text-align: center;"><em>Three trailers, three maps. Top: how distributed each channel is (higher = more firms share it). Bottom: the named spikes — a firm can govern a subsystem, co-develop heavily, or validate broadly while owning little of the surviving code.</em></p>
+
+The sharpest single case is a **gatekeeper**. In `iio`, Huawei authors barely
+**2%** of the surviving tokens but signs off on **53%** of all patches — because
+the iio maintainer, Jonathan Cameron, works there. A token census ranks Huawei as
+a minor iio firm; the Signed-off-by channel reveals it effectively _governs_ the
+subsystem. The opposite pattern is the **collaborator**: in `net`, Red Hat,
+Qualcomm, and Arista each co-develop far more than their code share (Qualcomm and
+Arista own well under 3% of the code yet drive a chunk of its co-development),
+hands-on work that ownership metrics cannot see. This is also why the code-vs-review
+axis was the weakest agreement earlier: "review" was really three signals averaged
+together, one concentrated and two distributed.
+
+There is one thread I chased that mostly _didn't_ hold up, and it is worth
+reporting honestly. If cross-company collaboration reduces single-firm dependence,
+then subsystems where firms talk across company lines on the mailing lists should
+be less concentrated. The raw correlation looked strong — but it collapses under a
+null model. Once you account for the simple fact that `net` has hundreds of firms
+present and `amd` has a handful, **every subsystem actually mixes _less_ than
+chance**: firms are more siloed than random co-participation would predict, `amd`
+most of all. What lowers concentration is more firms being present at all, not
+cross-firm relationships _per se_. A neat hypothesis, and the data declined it.
+
+<div style="display: flex; justify-content: center;">
+  <img src="/public/kc-crossfirm-mixing.png" alt="Grouped bar chart of observed versus null-model-expected cross-firm mailing-list thread rates for iio, amd, and net. In every subsystem the observed rate is well below the expected rate: 0.45 times chance in iio, 0.30 in amd, 0.38 in net.">
+</div>
+<p style="text-align: center;"><em>A hypothesis that didn't survive its confound. Cross-firm mailing-list contact is below the random-mixing expectation in all three subsystems, so the apparent link between mixing and lower concentration is really just "more firms present." Reported because negative results are results.</em></p>
 
 ## The firm outlives its people
 
@@ -367,12 +426,13 @@ the direction is consistent everywhere I look: the firm is what endures.
 This is the start of my master's at IME-USP, and it points at one clear paper:
 **a firm-level truck factor for the Linux kernel** that measures corporate
 _knowledge_ concentration, shows it diverges from _activity_, and demonstrates
-that knowledge, not activity, predicts what happens when a company leaves,
-asking which firms actually _understand_ a subsystem, not just which are busy in
-it. Everything in this post is its evidence; the work left is to harden it
-(sweep the threshold, lift `net`'s coverage, a true decay half-life) and widen
-the case set beyond three subsystems (btrfs, s390, bcachefs). I am aiming it at
-SBES or MSR.
+that knowledge, not activity, predicts what happens when a company leaves, asking
+which firms actually _understand_ a subsystem, not just which are busy in it, and
+separating who _governs_, who _co-develops_, and who _validates_ from who owns the
+code. Everything in this post is its evidence; the work left is to harden it (a
+true decay half-life rather than the survivorship view, a maintainer-normalized
+sign-off that separates "authored here" from "governed here") and widen the case
+set beyond three subsystems (btrfs, s390, bcachefs). I am aiming it at SBES or MSR.
 
 A natural second paper about how AI influences corporate knowledge. Every number
 here rests on git authorship, and generative AI breaks that: when a developer
