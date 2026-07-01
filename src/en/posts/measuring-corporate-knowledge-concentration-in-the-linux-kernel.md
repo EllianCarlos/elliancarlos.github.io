@@ -116,8 +116,17 @@ firm shares:
 
 $$G = \frac{\sum_{i=1}^{n} \sum_{j=1}^{n} \lvert s_i - s_j \rvert}{2 n^2 \bar{s}}$$
 
-and I report affiliation coverage next to every number so the reader knows how
-much of the code the claim actually rests on.
+The Gini coefficient is a single number from $0$ to $1$ that measures how
+_unevenly_ the tokens are split: it is literally the average absolute difference
+between every pair of firms' shares, normalized to land in $[0, 1]$. A Gini of
+$0$ means every firm owns exactly the same amount; a Gini approaching $1$ means
+one firm owns almost everything and the rest almost nothing. Where HHI (by
+squaring the shares) is dominated by the single largest firm and answers "is
+there one giant?", Gini looks at the whole spread and answers "is the field
+lopsided overall?", so two subsystems with a similar HHI can still differ in Gini
+if one has a long tail of tiny firms. I report both, and I put affiliation
+coverage next to every number so the reader knows how much of the code the claim
+actually rests on.
 
 ## Known Problems
 
@@ -203,7 +212,7 @@ commits really do come from company engineers.
 <div style="display: flex; justify-content: center;">
   <img src="/public/kc-coverage-lift.png" alt="Two bar charts. Left: affiliation coverage before and after resolving the unattributed tail, rising from 62 to 76 percent in iio and 59 to 82 percent in net, while amd barely moves near 98 percent. Right: corporate share of all tokens rising by 12 points in iio and 21 in net.">
 </div>
-<p style="text-align: center;"><em>Resolving the unattributed tail. Where the tail is large (iio, net), attributing it to firms lifts both coverage and the corporate share substantially; amd was already near-complete. This is the lower bound made concrete: the corporate share is provably higher than the raw email-domain view shows.</em></p>
+<p style="text-align: center;"><em>Resolving the unattributed tail. The two panels measure different things: the left is <strong>coverage</strong> (what fraction of tokens we can attribute to <em>any</em> employer at all), the right is the <strong>corporate</strong> slice of that (an employer that is specifically a company). Where the tail is large (iio, net), attributing it lifts both; amd was already near-complete. This is the lower bound made concrete: the corporate share is provably higher than the raw email-domain view shows.</em></p>
 
 But I have to be careful about what that does _not_ say. My first instinct was
 that resolving the tail would also make each subsystem look _more concentrated_,
@@ -230,6 +239,14 @@ fragility on the code?
 I enumerated **fifteen** firm-exit events across the three subsystems and
 classified every predicted-fragile file as orphaned, absorbed by another
 company, or retained.
+
+Each flagged file lands in one of three states, and the distinction matters:
+**orphaned** means _nobody_ picked it up (no known firm clears the expertise bar
+afterward, so the knowledge genuinely fell on the floor); **absorbed** means a
+_different_ company took it over and now dominates it; **retained** means the
+_same_ firm still holds it despite the exit, usually because the departure was
+partial. Orphaned is the bad outcome; the other two are knowledge surviving,
+either in new hands or the original ones.
 
 Across the genuine firm disengagements, only about **5%** of the flagged files
 were actually orphaned; roughly **93%** were absorbed by other companies and the
@@ -287,13 +304,17 @@ anything is counted.
 <div style="display: flex; justify-content: center;">
   <img src="/public/kc-mobility.png" alt="Two bar charts of knowledge held by developers who worked for more than one firm, and knowledge that changed corporate hands, for iio, amd, and net. Each shows a raw bar and a lower rebrand-corrected bar; net is highest at 25 percent corrected, amd near zero.">
 </div>
-<p style="text-align: center;"><em>Developer mobility, raw versus rebrand-corrected. net is the mobile case (~25% of known knowledge held by multi-firm developers); amd is almost immobile. The gap between the grey and coloured bars is the acquisition-rename correction.</em></p>
+<p style="text-align: center;"><em>Developer mobility, raw versus rebrand-corrected. The two panels count different things: the left is a <strong>stock</strong> (how much surviving knowledge is held by anyone who has <em>ever</em> had more than one employer), the right is the stricter <strong>flow</strong> (knowledge authored under a firm that differs from the developer's current one, so it actually <em>crossed</em> a corporate boundary), which is why the right is always smaller. net is the mobile case (~25% of known knowledge held by multi-firm developers); amd is almost immobile. The gap between the grey and coloured bars is the acquisition-rename correction.</em></p>
 
 ## Code, governance, and conversation point the same way
 
-The last piece is a convergent-validity check. If corporate influence is real,
-it should show up on more than one axis. So I measure three independently:
-**code** ownership, **governance** (which company the maintainers work for), and
+The last piece is a convergent-validity check. Convergent validity is a idea
+from measurement: if several _independent_ instruments that are supposed to
+capture the same underlying thing all agree, that agreement is evidence the thing
+is real and you are measuring it, rather than an artifact of one method. If
+corporate influence is real, it should show up on more than one axis. So I
+measure three independently, from entirely different data: **code** ownership
+(cregit tokens), **governance** (which company the maintainers work for), and
 **participation** (mailing-list discussion).
 
 They agree, subsystem by subsystem. In amd, governance concentration is total:
@@ -349,13 +370,20 @@ really three signals averaged together, one concentrated and two distributed.
 There is one thread I chased that mostly _didn't_ hold up, and it is worth
 reporting honestly. If cross-company collaboration reduces single-firm
 dependence, then subsystems where firms talk across company lines on the mailing
-lists should be less concentrated. The raw correlation looked strong — but it
-collapses under a null model. Once you account for the simple fact that `net`
-has hundreds of firms present and `amd` has a handful, **every subsystem
-actually mixes _less_ than chance**: firms are more siloed than random
-co-participation would predict, `amd` most of all. What lowers concentration is
-more firms being present at all, not cross-firm relationships _per se_. A neat
-hypothesis, and the data declined it.
+lists should be less concentrated. The raw correlation looked strong, but it
+collapses under a null model. The "expected" bar in the figure below is that
+null: I hold each subsystem's thread sizes and each firm's total message volume
+fixed, then randomly shuffle _which_ firm sent each message and recompute the
+cross-firm rate, averaged over many shuffles. That is the mixing you would see
+purely by chance, given how many firms are present and how much each one talks.
+Once you compare against it, **every subsystem actually mixes _less_ than
+chance**: firms are more siloed than random co-participation would predict, `amd`
+most of all. What lowers concentration is more firms being present at all, not
+cross-firm relationships _per se_. The comparison against the null is the whole
+result here, which is why the figure keeps both bars: the observed rate alone
+would misleadingly suggest `net` mixes the most, when the point is that it mixes
+_least_ relative to its opportunity. A neat hypothesis, and the data declined
+it.
 
 <div style="display: flex; justify-content: center;">
   <img src="/public/kc-crossfirm-mixing.png" alt="Grouped bar chart of observed versus null-model-expected cross-firm mailing-list thread rates for iio, amd, and net. In every subsystem the observed rate is well below the expected rate: 0.45 times chance in iio, 0.30 in amd, 0.38 in net.">
@@ -379,6 +407,16 @@ person-level truck factor climbs steadily in every subsystem, roughly **2 to
 people have to leave before the knowledge is lost. But the company truck factor
 barely moves. In amd it is **literally pinned at 1 for twelve straight years**
 while the individual figure octuples.
+
+One note on reading this against the headline numbers: because this panel
+reconstructs the tree as it stood at the end of each year, it uses Avelino's
+original normalized-DoA definition of an expert (rather than the $\tau = 5\%$
+surviving-token rule behind the headline firm truck factors), so the firm line
+sits a little lower here, ending near **5 in iio** and **6 in net** instead of
+the headline **7** and **17**. The two definitions disagree on the exact _level_,
+which is expected, but both put amd at **1** and both show the firm factor
+essentially flat while the individual one climbs. The shape of the gap, not its
+units, is the finding.
 
 <div style="display: flex; justify-content: center;">
   <img src="/public/kc-turnover-person-vs-firm-tf.png" alt="Two panels. Left: person-level truck factor (solid lines) climbing steeply for iio, amd, and net while the firm-level truck factor (dashed lines) stays flat near the bottom. Right: the person-to-firm truck-factor ratio widening over time, most sharply for amd.">
