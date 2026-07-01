@@ -200,10 +200,14 @@ engineers.
 
 But I have to be careful about what that does _not_ say. My first instinct was
 that resolving the tail would also make each subsystem look _more concentrated_,
-fewer firms, higher share each. It turns out to be the opposite: the
-unattributed tail resolves into _more distinct_ companies. Showing that smaller
-companies that tend to be flexible about their what e-mails their employees use
-for commit.
+fewer firms, each with a bigger share. It does not, at least not reliably: once
+the tail is attributed, the concentration indices barely move, and the change is
+not statistically distinguishable from zero. What the tail hides is not one more
+giant but a mix, some of it genuinely diverse and some of it, in `net`, actually
+more Red Hat than the visible head suggested. So the honest reading is narrow:
+the corporate _share_ is a firm lower bound, but the _concentration_ number is
+about where it looks, not obviously higher or lower once the unknowns are filled
+in.
 
 <div style="display: flex; justify-content: center;">
   <img src="/public/kc-concentration-coverage-over-time.png" alt="Three panels over time for iio, amd, and net: firm HHI, effective number of firms, and organization-attribution coverage percentage. amd sits near an HHI of 1 with ~98 percent coverage; iio and net trend toward dispersion with coverage stuck around 60 percent.">
