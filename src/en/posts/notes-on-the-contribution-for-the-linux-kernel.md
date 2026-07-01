@@ -163,3 +163,13 @@ The table with the updated statuses of our submissions is:
 | :------------------------------------------------------------------------------------: | -------------------- | --------------------------------- | --------- |
 |                 veml6030 and veml6035 duplication in hw_init function                  | Working on v2        | v2 PATCH review on 2026-04-20     | 1 day     |
 | Use `guards` and `scoped_guard` instead of mutex locks in the `null_blk` device driver | Waiting review on v2 | v2 PATCH submission on 2026-04-19 | 2 days    |
+
+## Last Update
+
+We want to work on the v3 for the veml6030 and vem6035 patches, but recently
+haven't had the time.
+
+|                                         Change                                         | status               | last update                                 | Stale for |
+| :------------------------------------------------------------------------------------: | -------------------- | ------------------------------------------- | --------- |
+|                 veml6030 and veml6035 duplication in hw_init function                  | Working on v3        | v2 was reviewed, we couldn't work on it yet | 35 days   |
+| Use `guards` and `scoped_guard` instead of mutex locks in the `null_blk` device driver | Waiting review on v2 | v2 PATCH submission on 2026-04-19           | +40 days  |
