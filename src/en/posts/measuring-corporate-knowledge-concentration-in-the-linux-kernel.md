@@ -321,14 +321,14 @@ records who validated it (_validation_). I split each subsystem's trailers into
 those three channels and measured concentration in each separately.
 
 They are three genuinely different maps, and none of them is the map of who owns
-the code. Signed-off-by is the _most_ concentrated — often more concentrated than
-code ownership — because it flows through a handful of maintainers. Tested-by is
-the _most_ distributed signal in the whole study: validation is a broad-ecosystem
-activity, spread across roughly **15 firms in iio and 18 in net**, including
-distros and test shops that own essentially no code. Co-developed-by sits in
-between, and is the trailer that diverges most from ownership everywhere (its rank
-correlation with code ownership is only **0.25–0.40**, against **0.58–0.90** for
-Signed-off-by).
+the code. Signed-off-by is the _most_ concentrated — often more concentrated
+than code ownership — because it flows through a handful of maintainers.
+Tested-by is the _most_ distributed signal in the whole study: validation is a
+broad-ecosystem activity, spread across roughly **15 firms in iio and 18 in
+net**, including distros and test shops that own essentially no code.
+Co-developed-by sits in between, and is the trailer that diverges most from
+ownership everywhere (its rank correlation with code ownership is only
+**0.25–0.40**, against **0.58–0.90** for Signed-off-by).
 
 <div style="display: flex; justify-content: center;">
   <img src="/public/kc-trailer-types.png" alt="Top row: effective number of firms for Signed-off-by, Co-developed-by, Tested-by, and code tokens in each subsystem; Tested-by is by far the most distributed in iio and net, while amd is saturated by AMD across all of them. Bottom row: iio Huawei holds 53 percent of Signed-off-by but 2 percent of code; iio co-development is led by Analog Devices and a USP student cohort; net co-development is led by Red Hat, Qualcomm, and Arista, all far above their code shares.">
@@ -337,24 +337,25 @@ Signed-off-by).
 
 The sharpest single case is a **gatekeeper**. In `iio`, Huawei authors barely
 **2%** of the surviving tokens but signs off on **53%** of all patches — because
-the iio maintainer, Jonathan Cameron, works there. A token census ranks Huawei as
-a minor iio firm; the Signed-off-by channel reveals it effectively _governs_ the
-subsystem. The opposite pattern is the **collaborator**: in `net`, Red Hat,
-Qualcomm, and Arista each co-develop far more than their code share (Qualcomm and
-Arista own well under 3% of the code yet drive a chunk of its co-development),
-hands-on work that ownership metrics cannot see. This is also why the code-vs-review
-axis was the weakest agreement earlier: "review" was really three signals averaged
-together, one concentrated and two distributed.
+the iio maintainer, Jonathan Cameron, works there. A token census ranks Huawei
+as a minor iio firm; the Signed-off-by channel reveals it effectively _governs_
+the subsystem. The opposite pattern is the **collaborator**: in `net`, Red Hat,
+Qualcomm, and Arista each co-develop far more than their code share (Qualcomm
+and Arista own well under 3% of the code yet drive a chunk of its
+co-development), hands-on work that ownership metrics cannot see. This is also
+why the code-vs-review axis was the weakest agreement earlier: "review" was
+really three signals averaged together, one concentrated and two distributed.
 
 There is one thread I chased that mostly _didn't_ hold up, and it is worth
-reporting honestly. If cross-company collaboration reduces single-firm dependence,
-then subsystems where firms talk across company lines on the mailing lists should
-be less concentrated. The raw correlation looked strong — but it collapses under a
-null model. Once you account for the simple fact that `net` has hundreds of firms
-present and `amd` has a handful, **every subsystem actually mixes _less_ than
-chance**: firms are more siloed than random co-participation would predict, `amd`
-most of all. What lowers concentration is more firms being present at all, not
-cross-firm relationships _per se_. A neat hypothesis, and the data declined it.
+reporting honestly. If cross-company collaboration reduces single-firm
+dependence, then subsystems where firms talk across company lines on the mailing
+lists should be less concentrated. The raw correlation looked strong — but it
+collapses under a null model. Once you account for the simple fact that `net`
+has hundreds of firms present and `amd` has a handful, **every subsystem
+actually mixes _less_ than chance**: firms are more siloed than random
+co-participation would predict, `amd` most of all. What lowers concentration is
+more firms being present at all, not cross-firm relationships _per se_. A neat
+hypothesis, and the data declined it.
 
 <div style="display: flex; justify-content: center;">
   <img src="/public/kc-crossfirm-mixing.png" alt="Grouped bar chart of observed versus null-model-expected cross-firm mailing-list thread rates for iio, amd, and net. In every subsystem the observed rate is well below the expected rate: 0.45 times chance in iio, 0.30 in amd, 0.38 in net.">
@@ -421,31 +422,12 @@ the direction is consistent everywhere I look: the firm is what endures.
 </div>
 <p style="text-align: center;"><em>Knowledge durability. Left: 12–15% of iio/net code is still held by firms whose people left 3+ years ago (amd is ~0%, because its one vendor never leaves). Right: how old the living code is; net's median surviving token is about a decade old.</em></p>
 
-## Where this goes next
+## Next Steps
 
-This is the start of my master's at IME-USP, and it points at one clear paper:
-**a firm-level truck factor for the Linux kernel** that measures corporate
-_knowledge_ concentration, shows it diverges from _activity_, and demonstrates
-that knowledge, not activity, predicts what happens when a company leaves, asking
-which firms actually _understand_ a subsystem, not just which are busy in it, and
-separating who _governs_, who _co-develops_, and who _validates_ from who owns the
-code. Everything in this post is its evidence; the work left is to harden it (a
-true decay half-life rather than the survivorship view, a maintainer-normalized
-sign-off that separates "authored here" from "governed here") and widen the case
-set beyond three subsystems (btrfs, s390, bcachefs). I am aiming it at SBES or MSR.
+This is the start of my master's at IME-USP where I'll be diving deeper into
+these topics such as: firm-level truck factor for Linux kernel and the diverse
+implications of corporate contributions to OSS.
 
-A natural second paper about how AI influences corporate knowledge. Every number
-here rests on git authorship, and generative AI breaks that: when a developer
-commits code an LLM largely wrote, whose knowledge is that? Disclosure trailers
-like `Assisted-by:` exist but lag usage. Re-running these measurements while
-treating a growing share of tokens as machine-authored would show whether AI
-dilutes corporate concentration, entrenches it (most compute writes the most
-code), or just hides it, a study of its own.
-
-Coming to this from the contributor side first changed how I read these numbers.
-The through-line is one claim: **corporate influence in open source is not one
-thing but three that move together, and it is the concentration of _knowledge_,
-not activity, that says how fragile a project really is.** A truck factor of 1
-is not a doomsday counter; it is a map of where a project has quietly bet on a
-single company, and open source is full of those bets. I will keep writing here
-as the research develops.
+I expect to run the same amount of analysis for more subsystems and even for
+groups of subsystems. Another clear direction is to explore how the usage of AI
+influences on the knowledge and governance across Linux subsystems and OSS.
