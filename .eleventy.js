@@ -1,7 +1,9 @@
 const fs = require("fs");
 const path = require("path");
 const sitemap = require("@quasibit/eleventy-plugin-sitemap");
+const rss = require("@11ty/eleventy-plugin-rss");
 const syntaxHighlight = require("@11ty/eleventy-plugin-syntaxhighlight");
+const tagSlug = require("./lib/tagSlug");
 
 const leftPadDate = (n) => {
   if (n > 9) return `${n}`;
@@ -91,6 +93,7 @@ module.exports = function (eleventyConfig) {
 
   eleventyConfig.addPassthroughCopy("src/Ellian_Carlos_Resume.pdf");
   eleventyConfig.addPassthroughCopy("src/robots.txt");
+  // NOTE: llms.txt is generated from src/llms.njk, not copied.
   //
   // Copy the `styles` directory to the output
   eleventyConfig.addPassthroughCopy("src/styles");
@@ -109,11 +112,15 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({"public/og-image.png": "og-image.png"});
 
   // Plugins
+  // Canonical tag slug, shared with lib/tagSlug.js used by the permalink builder.
+  eleventyConfig.addFilter("tagSlug", tagSlug);
+
   eleventyConfig.addPlugin(syntaxHighlight);
+  eleventyConfig.addPlugin(rss);
 
   eleventyConfig.addPlugin(sitemap, {
     sitemap: {
-      hostname: "https://www.elliancarlos.com.br",
+      hostname: "https://elliancarlos.com.br",
     },
   });
 

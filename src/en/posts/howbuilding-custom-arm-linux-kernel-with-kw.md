@@ -30,7 +30,7 @@ As part of my classes on [Open Source Software (OSS)](https://opensource.org/)
 my whole class is starting to work on Linux Kernel Development. This post is a
 series of my experiences throughout the class related to kernel development.
 This post is a follow-up of [this previous post](/posts/how-to-setup-lkd-notes)
-and part of [this series](/posts/tag/MAC5856).
+and part of [this series](/posts/tag/mac5856/).
 
 ## Kernel types
 

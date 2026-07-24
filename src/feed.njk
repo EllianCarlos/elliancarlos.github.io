@@ -1,0 +1,33 @@
+---
+permalink: /feed.xml
+layout: null
+eleventyExcludeFromCollections: true
+---
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>{{ seo.siteName }}</title>
+  <subtitle>{{ i18n[defaultLanguage].seo.defaultDescription }}</subtitle>
+  <link href="{{ seo.baseUrl }}/feed.xml" rel="self"/>
+  <link href="{{ seo.baseUrl }}/"/>
+  <updated>{{ collections['posts_en'] | getNewestCollectionItemDate | dateToRfc3339 }}</updated>
+  <id>{{ seo.baseUrl }}/</id>
+  <author>
+    <name>{{ seo.author.name }}</name>
+    <uri>{{ seo.author.url }}</uri>
+  </author>
+  {%- for post in collections['posts_en'] %}
+  <entry>
+    <title>{{ post.data.title }}</title>
+    <link href="{{ seo.baseUrl }}{{ post.url }}"/>
+    <updated>{{ post.date | dateToRfc3339 }}</updated>
+    <id>{{ seo.baseUrl }}{{ post.url }}</id>
+    {%- if post.data.description %}
+    <summary>{{ post.data.description }}</summary>
+    {%- endif %}
+    {%- for tag in post.data.tags %}
+    <category term="{{ tag }}"/>
+    {%- endfor %}
+    <content type="html">{{ post.templateContent | htmlToAbsoluteUrls(seo.baseUrl + post.url) }}</content>
+  </entry>
+  {%- endfor %}
+</feed>

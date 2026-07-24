@@ -24,7 +24,7 @@ As part of the second evaluation of my classes on
 contributing to an OSS project which each group can choose. This post is a
 follow-up of
 [my notes on our first contribution to the Linux Kernel](/posts/notes-on-the-contribution-for-the-linux-kernel)
-and part of [this series](/posts/tag/MAC5856).
+and part of [this series](/posts/tag/mac5856/).
 
 As my master's will be about corporate contributions to the kernel's source code
 and cregit is one of the tools tied to the Linux Foundation's

@@ -49,6 +49,9 @@ type: index
   <link rel="alternate" hreflang="x-default" href="{{ seo.baseUrl }}{{ page.url | switchLanguage('en') }}" />
   {% endif %}
   
+  <!-- Feed -->
+  <link rel="alternate" type="application/atom+xml" title="{{ seo.siteName }}" href="/feed.xml">
+
   <!-- Favicon -->
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">

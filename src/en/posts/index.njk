@@ -22,7 +22,7 @@ description: Thoughts on software engineering, tools, languages, and technology.
     {% if post.data.tags and post.data.tags.length %}
     <div class="post-tags">
       {% for tag in post.data.tags %}
-      <a href="/posts/tag/{{ tag }}/" class="tag-pill">{{ tag }}</a>
+      <a href="/posts/tag/{{ tag | tagSlug }}/" class="tag-pill">{{ tag }}</a>
       {% endfor %}
     </div>
     {% endif %}

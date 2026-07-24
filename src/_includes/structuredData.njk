@@ -1,26 +1,34 @@
+{#
+  All string values go through `| dump` so quotes, backslashes and newlines in
+  titles or descriptions can't produce invalid JSON-LD. `dump` emits the
+  surrounding quotes itself, so these are deliberately not wrapped in "".
+#}
+{% set sameAs = [
+  seo.social.github,
+  seo.social.linkedin,
+  seo.social.mastodon,
+  seo.social.lattes,
+  seo.social.orcid,
+  seo.social.scholar,
+  seo.social.wikidata
+] | select() | list %}
+
 {% if page.url == '/' or page.url == '/index.html' %}
 <!-- Person Schema for Homepage -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "Person",
-  "name": "{{ seo.author.name }}",
-  "url": "{{ seo.author.url }}",
-  "email": "{{ seo.author.email }}",
-  "jobTitle": "Software Development Engineer",
-  "worksFor": {
-    "@type": "Organization",
-    "name": "Amazon"
+  "@id": {{ seo.author.id | dump | safe }},
+  "name": {{ seo.author.name | dump | safe }},
+  "url": {{ seo.author.url | dump | safe }},
+  "jobTitle": {{ seo.author.jobTitle | dump | safe }},
+  "affiliation": {
+    "@type": "CollegeOrUniversity",
+    "name": {{ seo.author.affiliation | dump | safe }}
   },
-  "alumniOf": {
-    "@type": "EducationalOrganization",
-    "name": "University of São Paulo"
-  },
-  "sameAs": [
-    "{{ seo.social.github }}",
-    "{{ seo.social.linkedin }}",
-    "{{ seo.social.mastodon }}"
-  ],
+  "knowsAbout": {{ seo.author.knowsAbout | dump | safe }},
+  "sameAs": {{ sameAs | dump | safe }},
   "knowsLanguage": ["en", "pt", "es", "ja"]
 }
 </script>
@@ -32,14 +40,10 @@
 {
   "@context": "https://schema.org",
   "@type": "Blog",
-  "name": "{{ seo.siteName }} Blog",
-  "description": "{{ i18n[locale].seo.blog.description }}",
-  "url": "{{ seo.baseUrl }}{{ page.url }}",
-  "author": {
-    "@type": "Person",
-    "name": "{{ seo.author.name }}",
-    "url": "{{ seo.author.url }}"
-  }
+  "name": {{ (seo.siteName + " Blog") | dump | safe }},
+  "description": {{ i18n[locale].seo.blog.description | dump | safe }},
+  "url": {{ (seo.baseUrl + page.url) | dump | safe }},
+  "author": { "@id": {{ seo.author.id | dump | safe }} }
 }
 </script>
 {% endif %}
@@ -50,26 +54,38 @@
 {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
-  "headline": "{{ title }}",
-  "description": "{{ description or (content | striptags | truncate(160)) }}",
-  "author": {
-    "@type": "Person",
-    "name": "{{ seo.author.name }}",
-    "url": "{{ seo.author.url }}"
-  },
-  "datePublished": "{{ date.toISOString() }}",
-  {% if modified %}"dateModified": "{{ modified.toISOString() }}",{% endif %}
-  "url": "{{ seo.baseUrl }}{{ page.url }}",
-  "image": "{{ ogImage or seo.defaultImage }}",
-  "publisher": {
-    "@type": "Person",
-    "name": "{{ seo.author.name }}",
-    "url": "{{ seo.author.url }}"
-  },
+  "headline": {{ title | dump | safe }},
+  "description": {{ (description or (content | striptags | truncate(160))) | dump | safe }},
+  "author": { "@id": {{ seo.author.id | dump | safe }} },
+  "datePublished": {{ date.toISOString() | dump | safe }},
+  {% if modified %}"dateModified": {{ modified.toISOString() | dump | safe }},{% endif %}
+  {% if tags and tags.length %}"keywords": {{ tags | dump | safe }},{% endif %}
+  "url": {{ (seo.baseUrl + page.url) | dump | safe }},
+  "image": {{ (ogImage or seo.defaultImage) | dump | safe }},
+  "inLanguage": {{ (locale or "en") | dump | safe }},
+  "publisher": { "@id": {{ seo.author.id | dump | safe }} },
   "mainEntityOfPage": {
     "@type": "WebPage",
-    "@id": "{{ seo.baseUrl }}{{ page.url }}"
+    "@id": {{ (seo.baseUrl + page.url) | dump | safe }}
   }
+}
+</script>
+{% endif %}
+
+{#
+  The Person node is only emitted on the homepage, so every other page needs a
+  minimal stub for its "@id" references to resolve when a crawler fetches that
+  page in isolation.
+#}
+{% if page.url != '/' and page.url != '/index.html' %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "@id": {{ seo.author.id | dump | safe }},
+  "name": {{ seo.author.name | dump | safe }},
+  "url": {{ seo.author.url | dump | safe }},
+  "sameAs": {{ sameAs | dump | safe }}
 }
 </script>
 {% endif %}

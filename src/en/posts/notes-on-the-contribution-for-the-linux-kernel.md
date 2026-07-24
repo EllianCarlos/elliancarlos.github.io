@@ -23,7 +23,7 @@ my whole class is starting to work on Linux Kernel Development. This post is a
 series of my experiences throughout the class related to kernel development.
 This post is a follow-up of
 [this previous post](/posts/how-the-iio-module-works) and part of
-[this series](/posts/tag/MAC5856).
+[this series](/posts/tag/mac5856/).
 
 Throughout the whole series of posts we were learning how the kernel works and
 understanding how we could make smart changes to the Linux kernel. In this post
