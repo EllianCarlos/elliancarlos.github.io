@@ -9,8 +9,9 @@ module.exports = {
     // author references this @id instead of re-declaring a Person, so search
     // engines and LLMs resolve one entity rather than N look-alikes.
     id: "https://elliancarlos.com.br/#ellian",
-    jobTitle: "Doctoral researcher, empirical software engineering",
-    affiliation: "Universidade de São Paulo",
+    jobTitle: "Software Development Engineer",
+    worksFor: "Amazon",
+    affiliation: "University of São Paulo",
     knowsAbout: [
       "Empirical software engineering",
       "Linux kernel",
@@ -27,7 +28,7 @@ module.exports = {
     github: "https://www.github.com/elliancarlos",
     linkedin: "https://www.linkedin.com/in/elliancarlos",
     mastodon: "https://www.mastodon.social/@elliancarlos",
-    lattes: "",
+    lattes: "https://lattes.cnpq.br/3423853440338718",
     orcid: "",
     scholar: "",
     wikidata: "",
