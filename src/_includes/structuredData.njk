@@ -23,6 +23,10 @@
   "name": {{ seo.author.name | dump | safe }},
   "url": {{ seo.author.url | dump | safe }},
   "jobTitle": {{ seo.author.jobTitle | dump | safe }},
+  "worksFor": {
+    "@type": "Organization",
+    "name": {{ seo.author.worksFor | dump | safe }}
+  },
   "affiliation": {
     "@type": "CollegeOrUniversity",
     "name": {{ seo.author.affiliation | dump | safe }}
