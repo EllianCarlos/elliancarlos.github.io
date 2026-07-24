@@ -22,7 +22,7 @@ pagination:
   {% if post.data.tags and post.data.tags.length %}
   <div class="post-tags">
     {% for tag in post.data.tags %}
-    <a href="{% if locale == 'en' %}/posts/tag/{% else %}/{{ locale }}/posts/tag/{% endif %}{{ tag }}/" class="tag-pill">{{ tag }}</a>
+    <a href="{% if locale == 'en' %}/posts/tag/{% else %}/{{ locale }}/posts/tag/{% endif %}{{ tag | tagSlug }}/" class="tag-pill">{{ tag }}</a>
     {% endfor %}
   </div>
   {% endif %}

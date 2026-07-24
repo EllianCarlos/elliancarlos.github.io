@@ -24,7 +24,7 @@ my whole class is starting to work on Linux Kernel Development. This post is a
 series of my experiences throughout the class related to kernel development.
 This post is a follow-up of
 [this previous post](/posts/intro-linuxkernelbuildconfigandmodules) and part of
-[this series](/posts/tag/MAC5856).
+[this series](/posts/tag/mac5856/).
 
 > **Note:** This post is a companion to the
 > [Introduction to Linux kernel char device drivers](https://flusp.ime.usp.br/kernel/char-drivers-intro/)

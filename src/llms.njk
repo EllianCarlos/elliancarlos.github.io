@@ -1,0 +1,21 @@
+---
+permalink: /llms.txt
+layout: null
+eleventyExcludeFromCollections: true
+---
+# {{ seo.siteName }}
+
+> {{ i18n[defaultLanguage].seo.defaultDescription | safe }}
+
+A plain-text map of this site for language models. Full content for every
+entry below is available in the Atom feed at {{ seo.baseUrl }}/feed.xml;
+the complete URL list is at {{ seo.baseUrl }}/sitemap.xml.
+
+## Posts
+{% for post in collections['posts_en'] %}
+- [{{ post.data.title | safe }}]({{ seo.baseUrl }}{{ post.url }}){% if post.data.description %}: {{ post.data.description | striptags | replace("\n", " ") | trim | safe }}{% endif %}
+{%- endfor %}
+
+## About
+- [{{ seo.author.name }}]({{ seo.baseUrl }}/): homepage and background
+- [Contact]({{ seo.baseUrl }}/contact/)

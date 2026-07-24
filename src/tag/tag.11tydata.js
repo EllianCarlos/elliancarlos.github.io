@@ -1,3 +1,5 @@
+const tagSlug = require("../../lib/tagSlug");
+
 module.exports = {
   eleventyComputed: {
     permalink(data) {
@@ -5,8 +7,8 @@ module.exports = {
       if (!tagPage) return false;
       const { lang, tag } = tagPage;
       return lang === "en"
-        ? `/posts/tag/${tag}/index.html`
-        : `/${lang}/posts/tag/${tag}/index.html`;
+        ? `/posts/tag/${tagSlug(tag)}/index.html`
+        : `/${lang}/posts/tag/${tagSlug(tag)}/index.html`;
     },
     locale(data) {
       const tagPage = data.pagination?.items?.[0];
