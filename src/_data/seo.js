@@ -29,7 +29,7 @@ module.exports = {
     linkedin: "https://www.linkedin.com/in/elliancarlos",
     mastodon: "https://www.mastodon.social/@elliancarlos",
     lattes: "https://lattes.cnpq.br/3423853440338718",
-    orcid: "",
+    orcid: "https://orcid.org/0009-0004-9135-8207",
     scholar: "",
     wikidata: "",
   },

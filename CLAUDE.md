@@ -29,22 +29,34 @@ Formatting: Prettier with `printWidth: 80` and `proseWrap: "always"` (see `.pret
 filters, permalink logic, transforms) lives there rather than being spread across files.
 Read it first before making changes.
 
-### i18n (the central design constraint)
+### i18n (built for 4 languages, currently disabled)
 
-The site supports **4 languages: `en`, `pt`, `es`, `ja`** (`defaultLanguage = "en"`).
-This shapes almost every part of the build.
+The build machinery supports **4 languages: `en`, `pt`, `es`, `ja`**, but as of the
+"Cleanup" commit the site builds **English-only**. Only `src/en/` exists on disk —
+`src/pt/`, `src/es/`, and `src/ja/` were removed. Everything below describes how the
+machinery behaves and how to bring a language back, not the site's current output.
 
-- **Content layout**: `src/<lang>/` holds each language's pages and `posts/`. English
-  serves at root (`/`, `/posts/`); others are prefixed (`/pt/`, `/pt/posts/`, …).
+- **The flag**: `.eleventy.js` sets `const I18N_ENABLED = false;` near the top of
+  `module.exports`, with `ALL_LANGUAGES = ["en", "pt", "es", "ja"]` kept alongside it.
+  While `I18N_ENABLED` is `false`, `languages = ["en"]` and `i18nEnabled` (exposed as a
+  global) gates every i18n-aware template block — the language dropdown, `hreflang`
+  tags, and the browser-language auto-redirect (`languageRedirect.njk`) all render
+  nothing. To reactivate, flip the flag to `true` and recreate the `src/<lang>/`
+  content directories (see below); the rest of the pipeline picks it up automatically.
+- **Content layout** (when enabled): `src/<lang>/` holds each language's pages and
+  `posts/`. English serves at root (`/`, `/posts/`); others are prefixed (`/pt/`,
+  `/pt/posts/`, …).
 - **Permalink computation**: a global `permalink` function in `.eleventy.js` strips the
   `/<lang>/` segment from the file path and re-adds the prefix for non-English locales.
   Locale comes from directory data files (`src/<lang>/<lang>.json` → `{ "locale": "..." }`).
-- **Per-language collections** are generated in a loop: `posts_<lang>`, `tags_<lang>`,
-  `searchIndex_<lang>`. The plain `posts` collection is an English-only alias kept for
-  backward compatibility.
+- **Per-language collections** are generated in a loop over `languages`: `posts_<lang>`,
+  `tags_<lang>`, `searchIndex_<lang>`. With the flag off this loop only ever runs for
+  `en`. The plain `posts` collection is an English-only alias kept for backward
+  compatibility.
 - **Translations are linked by `translationKey`** in post frontmatter — the same key
   across `src/en/posts/x.md` and `src/pt/posts/x.md` marks them as the same post. The
-  `postInLanguage` filter checks whether a translation exists.
+  `postInLanguage` filter checks whether a translation exists. Not meaningful today
+  since no translated posts exist, but the field is harmless to set on new posts.
 - **Untranslated fallback**: non-English post pages show `translationWarning.njk`
   (a banner) when viewing an English post under a translated path.
 - **`switchLanguage` / `i18nUrl` filters** rewrite URLs between locales (used for the
@@ -53,10 +65,15 @@ This shapes almost every part of the build.
   language *only if a translated page actually exists* — it checks the `availableUrls`
   collection (a map of `lang → [urls]`). This guard exists to prevent the historical
   `/pt/pt/pt/...` redirect loop. It also bails out on 404 pages and respects the
-  `preferredLanguage` localStorage key.
+  `preferredLanguage` localStorage key. Inert while `i18nEnabled` is false.
 
-UI strings live in `src/_data/i18n/<lang>.json`, exposed as the `i18n` global via
+UI strings still live in `src/_data/i18n/<lang>.json` for all four languages (unused
+files for `pt`/`es`/`ja` while the flag is off), exposed as the `i18n` global via
 `src/_data/i18n.js` and referenced in templates as `i18n[locale].<path>`.
+
+Note: `structuredData.njk` still hard-codes `"knowsLanguage": ["en", "pt", "es", "ja"]`
+in the homepage Person schema — that's a stale claim while i18n is disabled and should
+be revisited if this schema gets another pass.
 
 ### Templates & layouts
 
@@ -90,9 +107,9 @@ title: "..."
 date: 2025-07-13
 layout: layouts/post.njk
 language: en          # display label
-locale: pt            # drives URL prefix & i18n (non-English posts)
+locale: pt            # drives URL prefix & i18n (non-English posts); only matters if I18N_ENABLED
 place: brazil
-translationKey: my-post   # links translations across languages
+translationKey: my-post   # links translations across languages; inert while i18n is disabled
 description: "..."    # used for SEO + search index
 tags: [tools]
 modified: 2025-08-01  # optional; shows "updated on"
@@ -117,12 +134,14 @@ Deployed via **Netlify** (status badge in README). `CNAME` → `elliancarlos.com
 
 ## Conventions
 
-- **When editing `src/en/index.njk` (the homepage), you must mirror the changes into
-  `src/es/index.njk`, `src/ja/index.njk`, and `src/pt/index.njk`** (see
-  `.cursor/rules/translate-homepage.mdc`). Use **LATAM Spanish** (e.g. "computadora"
-  not "ordenador") and **Brazilian Portuguese** (e.g. "você" not "tu"). Keep HTML
-  structure identical across all four versions and localize internal links
-  (`/es/posts`, `/ja/posts`, `/pt/posts`).
-- When translating a blog post: copy the `src/en/posts/*.md` file into the target
-  language directory, translate title/body/`description`, set `locale`, and keep the
-  same `translationKey`.
+- The site is English-only right now (see [i18n](#i18n-built-for-4-languages-currently-disabled)
+  above) — there are no `src/es/`, `src/ja/`, or `src/pt/` homepages to keep in sync, so
+  editing `src/en/index.njk` needs no mirroring today. The rule that used to require
+  this lived in `.cursor/rules/translate-homepage.mdc`, deleted in the "Cleanup" commit;
+  if `I18N_ENABLED` is flipped back on and the other language directories return,
+  reinstate an equivalent rule (LATAM Spanish, e.g. "computadora" not "ordenador";
+  Brazilian Portuguese, e.g. "você" not "tu"; identical HTML structure; localized
+  internal links) before editing the homepage again.
+- If i18n is ever re-enabled and posts get translated: copy the `src/en/posts/*.md`
+  file into the target language directory, translate title/body/`description`, set
+  `locale`, and keep the same `translationKey`.
