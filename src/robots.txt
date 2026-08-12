@@ -2,6 +2,7 @@
 # The wildcard below already permits every crawler; the named groups exist so
 # the intent is explicit rather than inferred, since the common default for
 # these agents is to be disallowed.
+Content-Signal: search=yes, ai-train=yes, ai-input=yes
 
 # Training crawlers -- what gets learned into the model itself
 User-agent: GPTBot
