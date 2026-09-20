@@ -18,7 +18,7 @@ jobs:
     name: Build (bun)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -42,7 +42,7 @@ jobs:
           test -f dist/search-index-en.json
           test -f dist/_headers
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: dist
           path: dist
@@ -52,7 +52,7 @@ jobs:
     name: Dev environment (devenv)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: cachix/install-nix-action@v31
         with:
@@ -76,3 +76,39 @@ jobs:
 
       - name: Check the build output
         run: test -f dist/index.html
+
+  # This replaces the legacy Jekyll build of GitHub Pages. That build always
+  # failed, because Jekyll reads the Nunjucks templates as Liquid.
+  # Netlify keeps serving elliancarlos.com.br. Pages serves the same output at
+  # https://elliancarlos.github.io/. The repository CNAME file stays out of
+  # dist/, so Pages never claims the custom domain.
+  deploy-pages:
+    name: Deploy to GitHub Pages
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Download the dist artifact from the build job
+        uses: actions/download-artifact@v5
+        with:
+          name: dist
+          path: dist
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+
+      - id: deploy
+        uses: actions/deploy-pages@v4
