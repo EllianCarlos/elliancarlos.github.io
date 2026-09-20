@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build (bun)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.4.2"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build the site
+        run: bun run build
+
+      # There is no test suite. The build output is the proof.
+      - name: Check the build output
+        run: |
+          set -eux
+          test -f dist/index.html
+          test -f dist/404.html
+          test -f dist/posts/index.html
+          test -f dist/sitemap.xml
+          test -f dist/feed.xml
+          test -f dist/search-index-en.json
+          test -f dist/_headers
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+          retention-days: 7
+
+  devenv:
+    name: Dev environment (devenv)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            accept-flake-config = true
+
+      - uses: cachix/cachix-action@v16
+        with:
+          name: devenv
+
+      # This installs the latest devenv CLI. If the CLI becomes newer than
+      # devenv.lock, the job fails with a lock error. Run `devenv update devenv`
+      # to refresh the lock.
+      - name: Install devenv
+        run: nix profile install nixpkgs#devenv
+
+      # This builds the shell, installs bun and the dependencies, then runs the
+      # `build` script inside the shell.
+      - name: Build the site inside the devenv shell
+        run: devenv shell build
+
+      - name: Check the build output
+        run: test -f dist/index.html
