@@ -1,111 +1,122 @@
-[![Netlify Status](https://api.netlify.com/api/v1/badges/703975f3-d832-4bd3-8051-d6ca4f375a5a/deploy-status)](https://app.netlify.com/sites/serene-lollipop-e973ed/deploys)
-# My website!
-Heey
+# elliancarlos.com.br
 
-# First Time Setup
+[![Netlify Status](https://api.netlify.com/api/v1/badges/703975f3-d832-4bd3-8051-d6ca4f375a5a/deploy-status)](https://app.netlify.com/sites/serene-lollipop-e973ed/deploys)
+
+Personal website and blog of Ellian Carlos. The site is live at
+[elliancarlos.com.br](https://www.elliancarlos.com.br).
+
+## Stack
+
+| Part                    | Tool                                                             |
+| ----------------------- | ---------------------------------------------------------------- |
+| Static site generator   | [Eleventy](https://www.11ty.dev/) 2.x                            |
+| Templates               | Nunjucks and Markdown                                            |
+| Package manager         | [Bun](https://bun.sh/)                                           |
+| Styles                  | [Pico CSS](https://picocss.com/) 2                               |
+| Client-side search      | [FlexSearch](https://github.com/nextapps-de/flexsearch)          |
+| Development environment | Nix, [devenv](https://devenv.sh/), [direnv](https://direnv.net/) |
+| Hosting                 | Netlify                                                          |
 
 ## Prerequisites
 
-You need Nix, devenv, and direnv installed on your system.
+You need Nix, direnv, and devenv on your system. Install them in this order.
 
-### Linux Setup
+1. Install Nix. On Linux, use the multi-user installation:
 
-```bash
-# 1. Install Nix (multi-user installation recommended)
-sh <(curl -L https://nixos.org/nix/install) --daemon
+   ```bash
+   sh <(curl -L https://nixos.org/nix/install) --daemon
+   ```
 
-# 2. Enable nix-command and flakes
-mkdir -p ~/.config/nix
-echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
+   On Windows Subsystem for Linux (WSL), use the single-user installation:
 
-# 3. Install direnv (if not already installed)
-# For Ubuntu/Debian:
-sudo apt install direnv
+   ```bash
+   sh <(curl -L https://nixos.org/nix/install) --no-daemon
+   ```
 
-# For Arch Linux:
-sudo pacman -S direnv
+2. Enable the `nix-command` and `flakes` features:
 
-# For other distros, check: https://direnv.net/docs/installation.html
+   ```bash
+   mkdir -p ~/.config/nix
+   echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
+   ```
 
-# 4. Add direnv hook to your shell
-# For bash, add to ~/.bashrc:
-echo 'eval "$(direnv hook bash)"' >> ~/.bashrc
+3. Install direnv. Use the package manager of your distribution:
 
-# For zsh, add to ~/.zshrc:
-echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc
+   ```bash
+   sudo apt install direnv     # Ubuntu, Debian, WSL
+   sudo pacman -S direnv       # Arch Linux
+   ```
 
-# Then reload your shell
-source ~/.bashrc  # or source ~/.zshrc
+   For other distributions, see the
+   [direnv installation guide](https://direnv.net/docs/installation.html).
 
-# 5. Install devenv
-nix profile install --accept-flake-config nixpkgs#devenv
-```
+4. Add the direnv hook to your shell. Then reload the shell:
 
-### WSL (Windows Subsystem for Linux) Setup
+   ```bash
+   echo 'eval "$(direnv hook bash)"' >> ~/.bashrc   # bash
+   echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc     # zsh
+   ```
 
-```bash
-# 1. Install Nix (use single-user installation for WSL)
-sh <(curl -L https://nixos.org/nix/install) --no-daemon
+5. Install devenv:
 
-# 2. Enable nix-command and flakes
-mkdir -p ~/.config/nix
-echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
+   ```bash
+   nix profile install --accept-flake-config nixpkgs#devenv
+   ```
 
-# 3. Install direnv
-sudo apt install direnv
-
-# 4. Add direnv hook to your shell
-# For bash, add to ~/.bashrc:
-echo 'eval "$(direnv hook bash)"' >> ~/.bashrc
-
-# For zsh, add to ~/.zshrc:
-echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc
-
-# Then reload your shell
-source ~/.bashrc  # or source ~/.zshrc
-
-# 5. Install devenv
-nix profile install --accept-flake-config nixpkgs#devenv
-```
-
-## Getting Started
-
-Once you have the prerequisites installed:
+## Setup
 
 ```bash
-# Clone the repository
-git clone <your-repo-url>
-cd website
-
-# Allow direnv (first time only)
+git clone https://github.com/EllianCarlos/elliancarlos.github.io.git
+cd elliancarlos.github.io
 direnv allow
-
-# The environment will automatically:
-# - Build the development shell
-# - Install bun
-# - Install all project dependencies
-# This may take a few minutes on first run
 ```
 
-# Developing
+The `direnv allow` command builds the development shell, installs Bun, and
+installs the project dependencies. The first run takes a few minutes.
 
-The development environment is automatically loaded when you enter the directory (thanks to direnv + devenv):
+After setup, direnv loads the environment each time you enter the directory.
 
-```sh
-cd /path/to/website
-# Environment is automatically loaded!
+## Commands
+
+| Command         | Action                                                     |
+| --------------- | ---------------------------------------------------------- |
+| `bun run start` | Start the development server with live reload on port 8080 |
+| `bun run build` | Build the production site into `dist/`                     |
+| `bun run clean` | Delete the `dist/` folder                                  |
+
+The devenv shell also exposes `build` and `clean` as bare scripts. The
+`processes.dev.exec` process runs `bun run start`.
+
+The project has no test suite and no linter. To verify a change, run
+`bun run build`. Then inspect the output in `dist/`.
+
+Prettier formats the source files. See `.prettierrc` for the configuration.
+
+## Layout
+
+```
+.eleventy.js    Eleventy configuration: collections, filters, permalinks, transforms
+src/
+  _data/        Global data: SEO constants and interface strings
+  _includes/    Layouts and partial templates
+  en/           English pages and blog posts
+  scripts/      Client-side JavaScript, for example the search code
+  styles/       CSS
+  tag/          Tag page template
+public/         Static files copied to the site root
+dist/           Build output; git ignores this folder
 ```
 
-## Available Commands
+Read `.eleventy.js` first. It holds almost all custom build behaviour.
 
-- `bun run start` - Start development server with live reload
-- `bun run build` - Create a production build
-- `bun run clean` - Clean the dist folder
+`CLAUDE.md` documents the architecture in detail. It also explains the
+internationalization (i18n) machinery, which the site disables today.
 
-Or use the devenv scripts:
-- `build` - Alias for `bun run build`
-- `clean` - Alias for `bun run clean`
+## Deployment
 
-## Package Management
+Netlify builds and deploys the `main` branch. The `CNAME` file sets the custom
+domain. The `public/_headers` file sets the cache-control rules.
 
-This project uses [Bun](https://bun.sh/) as the package manager instead of pnpm or npm.
+## License
+
+See [LICENSE.md](LICENSE.md).
