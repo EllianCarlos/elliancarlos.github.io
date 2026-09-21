@@ -116,6 +116,20 @@ grep_in "styles/tty/core.css" ".tty-tabs__tab:focus-visible" "the focused tab dr
 grep_in "styles/tty/core.css" ".tty-tag { height: var(--tap-min)" "the tag reads the touch-target token"
 grep_not "styles/tty/core.css" "height: 32px" "no hard-coded touch target in core.css"
 
+section "content components"
+have "styles/tty/content.css"
+grep_in "styles/tty.css" '@import "tty/content.css"' "the entry stylesheet imports content.css"
+grep_in "styles/tty/content.css" ".tty-postrow:hover .tty-postrow__title" "the post row hover state exists"
+grep_in "styles/tty/content.css" "border-left-color: var(--yellow)" "the post row grows a yellow left rule on hover"
+grep_in "styles/tty/content.css" "var(--texture-scanlines)" "the terminal carries the scanline texture"
+grep_in "styles/tty/content.css" "box-shadow: var(--shadow-hard)" "the terminal uses the hard offset block"
+grep_in "styles/tty/content.css" 'content: "▾"' "the open foldout marker exists"
+grep_in "styles/tty/content.css" "animation: tty-blink" "the caret blinks"
+grep_in "styles/tty/content.css" "max-width: var(--measure-prose)" "prose holds the 68ch measure"
+grep_in "styles/tty/content.css" 'div[style*="justify-content: center"]' "a centred figure breaks out of the prose measure"
+grep_in "styles/tty/content.css" "p:has(> img:only-child)" "a plain Markdown image breaks out too"
+grep_not "styles/tty/content.css" "border-radius: 4px" "no rounded corner slips into content.css"
+
 printf '\n'
 if [ "$fails" -eq 0 ]; then
   printf 'check-build: all assertions passed\n'

@@ -1,0 +1,70 @@
+{#
+  TTY content macros. Import as:  {% import "tty/content.njk" as ttyc %}
+
+  postrow() needs the `postDate` and `readingTime` filters. `readingTime` is
+  registered in .eleventy.js by Task 7, so do not render this file before that
+  task lands.
+#}
+
+{% macro postrow(post, index, archived=false) %}
+<a class="tty-postrow" href="{{ post.url }}">
+  <div class="tty-postrow__index">{{ index }}</div>
+  <div class="tty-postrow__body">
+    <h3 class="tty-postrow__title">{{ post.data.title }}</h3>
+    {% if post.data.description %}<p class="tty-postrow__excerpt">{{ post.data.description }}</p>{% endif %}
+    {% if post.data.tags and post.data.tags.length %}
+    <div class="tty-postrow__tags">
+      {% for t in post.data.tags %}<span>#{{ t }}</span>{% endfor %}
+    </div>
+    {% endif %}
+  </div>
+  <div class="tty-postrow__meta">
+    <time datetime="{{ post.date.toISOString() }}">{{ post.date | postDate }}</time>
+    <span>{{ post | readingTime }}</span>
+    {% if archived %}<span class="tty-badge tty-badge--outline tty-badge--warn">archived</span>{% endif %}
+  </div>
+</a>
+{%- endmacro %}
+
+{#
+  terminal() takes its transcript through caller():
+
+    {% call ttyc.terminal("~/posts") %}
+      <div class="tty-term__line"><span class="tty-term__prompt">$</span> <span>whoami</span></div>
+    {% endcall %}
+#}
+{% macro terminal(name, chrome="tab") %}
+<div class="tty-term">
+  <div class="tty-term__bar">
+    {% if chrome == "dots" %}
+    <span class="tty-term__dots" aria-hidden="true">
+      <span class="tty-term__dot tty-term__dot--r"></span>
+      <span class="tty-term__dot tty-term__dot--y"></span>
+      <span class="tty-term__dot tty-term__dot--g"></span>
+    </span>
+    <span class="tty-term__name tty-term__name--center">{{ name }}</span>
+    {% else %}
+    <span class="tty-term__tab">{{ name }}</span>
+    <span class="tty-term__name"></span>
+    {% endif %}
+  </div>
+  <div class="tty-term__body">{{ caller() }}</div>
+</div>
+{%- endmacro %}
+
+{#
+  foldout() wraps a native <details>, so the compact filter rail needs no script:
+
+    {% call ttyc.foldout("filter", "9 tags") %}
+      …rail body…
+    {% endcall %}
+#}
+{% macro foldout(label, hint="") %}
+<details class="tty-foldout">
+  <summary class="tty-foldout__summary">
+    <span>{{ label }}</span>
+    {% if hint %}<span class="tty-foldout__hint">{{ hint }}</span>{% endif %}
+  </summary>
+  <div class="tty-foldout__body">{{ caller() }}</div>
+</details>
+{%- endmacro %}

@@ -1,0 +1,238 @@
+/* TTY content components — ported from components/content/ and
+   components/motion/CursorBlink.jsx.
+
+   PostCard becomes one `<a class="tty-postrow">` so the whole row is a single
+   link with a single tab stop. The React version nests no links either: tags
+   inside a row are plain text, and the linked tags live in the filter rail. */
+
+/* ── PostCard, row variant ──────────────────────────────────────────────── */
+.tty-postrow {
+  display: flex;
+  gap: 18px;
+  padding: 14px;
+  color: inherit;
+  background: transparent;
+  text-decoration: none;
+  border: 0;
+  border-top: var(--border-w) solid var(--border-faint);
+  border-left: var(--border-w-thick) solid transparent;
+  transition: background var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+}
+.tty-postrow:hover {
+  background: var(--surface-raised);
+  border-left-color: var(--yellow);
+}
+.tty-postrow__index {
+  flex: none;
+  width: 34px;
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  color: var(--text-faint);
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.tty-postrow:hover .tty-postrow__index { color: var(--yellow); }
+.tty-postrow__body { flex: 1; min-width: 0; }
+.tty-postrow__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 17px;
+  line-height: var(--leading-tight);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.tty-postrow:hover .tty-postrow__title { color: var(--yellow); }
+.tty-postrow__excerpt {
+  margin: 7px 0 0;
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--text-muted);
+  text-wrap: pretty;
+}
+.tty-postrow__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+  font-size: var(--text-xs);
+  color: var(--text-faint);
+}
+.tty-postrow__meta {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  font-size: var(--text-xs);
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+
+/* On a phone the meta column squeezes the title, so it drops under the body. */
+@media (max-width: 430px) {
+  .tty-postrow { flex-wrap: wrap; gap: 10px; }
+  .tty-postrow__meta {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding-left: 34px;
+  }
+}
+
+/* ── TerminalWindow ─────────────────────────────────────────────────────── */
+.tty-term {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-inset);
+  border: var(--border-w) solid var(--border-default);
+  border-radius: var(--radius-none);
+  box-shadow: var(--shadow-hard);
+  overflow: hidden;
+}
+/* The CRT suggestion sits above the transcript and below the pointer. */
+.tty-term::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--texture-scanlines);
+}
+.tty-term__bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  height: 28px;
+  padding: 0 10px;
+  background: var(--surface-raised);
+  border-bottom: var(--border-w) solid var(--border-default);
+}
+.tty-term__tab {
+  padding: 2px var(--sp-2);
+  font-size: var(--text-xs);
+  color: var(--yellow);
+  background: var(--black-void);
+  border: var(--border-w) solid var(--border-default);
+}
+.tty-term__dots { display: flex; gap: 5px; }
+.tty-term__dot { width: 8px; height: 8px; }
+.tty-term__dot--r { background: var(--red); }
+.tty-term__dot--y { background: var(--yellow); }
+.tty-term__dot--g { background: var(--green); }
+.tty-term__name { flex: 1; font-size: var(--text-xs); color: var(--text-faint); }
+.tty-term__name--center { text-align: center; }
+.tty-term__body {
+  flex: 1;
+  min-height: 0;
+  padding: var(--sp-4);
+  font-family: var(--font-code);
+  font-size: var(--text-sm);
+  line-height: 1.65;
+  overflow: auto;
+}
+.tty-term__line { display: flex; gap: 12px; }
+.tty-term__prompt { color: var(--green); }
+.tty-term__out { color: var(--text-muted); }
+.tty-term__path { color: var(--cyan); }
+.tty-term__date { color: var(--text-faint); }
+
+/* ── CursorBlink ────────────────────────────────────────────────────────── */
+.tty-caret {
+  display: inline-block;
+  width: 0.55em;
+  height: 1em;
+  vertical-align: -0.13em;
+  background: var(--yellow);
+  animation: tty-blink var(--blink-rate) var(--ease-step-2) infinite;
+}
+.tty-caret--bar { width: 2px; }
+
+/* ── Foldout, as a native <details> ─────────────────────────────────────── */
+.tty-foldout { border-top: var(--border-w) solid var(--border-faint); }
+.tty-foldout__summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: var(--tap-min);
+  padding: 0 2px;
+  font: var(--text-xs)/1 var(--font-display);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+  cursor: pointer;
+  list-style: none;
+}
+.tty-foldout__summary::-webkit-details-marker { display: none; }
+.tty-foldout__summary::before { content: "▸"; font-family: var(--font-glyph); }
+.tty-foldout[open] > .tty-foldout__summary { color: var(--yellow); }
+.tty-foldout[open] > .tty-foldout__summary::before { content: "▾"; }
+.tty-foldout__hint { color: var(--text-faint); }
+.tty-foldout__body {
+  padding: 4px 0 16px;
+  animation: tty-wipe-up var(--dur-fast) var(--ease-step-4);
+}
+
+/* ── Prose wrapper ──────────────────────────────────────────────────────── */
+.tty-prose {
+  max-width: var(--measure-prose);
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  line-height: var(--leading-body);
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}
+.tty-prose--wide { max-width: var(--measure-wide); }
+.tty-prose--md { font-size: var(--text-md); }
+
+/* ── Figures break out of the reading measure ───────────────────────────────
+   A plot is not body copy. `--measure-prose` is 68ch, which is about 694px at
+   `--text-lg`. Three posts carry 15 figures, and twelve of them are multi-panel
+   `kc-*` plots up to 2101x479px: inside 694px each panel is about 170px wide and
+   the axis labels, firm names and legends stop being readable.
+
+   So a figure grows past the text column: to `--measure-wide` (92ch, about
+   938px) from 1280px up, and to the page column (`--page-max` less the two
+   gutters, 1184px) from 1440px up, where there is room for the whole plot.
+
+   Three selectors, and no post is edited:
+     1. `.tty-figure` — the class a new post may use.
+     2. `div[style*="justify-content: center"]` — the raw markup the 15 existing
+        figures already carry.
+     3. `p:has(> img:only-child)` — what markdown-it emits for `![alt](src)`,
+        which is the only image syntax the Markdown author needs.
+
+   `position: relative` plus a negative `left` does the offset, not a margin.
+   The post column is centred in the page (`.tty-post` in Task 8), so pulling the
+   box left by half the extra width centres the figure in the page, and Task 17's
+   `margin: var(--sp-8) 0 0` on the same figures keeps working — the two rules set
+   different properties and cannot fight. The caption below stays at the reading
+   measure, because a centred caption 1184px wide reads worse, not better. */
+@media (min-width: 1280px) {
+  .tty-prose > .tty-figure,
+  .tty-prose > div[style*="justify-content: center"],
+  .tty-prose > p:has(> img:only-child) {
+    position: relative;
+    left: calc((var(--measure-prose) - var(--measure-wide)) / 2);
+    width: var(--measure-wide);
+    /* A guard, so a wider measure token can never overflow the page column. */
+    max-width: calc(var(--page-max) - 2 * var(--gutter));
+  }
+}
+@media (min-width: 1440px) {
+  .tty-prose > .tty-figure,
+  .tty-prose > div[style*="justify-content: center"],
+  .tty-prose > p:has(> img:only-child) {
+    left: calc((var(--measure-prose) - var(--page-max) + 2 * var(--gutter)) / 2);
+    width: calc(var(--page-max) - 2 * var(--gutter));
+  }
+}
