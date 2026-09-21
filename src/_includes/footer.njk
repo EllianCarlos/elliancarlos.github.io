@@ -1,23 +1,43 @@
-<footer>
-    <div class="container">
-      <hr>
-      <small> 
-        <p>{{ i18n[locale].footer.social }} 
-          <a class="social" target="_blank" rel="noreferrer noopener" href="https://www.github.com/elliancarlos">github</a>; 
-          <a target="_blank" rel="noreferrer noopener" href="https://www.linkedin.com/in/elliancarlos">linkedin</a>;
-          <a target="_blank" rel="me noreferrer noopener" href="https://www.mastodon.social/@elliancarlos">Mastodon</a>;
-        </p>
-        <p>{{ i18n[locale].footer.inspired }} 
-          <a target="_blank" rel="noreferrer noopener" href="https://m7.rs/">misterio's page</a>; 
-        </p>
-        <p>
-          {{ i18n[locale].footer.copyleft }} 
-          <a href="https://elliancarlos.com.br">elliancarlos</a>
-          (
-            <a href="https://www.github.com/elliancarlos/elliancarlos.github.io"> 
-              {{ i18n[locale].footer.sourceCode }}
-            </a> 
-          )</p>
-      </small>
+<footer class="tty-foot">
+  <div class="tty-foot__inner">
+    <div class="tty-foot__row">
+      <span class="tty-foot__cmd"><span class="tty-term__prompt">$</span> eleventy --input src --output dist</span>
+      <span class="tty-spacer"></span>
+      <span class="tty-foot__links">
+        <span class="tty-foot__mark">{{ i18n[locale].footer.feeds }}</span>
+        <a href="/feed.xml">feed.xml</a>
+        <span aria-hidden="true">·</span>
+        <a href="/llms.txt">llms.txt</a>
+        <span aria-hidden="true">·</span>
+        <a href="/sitemap.xml">sitemap.xml</a>
+      </span>
     </div>
+    <hr class="tty-rule">
+    <div class="tty-foot__row">
+      <span class="tty-foot__links">
+        <span class="tty-foot__mark">{{ i18n[locale].footer.elsewhere }}</span>
+        <a href="/Ellian_Carlos_Resume.pdf">{{ i18n[locale].nav.resume }}</a>
+        <span aria-hidden="true">·</span>
+        <a href="{{ seo.social.lattes }}" target="_blank" rel="noreferrer noopener">{{ i18n[locale].nav.academicCv }}</a>
+        <span aria-hidden="true">·</span>
+        <a href="{{ seo.social.github }}" target="_blank" rel="noreferrer noopener">github</a>
+        <span aria-hidden="true">·</span>
+        <a href="{{ seo.social.linkedin }}" target="_blank" rel="noreferrer noopener">linkedin</a>
+        <span aria-hidden="true">·</span>
+        <a href="{{ seo.social.mastodon }}" target="_blank" rel="me noreferrer noopener">mastodon</a>
+        <span aria-hidden="true">·</span>
+        <a href="{{ seo.social.orcid }}" target="_blank" rel="noreferrer noopener">orcid</a>
+      </span>
+      <span class="tty-spacer"></span>
+      <span class="tty-foot__meta">
+        {{ i18n[locale].footer.copyleft }}
+        <a href="https://www.github.com/elliancarlos/elliancarlos.github.io">{{ i18n[locale].footer.source }}</a>
+      </span>
+    </div>
+    <div class="tty-foot__row tty-foot__row--quiet">
+      <span class="tty-foot__mark">elliancarlos</span>
+      <span aria-hidden="true">·</span>
+      <span>{{ i18n[locale].footer.inspired }} <a href="https://m7.rs/" target="_blank" rel="noreferrer noopener">misterio's page</a></span>
+    </div>
+  </div>
 </footer>

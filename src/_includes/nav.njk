@@ -1,0 +1,46 @@
+{% import "tty/core.njk" as tty %}
+{#
+  The tab strip replaces the old hamburger menu. It scrolls sideways under
+  1280px instead of collapsing, which is the design system's compact idiom and
+  needs no JavaScript.
+
+  `resume` and `academic cv` are not tabs — they are external documents, and they
+  live in the footer and in the Elsewhere list on the homepage.
+
+  A tab renders only when the build writes its page. `/preprints/` arrives in
+  Task 13, so until then the strip shows three tabs and no task ships a nav link
+  that 404s. The gate is one string: `collections.all | join(" ", "url")` is every
+  URL the build writes, space delimited, and `indexOf` looks one up. Nunjucks'
+  `join` filter takes an attribute name as its third argument.
+#}
+{% set liveUrls = " " + (collections.all | join(" ", "url")) + " " %}
+{% set navItems = [
+  { url: "/", label: i18n[locale].nav.about },
+  { url: "/posts/", label: i18n[locale].nav.posts },
+  { url: "/posts/archive/", label: i18n[locale].blog.archive, count: collections.posts_en.length },
+  { url: "/preprints/", label: i18n[locale].nav.preprints },
+  { url: "/contact/", label: i18n[locale].nav.contact }
+] %}
+<header class="tty-nav">
+  <a class="tty-nav__mark" href="/">elliancarlos<span class="tty-caret tty-nav__caret" aria-hidden="true"></span></a>
+  <nav class="tty-tabs" aria-label="Main">
+    {%- for item in navItems -%}
+      {%- if liveUrls.indexOf(" " + item.url + " ") >= 0 -%}
+      {%- set on = (page.url == item.url) or (item.url != "/" and page.url.indexOf(item.url) == 0) -%}
+      <a class="tty-tabs__tab" href="{{ item.url }}"{% if on %} aria-current="page"{% endif %}>{{ item.label }}{% if item.count %}<span class="tty-tabs__count">({{ item.count }})</span>{% endif %}</a>{{ "\n" }}
+      {%- endif -%}
+    {%- endfor -%}
+  </nav>
+  <span class="tty-spacer"></span>
+  {#
+    The search control ships `hidden`. /scripts/tty-search.js reveals it, and only
+    when an overlay exists to open, so no task ships a visible control that does
+    nothing and no page advertises a `/` binding that is not installed. With
+    JavaScript off the control stays hidden, and every post stays reachable from
+    /posts/, sitemap.xml and feed.xml.
+  #}
+  <button class="tty-nav__search" type="button" data-tty-search-open hidden
+          aria-label="{{ i18n[locale].search.open }}" aria-controls="tty-search" aria-expanded="false">
+    {{ tty.keyhint(["/"], "search") }}
+  </button>
+</header>

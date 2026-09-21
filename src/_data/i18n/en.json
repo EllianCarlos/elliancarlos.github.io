@@ -4,42 +4,85 @@
     "code": "en"
   },
   "nav": {
-    "aboutme": "aboutme",
+    "about": "about",
+    "posts": "posts",
+    "preprints": "preprints",
+    "contact": "contact",
     "resume": "resume",
-    "academicCv": "academic cv",
-    "blog": "blog",
-    "contact": "contact"
+    "academicCv": "academic cv"
   },
-  "contact": {
-    "title": "Contact",
-    "email": "Email",
-    "social": "Social Media"
-  },
-  "home": {
-    "title": "About Me",
-    "readBlog": "Read my Blog!"
+  "search": {
+    "open": "Search posts",
+    "placeholder": "search posts, tags, words…",
+    "results": "results",
+    "result": "result",
+    "noResults": "no results",
+    "openHint": "open",
+    "closeHint": "close"
   },
   "blog": {
-    "allPosts": "All posts",
-    "postsTagged": "Posts tagged:",
-    "noPostsWithTag": "No posts with this tag.",
-    "tagged": "Tagged:",
-    "searchPlaceholder": "Search posts",
-    "noResults": "No results"
+    "eyebrow": "Notes on kernels, open source, and the tools I keep",
+    "heroLine1": "Notes from",
+    "heroLine2": "the kernel",
+    "heroLine3": "and the tools",
+    "lead": "Long-form notes on the Linux kernel, on how open source work concentrates in a few hands, and on the tools I keep on disk. Most of it started as a note to myself.",
+    "readArchive": "Read the archive",
+    "readPosts": "Read the posts",
+    "latestPost": "Latest post",
+    "recent": "recent",
+    "feeds": "feeds",
+    "feedsHint": "3 endpoints",
+    "searchHint": "press / anywhere",
+    "allPosts": "all posts",
+    "archive": "archive",
+    "postsTagged": "posts tagged",
+    "noPostsWithTag": "No posts carry this tag.",
+    "tagged": "tagged",
+    "byYear": "by year",
+    "tags": "tags",
+    "filter": "filter",
+    "sortNewest": "newest first",
+    "sortOldest": "oldest first",
+    "post": "post",
+    "count": "posts"
   },
   "post": {
     "translationWarning": {
-      "title": "Automatic Translation",
-      "message": "This post was automatically translated from English using a language model (LLM). It may contain inaccuracies or nuances that were lost in translation."
+      "title": "automatic translation",
+      "message": "A language model translated this post from English. It may contain inaccuracies, or nuances lost in translation."
     },
-    "publishedOn": "Published",
-    "updatedOn": "Updated"
+    "archived": {
+      "title": "archived",
+      "message": "This post is no longer listed on the posts page. A newer post supersedes it. The text stays here unchanged."
+    },
+    "publishedOn": "published",
+    "updatedOn": "updated",
+    "backToPosts": "posts",
+    "next": "next"
+  },
+  "preprints": {
+    "title": "preprints",
+    "description": "Papers I have written or co-written. Each row opens the PDF in a new tab.",
+    "paper": "paper",
+    "papers": "papers",
+    "openHint": "each row opens a pdf"
+  },
+  "contact": {
+    "title": "contact",
+    "email": "email",
+    "social": "social"
+  },
+  "error": {
+    "title": "page not found",
+    "message": "That path does not resolve. The post may have moved, or the link may be wrong.",
+    "home": "Go home"
   },
   "footer": {
-    "social": "Social:",
-    "inspired": "This page was inspired by",
-    "copyleft": "Copyleft",
-    "sourceCode": "Source Code"
+    "feeds": "feeds",
+    "elsewhere": "elsewhere",
+    "copyleft": "copyleft",
+    "source": "source",
+    "inspired": "inspired by"
   },
   "seo": {
     "defaultTitle": "Ellian Carlos",

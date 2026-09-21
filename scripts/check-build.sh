@@ -130,6 +130,28 @@ grep_in "styles/tty/content.css" 'div[style*="justify-content: center"]' "a cent
 grep_in "styles/tty/content.css" "p:has(> img:only-child)" "a plain Markdown image breaks out too"
 grep_not "styles/tty/content.css" "border-radius: 4px" "no rounded corner slips into content.css"
 
+section "page shell"
+have "styles/tty/layout.css"
+grep_in "styles/tty/layout.css" "overflow-x: clip" "body is not turned into a scroll container"
+grep_in "styles/tty/layout.css" "html:has(body.tty-search-open)" "the scroll lock lands on the element the viewport scrolls"
+have "scripts/tty-search.js"
+grep_in "styles/tty.css" '@import "tty/layout.css"' "the entry stylesheet imports layout.css"
+grep_not "index.html" "picocss" "Pico CSS is gone from the homepage"
+grep_not "posts/index.html" "picocss" "Pico CSS is gone from the blog index"
+grep_not "404.html" "picocss" "Pico CSS is gone from the 404 page"
+grep_not "index.html" "/styles/style.css" "the old stylesheet is unlinked"
+grep_not "posts/index.html" "/styles/blog.css" "the old blog stylesheet is unlinked"
+grep_in "index.html" '<link rel="stylesheet" href="/styles/tty.css">' "the homepage links tty.css"
+grep_in "index.html" 'class="tty-nav__mark"' "the wordmark is present"
+count_at_least "index.html" 'class="tty-tabs__tab"' 3 "the three live nav tabs render"
+grep_not "index.html" 'href="/preprints/"' "the nav ships no tab for a page the build does not write"
+grep_in "index.html" 'data-tty-search-open hidden' "the search control stays hidden until a script can open it"
+grep_in "index.html" 'class="tty-foot"' "the new footer is present"
+grep_in "posts/index.html" 'aria-current="page"' "the active tab is marked on /posts/"
+grep_in "index.html" 'content="#0A0A09"' "the theme colour is the root surface"
+grep_not "index.html" "mobile-menu-toggle" "the old hamburger is gone"
+grep_not "index.html" "page-header-content" "the old page header is gone"
+
 printf '\n'
 if [ "$fails" -eq 0 ]; then
   printf 'check-build: all assertions passed\n'

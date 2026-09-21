@@ -1,17 +1,15 @@
 ---
-relative_path: '.'
-type: index 
+type: index
 ---
 <!DOCTYPE html>
-<html data-theme="dark" lang="{{ locale or 'en' }}">
+<html lang="{{ locale or 'en' }}">
 
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light dark" />
-  <meta name="theme-color" content="#1095c1" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#1f2937" media="(prefers-color-scheme: dark)">
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0A0A09">
+
   <!-- SEO Meta Tags -->
   {% set pageTitle = seoTitle or title or i18n[locale].seo.defaultTitle %}
   {% if pageTitle != seo.siteName %}
@@ -19,13 +17,13 @@ type: index
   {% else %}
     <title>{{ seo.siteName }}</title>
   {% endif %}
-  
+
   <meta name="description" content="{{ description or i18n[locale].seo.defaultDescription }}">
   <meta name="author" content="{{ seo.author.name }}">
-  
+
   <!-- Canonical URL -->
   <link rel="canonical" href="{{ seo.baseUrl }}{{ page.url }}">
-  
+
   <!-- Open Graph Tags -->
   <meta property="og:title" content="{{ pageTitle }}">
   <meta property="og:description" content="{{ description or i18n[locale].seo.defaultDescription }}">
@@ -34,13 +32,13 @@ type: index
   <meta property="og:image" content="{{ ogImage or seo.defaultImage }}">
   <meta property="og:locale" content="{{ locale or 'en' }}">
   <meta property="og:site_name" content="{{ seo.siteName }}">
-  
+
   <!-- Twitter Card Tags -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="{{ pageTitle }}">
   <meta name="twitter:description" content="{{ description or i18n[locale].seo.defaultDescription }}">
   <meta name="twitter:image" content="{{ ogImage or seo.defaultImage }}">
-  
+
   <!-- hreflang tags for SEO -->
   {% if i18nEnabled %}
   {% for lang in languages %}
@@ -48,7 +46,7 @@ type: index
   {% endfor %}
   <link rel="alternate" hreflang="x-default" href="{{ seo.baseUrl }}{{ page.url | switchLanguage('en') }}" />
   {% endif %}
-  
+
   <!-- Feed -->
   <link rel="alternate" type="application/atom+xml" title="{{ seo.siteName }}" href="/feed.xml">
 
@@ -56,36 +54,28 @@ type: index
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-  
-  <!-- Performance Optimization -->
-  <link rel="preconnect" href="https://cdn.jsdelivr.net">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism-tomorrow.min.css">
+
+  <!-- Both webfonts and the maths stylesheet come from jsdelivr. -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+
+  <!-- Stylesheets: tty.css is the whole design system. -->
+  <link rel="stylesheet" href="/styles/tty.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/katex.min.css" crossorigin="anonymous">
-  
-  <!-- Stylesheets -->
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
-  >
-  <link 
-    rel="stylesheet"
-    href="/styles/style.css"
-  >
-  {% if type == "blog" or type == "blogPost" %}
-    <link rel="stylesheet" href="/styles/blog.css">
-  {% endif %}
-  
+
   <!-- Structured Data -->
   {% include "structuredData.njk" %}
 </head>
-<body style="min-height: 100%;">
-    {% include "header.njk" %}
-    <main class="container page">
+<body class="tty-shell">
+    {% include "nav.njk" %}
+    <main class="tty-main">
         {{ content | safe }}
     </main>
     {% include "footer.njk" %}
+    {% include "searchOverlay.njk" %}
     {% if i18nEnabled %}{% include "languageRedirect.njk" %}{% endif %}
-    
+
+    <script defer src="/scripts/tty-search.js"></script>
+
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-2GHK298WZ2"></script>
     <script>

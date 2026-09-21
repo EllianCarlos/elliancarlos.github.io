@@ -1,0 +1,254 @@
+/* TTY page shell — ported from ui_kits/blog/Site.jsx plus the screen grids the
+   Home, Archive and About screens share. The search overlay lives here too,
+   because it is shell furniture, not a component. */
+
+html { height: 100%; }
+
+/* tokens/breakpoints.css ends with `html, body { overflow-x: hidden; }`. That line
+   is why the page never scrolls sideways, and it must keep doing that job: the
+   rule stays on <html>, where it propagates to the viewport.
+   On <body> it does something else as well. Per CSS Overflow 3, a `visible` value
+   beside a value that is neither `visible` nor `clip` computes to `auto`, so
+   body's unset `overflow-y` becomes `auto` and <body> becomes a scroll container.
+   A sticky box is offset against its nearest scroll container, and body's
+   scrollport never scrolls, because body's height is auto. Every
+   `position: sticky` under <body> therefore stops working: `.tty-nav` and
+   `.tty-rail--sticky` below, and with them the `scroll-margin-top` offsets in
+   Task 6 and Task 11, which exist only to clear a sticky nav.
+   `clip` is the one value that pairs with `visible` and is left alone, so it
+   clips the sideways overflow without creating a scrollport. The token files are
+   vendored verbatim and must not be edited, so the override lands here;
+   layout.css is imported after tokens/breakpoints.css and wins on equal
+   specificity. An engine that does not know `overflow-x: clip` drops this line
+   and keeps today's behaviour. */
+body { overflow-x: clip; }
+
+.tty-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-root);
+}
+
+/* ── Sticky nav ─────────────────────────────────────────────────────────── */
+.tty-nav {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 52px;
+  padding: 0 var(--gutter);
+  background: var(--surface-root);
+  border-bottom: var(--border-w) solid var(--border-faint);
+}
+.tty-nav__mark {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  font-family: var(--font-display);
+  font-size: 18px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--yellow);
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+  text-decoration: none;
+  border: 0;
+}
+.tty-nav__mark:hover { color: var(--yellow-bright); }
+.tty-nav__caret { background: var(--text-primary); }
+.tty-nav > .tty-tabs { border-bottom: 0; align-self: stretch; }
+.tty-nav__search {
+  flex: none;
+  min-height: var(--tap-min);
+  padding: 0 4px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+/* The wordmark alone is 150px at 18px Silkscreen; on a small phone the tab
+   strip needs the rest of the row, so the mark steps down instead of wrapping. */
+@media (max-width: 430px) {
+  .tty-nav { gap: 10px; }
+  .tty-nav__mark { font-size: var(--display-xs); letter-spacing: 0.08em; }
+}
+
+/* ── Main column ────────────────────────────────────────────────────────── */
+.tty-main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: var(--sp-section) var(--gutter) calc(var(--sp-section) + 8px);
+}
+
+/* A screen is a stack of sections at the section rhythm. */
+.tty-screen { display: flex; flex-direction: column; gap: var(--sp-section); }
+.tty-section { display: flex; flex-direction: column; gap: var(--sp-block); }
+
+/* ── Display type ───────────────────────────────────────────────────────── */
+.tty-eyebrow {
+  font-size: var(--text-xs);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.tty-h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--display-md);
+  line-height: var(--leading-tight);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+}
+.tty-h1--hero {
+  font-size: var(--display-xl);
+  line-height: 1.05;
+  letter-spacing: 0.04em;
+}
+.tty-h1--hero .tty-accent { color: var(--yellow); }
+.tty-h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--display-md);
+  line-height: var(--leading-tight);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--yellow);
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+}
+
+/* ── Screen grids ───────────────────────────────────────────────────────── */
+.tty-split { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; }
+.tty-split--rail { align-items: start; }
+.tty-split--rail-wide { align-items: start; }
+
+@media (min-width: 1280px) {
+  .tty-split { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 48px; align-items: center; }
+  .tty-split--rail { grid-template-columns: minmax(0, 1fr) 220px; gap: 48px; align-items: start; }
+  .tty-split--rail-wide { grid-template-columns: minmax(0, 1fr) 280px; gap: 48px; align-items: start; }
+}
+
+.tty-rail { display: flex; flex-direction: column; gap: 20px; }
+@media (min-width: 1280px) {
+  .tty-rail--sticky { position: sticky; top: calc(52px + var(--sp-6)); }
+}
+
+/* Two layouts, not five: the rail is an aside on desktop and a <details> under
+   1280px. Both markups render; CSS picks one. The source stays DRY because both
+   call the same macro. */
+.tty-when-desktop { display: none; }
+.tty-when-compact { display: block; }
+@media (min-width: 1280px) {
+  .tty-when-desktop { display: block; }
+  .tty-when-compact { display: none; }
+}
+
+/* ── Key/value link list ("Elsewhere") ──────────────────────────────────── */
+.tty-linklist { display: flex; flex-direction: column; gap: var(--sp-2); font-size: var(--text-sm); }
+.tty-linklist__row { display: flex; align-items: center; gap: 16px; min-height: var(--tap-min); }
+.tty-linklist__key {
+  flex: none;
+  width: 72px;
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+/* ── Footer ─────────────────────────────────────────────────────────────── */
+.tty-foot {
+  border-top: var(--border-w) solid var(--border-faint);
+  background: var(--surface-panel);
+}
+.tty-foot__inner {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 22px var(--gutter);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.tty-foot__row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: var(--text-xs);
+  color: var(--text-faint);
+}
+.tty-foot__row--quiet { color: var(--text-faint); opacity: 0.8; }
+.tty-foot__cmd { font-family: var(--font-code); }
+.tty-foot__links { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.tty-foot__meta { display: flex; align-items: center; gap: 6px; }
+.tty-foot__mark {
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+}
+
+/* ── Search overlay ─────────────────────────────────────────────────────── */
+.tty-search[hidden] { display: none; }
+.tty-search {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  justify-content: center;
+  padding: clamp(16px, 12vh, 120px) var(--gutter) 0;
+}
+.tty-search__scrim { position: absolute; inset: 0; background: var(--surface-scrim); }
+.tty-search__panel {
+  position: relative;
+  width: 620px;
+  max-width: 100%;
+  height: fit-content;
+  max-height: 80vh;
+  overflow: auto;
+  background: var(--surface-panel);
+  border: var(--border-w) solid var(--yellow);
+  box-shadow: var(--shadow-hard);
+  animation: tty-wipe-up var(--dur-base) var(--ease-step-8);
+}
+.tty-search__field { padding: 10px; border-bottom: var(--border-w) solid var(--border-faint); }
+.tty-search__foot {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 12px;
+  border-top: var(--border-w) solid var(--border-faint);
+  font-size: var(--text-xs);
+  color: var(--text-faint);
+}
+.tty-search__empty { padding: 14px; font-size: var(--text-sm); color: var(--text-faint); }
+
+/* While the overlay is open the page behind it must not scroll.
+   The lock has to land on <html>, not on <body>. tokens/breakpoints.css gives
+   <html> a non-visible `overflow-x`, so the viewport takes its overflow from
+   <html>; body's overflow no longer propagates, and `overflow: hidden` on a body
+   whose height is auto clips nothing at all.
+   `hidden` is what locks it, and `clip` must not be used here: `hidden` keeps the
+   scrollport, so the scroll offset survives and the page is exactly where the
+   reader left it when the overlay closes, while `clip` removes the scrollport and
+   the page jumps back to the top.
+   `:has()` keeps the DOM contract the script declares — one class, on <body>.
+   `html.tty-search-open` is listed as well, so the lock still holds if the script
+   sets the class on <html> too.
+   `scrollbar-gutter: stable` reserves the scrollbar space at all times, so the
+   page does not shift sideways the moment the lock removes the scrollbar. */
+html { scrollbar-gutter: stable; }
+html:has(body.tty-search-open),
+html.tty-search-open { overflow: hidden; }
+body.tty-search-open { overflow: hidden; }
