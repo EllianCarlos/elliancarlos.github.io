@@ -1,0 +1,39 @@
+:root {
+  /* the character cell is the unit of the system */
+  --cell-w: 9px; /* @kind spacing */
+  --cell-h: 20px; /* @kind spacing */
+
+  --sp-0: 0px;
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+  --sp-20: 80px;
+  --sp-24: 96px;
+
+  /* control heights, all cell multiples */
+  --control-sm: 24px;
+  --control-md: 32px;
+  --control-lg: 40px;
+
+  /* radii — near-zero: pixels don't round */
+  --radius-none: 0px;
+  --radius-px: 1px;
+  --radius-sm: 2px;
+  --radius-pill: 999px;
+
+  /* borders */
+  --border-w: 1px;
+  --border-w-thick: 2px;
+
+  /* reading measure */
+  --measure-prose: 68ch; /* @kind spacing */
+  --measure-wide: 92ch; /* @kind spacing */
+  --page-max: 1240px; /* @kind spacing */
+}

@@ -1,0 +1,41 @@
+:root {
+  /* families */
+  --font-display: "Silkscreen", ui-monospace, monospace;
+  --font-body: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-code: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-glyph: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace; /* box drawing, blocks, braille */
+
+  /* display scale — Silkscreen, always uppercase, always tracked out.
+     Fluid between the 360px phone and the 1440px desktop; the floor is the
+     smallest size the pixel face stays legible at, never below 15px. */
+  --display-xl: clamp(32px, calc(3.4vw + 20px), 56px); /* @kind font */
+  --display-lg: clamp(26px, calc(2.0vw + 19px), 40px); /* @kind font */
+  --display-md: clamp(20px, calc(1.1vw + 16px), 28px); /* @kind font */
+  --display-sm: clamp(17px, calc(0.4vw + 15px), 20px); /* @kind font */
+  --display-xs: 15px; /* @kind font */
+
+  /* body / UI scale — JetBrains Mono. Reading sizes grow, UI sizes hold:
+     a 13px table cell is 13px on every screen, the paragraph is not. */
+  --text-xl: clamp(17px, calc(0.4vw + 15px), 20px); /* @kind font */
+  --text-lg: clamp(16px, calc(0.15vw + 15px), 17px); /* @kind font */
+  --text-md: 15px; /* @kind font */
+  --text-sm: 13px; /* @kind font */
+  --text-xs: 11px; /* @kind font */
+
+  /* weights */
+  --weight-regular: 400; /* @kind other */
+  --weight-medium: 500; /* @kind other */
+  --weight-bold: 700; /* @kind other */
+
+  /* line heights — multiples of the cell so text sits on the grid */
+  --leading-tight: 1.1; /* @kind other */
+  --leading-ui: 1.35; /* @kind other */
+  --leading-body: 1.7; /* @kind other */
+  --leading-loose: 1.9; /* @kind other */
+
+  /* tracking */
+  --tracking-display: 0.08em; /* @kind other */
+  --tracking-label: 0.14em; /* @kind other */
+  --tracking-body: 0; /* @kind other */
+  --tracking-tight: -0.01em; /* @kind other */
+}

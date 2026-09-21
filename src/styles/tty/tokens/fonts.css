@@ -1,0 +1,37 @@
+/* Silkscreen — pixel display face (SIL OFL, Jason Kottke). Chrome only:
+   wordmark, headings, panel titles, button labels, status modes.
+   Never smoothed, never set below 15px, never used for body copy. */
+@font-face {
+  font-family: "Silkscreen";
+  src: url("https://cdn.jsdelivr.net/fontsource/fonts/silkscreen@latest/latin-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Silkscreen";
+  src: url("https://cdn.jsdelivr.net/fontsource/fonts/silkscreen@latest/latin-700-normal.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* NOTE: no icon font is shipped. The glyph vocabulary (box drawing, blocks,
+   braille spinner frames, geometric markers) comes from JetBrains Mono, which
+   is what --font-glyph resolves to. See readme.md → ICONOGRAPHY. */
+
+/* JetBrains Mono — reading + code + glyph face */
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("https://cdn.jsdelivr.net/fontsource/fonts/jetbrains-mono:vf@5.3.0/latin-wght-normal.woff2") format("woff2-variations");
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("https://cdn.jsdelivr.net/fontsource/fonts/jetbrains-mono:vf@5.3.0/latin-wght-italic.woff2") format("woff2-variations");
+  font-weight: 100 800;
+  font-style: italic;
+  font-display: swap;
+}

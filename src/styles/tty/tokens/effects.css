@@ -1,0 +1,25 @@
+:root {
+  /* No soft drop shadows anywhere. Depth is a 1px rule or a hard offset block. */
+  --shadow-none: none;
+  --shadow-hard: 3px 3px 0 var(--black-void);
+  --shadow-hard-accent: 3px 3px 0 var(--yellow-dim);
+  --shadow-inset-top: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
+  /* glow is reserved for focus + live status, never decoration */
+  --glow-yellow: 0 0 0 1px var(--yellow), 0 0 12px rgba(255, 212, 0, 0.28);
+  --glow-green: 0 0 8px rgba(90, 247, 142, 0.45);
+  --glow-red: 0 0 8px rgba(255, 92, 87, 0.45);
+
+  --focus-ring: 0 0 0 1px var(--black-void), 0 0 0 2px var(--yellow);
+
+  /* textures */
+  --texture-scanlines: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.022) 0px,
+    rgba(255, 255, 255, 0.022) 1px,
+    transparent 1px,
+    transparent 3px
+  ); /* @kind other */
+  --texture-dither: repeating-conic-gradient(var(--black-300) 0% 25%, transparent 0% 50%) 0 0 / 4px 4px; /* @kind other */
+  --texture-hatch: repeating-linear-gradient(45deg, var(--black-300) 0 1px, transparent 1px 5px); /* @kind other */
+}

@@ -1,0 +1,20 @@
+/* TTY — the one stylesheet every template links.
+   Import order matters: tokens, then components, then layout, then long-form
+   prose, then syntax highlighting. Later files read the earlier ones' custom
+   properties, and later rules win on equal specificity.
+
+   tty/tokens/ is a verbatim copy of the design system. Do not edit those eight
+   files; re-copy them from the archive when the system ships a new version.
+   Everything outside tty/tokens/ is this site's port of the React components.
+
+   Every `@import` must stay above every rule in this file. CSS drops an
+   `@import` that follows a rule. */
+@import "tty/tokens/fonts.css";
+@import "tty/webfonts.css";
+@import "tty/tokens/colors.css";
+@import "tty/tokens/typography.css";
+@import "tty/tokens/spacing.css";
+@import "tty/tokens/effects.css";
+@import "tty/tokens/motion.css";
+@import "tty/tokens/breakpoints.css";
+@import "tty/tokens/base.css";

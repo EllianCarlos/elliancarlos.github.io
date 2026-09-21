@@ -73,6 +73,30 @@ runtime=$(find "$DIST" -type f \( -name '*.php' -o -name '*.cgi' -o -name '*.rb'
   -o -name '*.py' \) | tr '\n' ' ')
 if [ -n "$runtime" ]; then bad "no server-side script ($runtime)"; else pass "no server-side script"; fi
 
+section "design system tokens"
+have "styles/tty.css"
+have "styles/tty/tokens/colors.css"
+have "styles/tty/tokens/fonts.css"
+have "styles/tty/tokens/typography.css"
+have "styles/tty/tokens/spacing.css"
+have "styles/tty/tokens/effects.css"
+have "styles/tty/tokens/motion.css"
+have "styles/tty/tokens/breakpoints.css"
+have "styles/tty/tokens/base.css"
+grep_in "styles/tty/tokens/colors.css" "--yellow: #FFD400" "signal yellow is defined"
+grep_in "styles/tty/tokens/colors.css" "--surface-root: var(--black-000)" "root surface is defined"
+grep_in "styles/tty/tokens/typography.css" '"Silkscreen"' "Silkscreen is the display face"
+grep_in "styles/tty/tokens/typography.css" '"JetBrains Mono"' "JetBrains Mono is the body face"
+grep_in "styles/tty/tokens/spacing.css" "--measure-prose: 68ch" "reading measure is 68ch"
+grep_in "styles/tty/tokens/motion.css" "steps(2, end)" "stepped easing is defined"
+grep_in "styles/tty/tokens/base.css" "-webkit-font-smoothing: none" "the pixel face is not smoothed"
+grep_in "styles/tty/tokens/breakpoints.css" "max-width: 1279.98px" "the compact edge is 1280px"
+grep_in "styles/tty.css" '@import "tty/tokens/colors.css"' "the entry stylesheet imports the tokens"
+have "styles/tty/webfonts.css"
+grep_in "styles/tty.css" '@import "tty/webfonts.css"' "the entry stylesheet loads the pinned display face"
+grep_in "styles/tty/webfonts.css" "silkscreen@5.3.0" "the display face is pinned to one version"
+grep_not "styles/tty/webfonts.css" "@latest" "no mutable font tag ships"
+
 printf '\n'
 if [ "$fails" -eq 0 ]; then
   printf 'check-build: all assertions passed\n'

@@ -1,0 +1,40 @@
+:root {
+  /* TUI motion is stepped, not eased — frames, not curves */
+  --ease-step-2: steps(2, end); /* @kind other */
+  --ease-step-4: steps(4, end); /* @kind other */
+  --ease-step-8: steps(8, end); /* @kind other */
+  --ease-step-12: steps(12, end); /* @kind other */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.3, 1); /* @kind other */
+  --ease-in-out: cubic-bezier(0.6, 0, 0.3, 1); /* @kind other */
+
+  --dur-instant: 60ms; /* @kind other */
+  --dur-fast: 120ms; /* @kind other */
+  --dur-base: 200ms; /* @kind other */
+  --dur-slow: 400ms; /* @kind other */
+  --dur-screen: 520ms; /* @kind other */
+  --dur-boot: 1600ms; /* @kind other */
+
+  --blink-rate: 1060ms; /* @kind other */
+  --spin-rate: 800ms; /* @kind other */
+  --scan-rate: 6s; /* @kind other */
+}
+
+@keyframes tty-blink { 0%, 49% { opacity: 1 } 50%, 100% { opacity: 0 } }
+@keyframes tty-blink-soft { 0%, 60% { opacity: 1 } 61%, 100% { opacity: 0.25 } }
+@keyframes tty-pulse { 0%, 100% { opacity: 1 } 50% { opacity: 0.45 } }
+@keyframes tty-caret-slide { from { width: 0 } to { width: 100% } }
+@keyframes tty-scanline { from { transform: translateY(-100%) } to { transform: translateY(100vh) } }
+@keyframes tty-wipe-in { from { clip-path: inset(0 100% 0 0) } to { clip-path: inset(0 0 0 0) } }
+@keyframes tty-wipe-up { from { clip-path: inset(100% 0 0 0) } to { clip-path: inset(0 0 0 0) } }
+@keyframes tty-glitch-x { 0%,100% { transform: translate(0) } 20% { transform: translate(-2px,1px) } 40% { transform: translate(2px,-1px) } 60% { transform: translate(-1px,0) } 80% { transform: translate(1px,1px) } }
+@keyframes tty-flicker { 0%,100% { opacity: 1 } 42% { opacity: 1 } 43% { opacity: 0.6 } 45% { opacity: 1 } 78% { opacity: 0.85 } 80% { opacity: 1 } }
+@keyframes tty-marquee { from { background-position: 0 0 } to { background-position: 14px 0 } }
+@keyframes tty-spin-rot { to { transform: rotate(360deg) } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

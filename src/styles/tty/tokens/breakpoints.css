@@ -1,0 +1,84 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Breakpoints
+
+   TTY has TWO layouts, not five:
+
+     COMPACT   < 1280px   one pane at a time, menu button, 44px targets
+     DESKTOP  >= 1280px   side-by-side panes, keyboard chrome, 24/32/40 density
+
+   Tablets deliberately get COMPACT — a 1024px window running a five-pane TUI
+   is a worse experience than a single pane with a pane bar.
+
+   Components read these as custom properties, so inline styles stay responsive
+   without media queries. Layout switches (single pane, hidden columns, menu)
+   read the same edges through useBreakpoint().
+   ───────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* named edges — min-width semantics */
+  --bp-xs: 360px;   /* small phone      */
+  --bp-sm: 430px;   /* large phone      */
+  --bp-md: 768px;   /* tablet portrait  */
+  --bp-lg: 1280px;  /* laptop — DESKTOP starts here */
+  --bp-xl: 1440px;  /* desktop          */
+
+  /* layout metrics, redefined per layout */
+  --gutter: 28px;          /* page padding */
+  --pane-gap: 10px;        /* gap between panes */
+  --tap-min: 32px;         /* smallest interactive box */
+  --app-header-h: 38px;
+  --app-status-h: 26px;
+  --panel-header-h: 30px;
+  --panel-footer-h: 26px;
+  --row-h: 30px;
+  --row-h-dense: 24px;
+
+  /* fluid rhythm — sections breathe less on a phone */
+  --sp-section: clamp(40px, 6vw, 64px); /* @kind spacing */
+  --sp-block: clamp(20px, 3vw, 34px); /* @kind spacing */
+}
+
+@media (max-width: 1279.98px) {
+  :root {
+    --gutter: 16px;
+    --pane-gap: 8px;
+    --tap-min: 44px;
+
+    /* every control clears 44px; sm stays the compact variant, not a tiny one */
+    --control-sm: 36px;
+    --control-md: 44px;
+    --control-lg: 48px;
+
+    --app-header-h: 48px;
+    --app-status-h: 34px;
+    --panel-header-h: 40px;
+    --panel-footer-h: 34px;
+    --row-h: 44px;
+    --row-h-dense: 40px;
+  }
+}
+
+@media (max-width: 430px) {
+  :root {
+    --gutter: 14px;
+    --pane-gap: 6px;
+  }
+}
+
+/* A mouse in a narrow window does not need finger-sized rows, but it does need
+   the compact layout — pull density back for fine pointers only. */
+@media (max-width: 1279.98px) and (pointer: fine) {
+  :root {
+    --tap-min: 32px;
+    --control-sm: 26px;
+    --control-md: 34px;
+    --control-lg: 40px;
+    --row-h: 32px;
+    --row-h-dense: 26px;
+    --panel-header-h: 30px;
+    --app-header-h: 40px;
+  }
+}
+
+/* Panels and tables scroll their own overflow; the page never scrolls sideways. */
+html, body { overflow-x: hidden; }

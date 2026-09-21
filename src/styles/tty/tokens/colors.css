@@ -1,0 +1,82 @@
+:root {
+  /* ── base neutrals: black-first, warm-neutral ink ───────────────── */
+  --black-void: #000000;
+  --black-000: #0A0A09;
+  --black-100: #121211;
+  --black-200: #1A1A18;
+  --black-300: #242422;
+  --black-400: #33332F;
+  --grey-500: #4A4A45;
+  --grey-600: #5E5E58;
+  --grey-700: #8C8C84;
+  --grey-800: #B4B4AC;
+  --white-900: #E8E8E3;
+  --white-max: #FFFFFF;
+
+  /* ── primary: signal yellow ─────────────────────────────────────── */
+  --yellow-bright: #FFE566;
+  --yellow: #FFD400;
+  --yellow-deep: #D9B400;
+  --yellow-dim: #8A7300;
+  --yellow-wash: rgba(255, 212, 0, 0.12);
+  --yellow-wash-strong: rgba(255, 212, 0, 0.22);
+
+  /* ── ANSI accents ───────────────────────────────────────────────── */
+  --green: #5AF78E;
+  --green-dim: #2E8F52;
+  --green-wash: rgba(90, 247, 142, 0.12);
+  --cyan: #5EDFFF;
+  --cyan-dim: #2C7F94;
+  --cyan-wash: rgba(94, 223, 255, 0.12);
+  --magenta: #FF6AC1;
+  --magenta-dim: #94396E;
+  --magenta-wash: rgba(255, 106, 193, 0.12);
+  --red: #FF5C57;
+  --red-dim: #933531;
+  --red-wash: rgba(255, 92, 87, 0.12);
+
+  /* ── semantic surfaces ──────────────────────────────────────────── */
+  --surface-root: var(--black-000);
+  --surface-panel: var(--black-100);
+  --surface-raised: var(--black-200);
+  --surface-inset: var(--black-void);
+  --surface-hover: var(--black-300);
+  --surface-selected: var(--yellow-wash);
+  --surface-scrim: rgba(0, 0, 0, 0.72);
+
+  /* ── semantic text ──────────────────────────────────────────────── */
+  --text-primary: var(--white-900);
+  --text-secondary: var(--grey-800);
+  --text-muted: var(--grey-700);
+  --text-faint: var(--grey-600);
+  --text-accent: var(--yellow);
+  --text-on-accent: var(--black-void);
+  --text-link: var(--yellow);
+  --text-link-hover: var(--yellow-bright);
+
+  /* ── semantic borders ───────────────────────────────────────────── */
+  --border-faint: var(--black-300);
+  --border-default: var(--black-400);
+  --border-strong: var(--grey-500);
+  --border-focus: var(--yellow);
+
+  /* ── semantic status ────────────────────────────────────────────── */
+  --status-ok: var(--green);
+  --status-ok-dim: var(--green-dim);
+  --status-info: var(--cyan);
+  --status-info-dim: var(--cyan-dim);
+  --status-warn: var(--yellow);
+  --status-warn-dim: var(--yellow-deep);
+  --status-error: var(--red);
+  --status-error-dim: var(--red-dim);
+  --status-special: var(--magenta);
+  --status-special-dim: var(--magenta-dim);
+
+  /* ── syntax (code blocks + log output) ──────────────────────────── */
+  --syntax-keyword: var(--magenta);
+  --syntax-string: var(--green);
+  --syntax-number: var(--cyan);
+  --syntax-comment: var(--grey-600);
+  --syntax-function: var(--yellow);
+  --syntax-punct: var(--grey-700);
+}
