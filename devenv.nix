@@ -22,6 +22,7 @@
   # https://devenv.sh/scripts/
   scripts.build.exec = "bun run build";
   scripts.clean.exec = "bun run clean";
+  scripts.check.exec = "bun run build && ./scripts/check-build.sh";
 
   enterShell = ''
     echo "🚀 Welcome to the Eleventy development environment!"
@@ -31,6 +32,7 @@
     echo "  bun run start  - Start development server"
     echo "  bun run build  - Build the site"
     echo "  bun run clean  - Clean dist folder"
+    echo "  check          - Build, then assert on dist/ (stop the dev server first)"
     echo ""
   '';
 

@@ -32,15 +32,7 @@ jobs:
 
       # There is no test suite. The build output is the proof.
       - name: Check the build output
-        run: |
-          set -eux
-          test -f dist/index.html
-          test -f dist/404.html
-          test -f dist/posts/index.html
-          test -f dist/sitemap.xml
-          test -f dist/feed.xml
-          test -f dist/search-index-en.json
-          test -f dist/_headers
+        run: ./scripts/check-build.sh
 
       - uses: actions/upload-artifact@v5
         with:
