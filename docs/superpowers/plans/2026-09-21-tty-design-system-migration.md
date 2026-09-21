@@ -267,7 +267,7 @@ grep_not() {
 
 count_at_least() {
   if [ ! -f "$DIST/$1" ]; then bad "$4 (file $1 is missing)"; return; fi
-  n=$(grep -cF -e "$2" "$DIST/$1" || true)
+  n=$(grep -oF -e "$2" "$DIST/$1" | wc -l || true)
   if [ "$n" -ge "$3" ]; then pass "$4 ($n found)"; else bad "$4 (found $n, want $3+)"; fi
 }
 
