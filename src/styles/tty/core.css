@@ -1,0 +1,421 @@
+/* TTY core components — ported from components/core/, components/forms/Input.jsx,
+   and components/navigation/Tabs.jsx + MenuList.jsx.
+   The React originals carry inline styles; these are the same values as classes.
+
+   Note on link resets: tokens/base.css gives every `a` a dim-yellow bottom border.
+   Any component rendered as an `<a>` sets its own `border` and therefore overrides
+   it on specificity. The explicit `:hover` rules below beat base.css's
+   `a:hover { border-bottom-color: … }` because core.css is imported after it. */
+
+.tty-spacer { flex: 1 1 auto; }
+
+/* ── Button ─────────────────────────────────────────────────────────────── */
+.tty-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  height: var(--control-md);
+  padding: 0 14px;
+  font: var(--weight-medium) var(--text-sm)/1 var(--font-body);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  background: transparent;
+  border: var(--border-w) solid var(--border-strong);
+  border-radius: var(--radius-none);
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+}
+.tty-btn:hover {
+  color: var(--text-primary);
+  background: var(--surface-hover);
+  border-color: var(--border-strong);
+}
+/* Press nudges one pixel down-right; the key travels. */
+.tty-btn:active { transform: translate(1px, 1px); }
+.tty-btn[aria-disabled="true"],
+.tty-btn:disabled {
+  color: var(--text-faint);
+  background: var(--surface-raised);
+  border-color: var(--border-faint);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.tty-btn--primary {
+  color: var(--text-on-accent);
+  background: var(--yellow);
+  border-color: var(--yellow);
+}
+.tty-btn--primary:hover {
+  color: var(--text-on-accent);
+  background: var(--yellow-bright);
+  border-color: var(--yellow-bright);
+}
+
+.tty-btn--ghost {
+  color: var(--text-secondary);
+  border-color: transparent;
+}
+.tty-btn--ghost:hover {
+  color: var(--text-primary);
+  background: var(--surface-raised);
+  border-color: transparent;
+}
+
+.tty-btn--sm { height: var(--control-sm); padding: 0 10px; font-size: var(--text-xs); }
+.tty-btn--lg { height: var(--control-lg); padding: 0 20px; font-size: var(--text-md); }
+.tty-btn--block { display: flex; width: 100%; }
+
+/* ── Tag ────────────────────────────────────────────────────────────────── */
+.tty-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 var(--sp-2);
+  font: var(--text-xs)/1 var(--font-body);
+  color: var(--text-secondary);
+  background: var(--surface-raised);
+  border: var(--border-w) solid var(--border-faint);
+  border-radius: var(--radius-none);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+}
+.tty-tag::before { content: "#"; opacity: 0.5; }
+.tty-tag:hover {
+  color: var(--yellow);
+  background: var(--yellow-wash);
+  border-color: var(--border-faint);
+}
+.tty-tag__count { opacity: 0.6; }
+
+.tty-tag--on {
+  color: var(--text-on-accent);
+  background: var(--yellow);
+  border-color: var(--yellow);
+}
+.tty-tag--on:hover {
+  color: var(--text-on-accent);
+  background: var(--yellow-bright);
+  border-color: var(--yellow-bright);
+}
+
+/* Deliberate deviation: the React Tag is a flat 22px. Under 1280px the target
+   reads --tap-min, so a finger gets 44px and a mouse in a narrow window keeps
+   32px. See the note at the head of Task 3. */
+@media (max-width: 1279.98px) {
+  .tty-tag { height: var(--tap-min); padding: 0 10px; font-size: var(--text-sm); }
+}
+
+/* ── Badge ──────────────────────────────────────────────────────────────── */
+.tty-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 18px;
+  padding: 0 6px;
+  font: var(--weight-medium) var(--text-xs)/1 var(--font-body);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-on-accent);
+  background: var(--grey-700);
+  border: var(--border-w) solid var(--grey-700);
+  border-radius: var(--radius-none);
+  white-space: nowrap;
+}
+.tty-badge--outline { color: var(--grey-700); background: transparent; }
+
+.tty-badge--accent { background: var(--yellow); border-color: var(--yellow); }
+.tty-badge--accent.tty-badge--outline { color: var(--yellow); background: transparent; }
+.tty-badge--ok { background: var(--status-ok); border-color: var(--status-ok); }
+.tty-badge--ok.tty-badge--outline { color: var(--status-ok); background: transparent; }
+.tty-badge--info { background: var(--status-info); border-color: var(--status-info); }
+.tty-badge--info.tty-badge--outline { color: var(--status-info); background: transparent; }
+.tty-badge--warn { background: var(--status-warn); border-color: var(--status-warn); }
+.tty-badge--warn.tty-badge--outline { color: var(--status-warn); background: transparent; }
+.tty-badge--error { background: var(--status-error); border-color: var(--status-error); }
+.tty-badge--error.tty-badge--outline { color: var(--status-error); background: transparent; }
+.tty-badge--special { background: var(--status-special); border-color: var(--status-special); }
+.tty-badge--special.tty-badge--outline { color: var(--status-special); background: transparent; }
+
+/* ── KeyHint ────────────────────────────────────────────────────────────── */
+.tty-keyhint { display: inline-flex; align-items: center; gap: 6px; }
+.tty-keyhint__keys { display: inline-flex; gap: 3px; }
+.tty-keyhint kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  font: var(--text-xs)/1 var(--font-body);
+  color: var(--text-secondary);
+  background: var(--surface-raised);
+  border: var(--border-w) solid var(--border-default);
+  border-radius: var(--radius-none);
+}
+.tty-keyhint__label { font-size: var(--text-xs); color: var(--text-faint); }
+.tty-keyhint--accent kbd {
+  color: var(--text-on-accent);
+  background: var(--yellow);
+  border-color: var(--yellow);
+}
+
+/* ── Divider ────────────────────────────────────────────────────────────── */
+.tty-rule {
+  border: 0;
+  border-top: var(--border-w) solid var(--border-faint);
+  margin: 0;
+}
+.tty-divider { display: flex; align-items: center; gap: 10px; }
+.tty-divider__label {
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-faint);
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+}
+.tty-divider__line {
+  flex: 1;
+  border-top: var(--border-w) solid var(--border-faint);
+}
+
+/* ── Panel ──────────────────────────────────────────────────────────────── */
+.tty-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--surface-panel);
+  border: var(--border-w) solid var(--border-default);
+  border-radius: var(--radius-none);
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+.tty-panel__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  min-height: var(--panel-header-h);
+  padding: 0 10px;
+  border-bottom: var(--border-w) solid var(--border-default);
+  background: var(--surface-raised);
+}
+.tty-panel__title {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+}
+.tty-panel__sub { font-size: var(--text-xs); color: var(--text-faint); }
+.tty-panel__body { flex: 1; min-height: 0; padding: var(--sp-4); }
+.tty-panel__foot {
+  flex: none;
+  min-height: var(--panel-footer-h);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 4px 10px;
+  border-top: var(--border-w) solid var(--border-faint);
+  font-size: var(--text-xs);
+  color: var(--text-faint);
+}
+.tty-panel--accent { border-color: var(--yellow); }
+.tty-panel--accent .tty-panel__head {
+  border-bottom-color: var(--yellow);
+  background: var(--yellow-wash);
+}
+.tty-panel--accent .tty-panel__title { color: var(--yellow); }
+.tty-panel--flush .tty-panel__body { padding: 0; }
+
+/* ── Tabs (underline variant) ───────────────────────────────────────────── */
+.tty-tabs {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: var(--border-w) solid var(--border-default);
+}
+.tty-tabs::-webkit-scrollbar { display: none; }
+.tty-tabs__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex: none;
+  min-height: var(--tap-min);
+  padding: 0 12px;
+  font: var(--text-xs)/1 var(--font-body);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: transparent;
+  border: 0;
+  border-bottom: var(--border-w-thick) solid transparent;
+  margin-bottom: -1px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+}
+.tty-tabs__tab:hover {
+  color: var(--text-primary);
+  border-bottom-color: var(--border-strong);
+}
+.tty-tabs__tab[aria-current="page"],
+.tty-tabs__tab[aria-selected="true"] {
+  color: var(--yellow);
+  border-bottom-color: var(--yellow);
+}
+.tty-tabs__count { opacity: 0.6; }
+/* .tty-tabs is a scroll container: `overflow-x: auto` makes `overflow-y` compute
+   to `auto` too, so the outset `--focus-ring` box-shadow base.css puts on a
+   focused tab is clipped at the top and bottom edges of the strip, and
+   `scrollbar-width: none` hides every sign of it. Draw the ring inside the tab
+   instead. A negative `outline-offset` paints the outline within the border box,
+   where no scroll container can cut it, and the strip still scrolls sideways. */
+.tty-tabs__tab:focus-visible {
+  box-shadow: none;
+  outline: var(--border-w-thick) solid var(--yellow);
+  outline-offset: calc(var(--border-w-thick) * -1);
+}
+
+/* ── Input ──────────────────────────────────────────────────────────────── */
+.tty-input {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  height: var(--control-md);
+  padding: 0 10px;
+  background: var(--surface-inset);
+  border: var(--border-w) solid var(--border-default);
+  border-radius: var(--radius-none);
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+.tty-input:focus-within {
+  border-color: var(--yellow);
+  box-shadow: 0 0 0 1px var(--yellow-wash-strong);
+}
+.tty-input--lg { height: var(--control-lg); }
+.tty-input__prefix {
+  flex: none;
+  font-family: var(--font-glyph);
+  font-size: var(--text-sm);
+  color: var(--text-faint);
+}
+.tty-input:focus-within .tty-input__prefix { color: var(--yellow); }
+.tty-input input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--text-primary);
+  font: var(--text-sm)/1 var(--font-body);
+}
+.tty-input input::placeholder { color: var(--text-faint); opacity: 1; }
+/* The wrapper owns the focus language, so the inner field must not draw a ring
+   of its own on top of it. */
+.tty-input input:focus-visible { box-shadow: none; }
+.tty-input input[type="search"]::-webkit-search-cancel-button { display: none; }
+
+/* ── MenuList ───────────────────────────────────────────────────────────── */
+.tty-menu { list-style: none; margin: 0; padding: 0; }
+.tty-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-height: var(--row-h);
+  padding: 0 10px;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-none);
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+/* Dense is a desktop density. `MenuList` is used as `dense={!bp.compact}` in both
+   Archive.jsx and About.jsx, so the modifier must not reach a compact screen. The
+   media query here is what enforces that, so a template can carry
+   `tty-menu--dense` at every width — which is what the archive rail and the
+   homepage rail do. Under 1280px the row falls back to `--row-h`: 44px for a
+   finger, 32px for a fine pointer. */
+@media (min-width: 1280px) {
+  .tty-menu--dense .tty-menu__item { min-height: var(--row-h-dense); }
+}
+.tty-menu__item:hover { color: var(--text-primary); background: var(--surface-hover); }
+/* A focused row draws its ring inside its own box. `.tty-search__panel` is
+   `overflow: auto`, and the outset `--focus-ring` box-shadow is ink overflow,
+   which a scroll container clips — the same defect as the tab strip above. An
+   outline with a negative offset paints inside the border box, where nothing can
+   cut it. A selected row is a yellow bar, so its ring turns black to stay
+   visible. */
+.tty-menu__item:focus-visible {
+  box-shadow: none;
+  outline: var(--border-w-thick) solid var(--yellow);
+  outline-offset: calc(var(--border-w-thick) * -1);
+}
+.tty-menu__item[aria-selected="true"]:focus-visible,
+.tty-menu__item.is-on:focus-visible { outline-color: var(--black-void); }
+/* Selection is a full-width yellow bar with black text — the TUI list idiom. */
+.tty-menu__item[aria-selected="true"],
+.tty-menu__item.is-on {
+  color: var(--text-on-accent);
+  background: var(--yellow);
+}
+.tty-menu__cursor {
+  flex: none;
+  width: 8px;
+  font-family: var(--font-glyph);
+  opacity: 0;
+}
+.tty-menu__item:hover .tty-menu__cursor { opacity: 0.5; }
+.tty-menu__item[aria-selected="true"] .tty-menu__cursor,
+.tty-menu__item.is-on .tty-menu__cursor { opacity: 1; }
+.tty-menu__glyph {
+  flex: none;
+  width: 14px;
+  font-family: var(--font-glyph);
+  opacity: 0.7;
+}
+.tty-menu__label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tty-menu__hint { flex: none; font-size: var(--text-xs); opacity: 0.45; }
+.tty-menu__item[aria-selected="true"] .tty-menu__hint,
+.tty-menu__item.is-on .tty-menu__hint { opacity: 0.7; }
+.tty-menu__section {
+  padding: 10px 10px 4px;
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-faint);
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+}

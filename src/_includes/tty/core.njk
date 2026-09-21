@@ -1,0 +1,43 @@
+{#
+  TTY core macros. Import as:  {% import "tty/core.njk" as tty %}
+
+  Every macro renders the classes defined in /styles/tty/core.css. Keep the two
+  files in step: a class that appears here must exist there.
+#}
+
+{% macro btn(label, href, tone="", size="") %}
+<a class="tty-btn{% if tone %} tty-btn--{{ tone }}{% endif %}{% if size %} tty-btn--{{ size }}{% endif %}" href="{{ href }}">{{ label }}</a>
+{%- endmacro %}
+
+{% macro tag(label, href, count=null, on=false) %}
+<a class="tty-tag{% if on %} tty-tag--on{% endif %}" href="{{ href }}">{{ label }}{% if count != null %}<span class="tty-tag__count">{{ count }}</span>{% endif %}</a>
+{%- endmacro %}
+
+{% macro badge(label, tone="", outline=false) %}
+<span class="tty-badge{% if tone %} tty-badge--{{ tone }}{% endif %}{% if outline %} tty-badge--outline{% endif %}">{{ label }}</span>
+{%- endmacro %}
+
+{% macro keyhint(keys, label="", tone="") %}
+<span class="tty-keyhint{% if tone %} tty-keyhint--{{ tone }}{% endif %}"><span class="tty-keyhint__keys">{% for k in keys %}<kbd>{{ k }}</kbd>{% endfor %}</span>{% if label %}<span class="tty-keyhint__label">{{ label }}</span>{% endif %}</span>
+{%- endmacro %}
+
+{% macro divider(label) %}
+<div class="tty-divider"><span class="tty-divider__label">{{ label }}</span><span class="tty-divider__line"></span></div>
+{%- endmacro %}
+
+{#
+  panel() takes its body through caller(), so call it with {% call %}:
+
+    {% call tty.panel("feeds", "3 endpoints") %}
+      <p>…</p>
+    {% endcall %}
+#}
+{% macro panel(title, sub="", cls="") %}
+<section class="tty-panel{% if cls %} {{ cls }}{% endif %}">
+  <header class="tty-panel__head">
+    <span class="tty-panel__title">{{ title }}</span>
+    {% if sub %}<span class="tty-panel__sub">{{ sub }}</span>{% endif %}
+  </header>
+  <div class="tty-panel__body">{{ caller() }}</div>
+</section>
+{%- endmacro %}

@@ -97,6 +97,25 @@ grep_in "styles/tty.css" '@import "tty/webfonts.css"' "the entry stylesheet load
 grep_in "styles/tty/webfonts.css" "silkscreen@5.3.0" "the display face is pinned to one version"
 grep_not "styles/tty/webfonts.css" "@latest" "no mutable font tag ships"
 
+section "core components"
+have "styles/tty/core.css"
+grep_in "styles/tty.css" '@import "tty/core.css"' "the entry stylesheet imports core.css"
+grep_in "styles/tty/core.css" ".tty-btn--primary" "the primary button exists"
+grep_in "styles/tty/core.css" ".tty-tag--on" "the selected tag exists"
+grep_in "styles/tty/core.css" ".tty-badge--outline" "the outline badge exists"
+grep_in "styles/tty/core.css" ".tty-keyhint kbd" "the key cap exists"
+grep_in "styles/tty/core.css" ".tty-divider__label" "the divider label exists"
+grep_in "styles/tty/core.css" ".tty-panel__title" "the panel title exists"
+grep_in "styles/tty/core.css" '.tty-tabs__tab[aria-current="page"]' "the active tab exists"
+grep_in "styles/tty/core.css" ".tty-input:focus-within" "the input focus state exists"
+grep_in "styles/tty/core.css" ".tty-menu__cursor" "the menu cursor exists"
+grep_not "styles/tty/core.css" "border-radius: 4px" "no rounded corner slips into core.css"
+grep_not "styles/tty/core.css" "box-shadow: 0 2px" "no soft shadow slips into core.css"
+count_at_least "styles/tty/core.css" "-webkit-font-smoothing: none" 3 "every Silkscreen rule disables smoothing"
+grep_in "styles/tty/core.css" ".tty-tabs__tab:focus-visible" "the focused tab draws its ring inside the scroll container"
+grep_in "styles/tty/core.css" ".tty-tag { height: var(--tap-min)" "the tag reads the touch-target token"
+grep_not "styles/tty/core.css" "height: 32px" "no hard-coded touch target in core.css"
+
 printf '\n'
 if [ "$fails" -eq 0 ]; then
   printf 'check-build: all assertions passed\n'
