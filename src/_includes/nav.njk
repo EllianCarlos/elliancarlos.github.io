@@ -27,7 +27,7 @@
     {%- for item in navItems -%}
       {%- if liveUrls.indexOf(" " + item.url + " ") >= 0 -%}
       {%- set on = (page.url == item.url) or (item.url != "/" and page.url.indexOf(item.url) == 0) -%}
-      <a class="tty-tabs__tab" href="{{ item.url }}"{% if on %} aria-current="page"{% endif %}>{{ item.label }}{% if item.count %}<span class="tty-tabs__count">({{ item.count }})</span>{% endif %}</a>{{ "\n" }}
+      <a class="tty-tabs__tab" href="{{ item.url }}"{% if on %} aria-current="page"{% endif %}>{{ item.label }}{% if item.count %}<span class="tty-tabs__count">({{ item.count }})</span>{% endif %}</a>
       {%- endif -%}
     {%- endfor -%}
   </nav>
