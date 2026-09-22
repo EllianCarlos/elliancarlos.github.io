@@ -182,7 +182,7 @@ module.exports = function (eleventyConfig) {
 
   // Pinned to an exact version, not the mutable "@1" tag — see the final
   // whole-branch review (I7): every other third-party reference on this site
-  // is pinned the same way (katex, flexsearch, silkscreen, JetBrains Mono).
+  // is pinned the same way (katex, flexsearch, JetBrains Mono).
   const PRISM_PLUGIN_BLOCK = `
 <script>window.Prism = window.Prism || {}; Prism.manual = true;</script>
 <script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-core.min.js"></script>

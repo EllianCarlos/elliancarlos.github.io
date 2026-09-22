@@ -183,12 +183,13 @@
 .tty-divider { display: flex; align-items: center; gap: 10px; }
 .tty-divider__label {
   font-family: var(--font-display);
+  font-weight: var(--weight-display);
   font-size: 12px;
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
   color: var(--text-faint);
-  -webkit-font-smoothing: none;
-  font-smooth: never;
+  -webkit-font-smoothing: antialiased;
+  font-smooth: auto;
 }
 .tty-divider__line {
   flex: 1;
@@ -217,12 +218,13 @@
 }
 .tty-panel__title {
   font-family: var(--font-display);
+  font-weight: var(--weight-display);
   font-size: var(--text-sm);
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
   color: var(--text-secondary);
-  -webkit-font-smoothing: none;
-  font-smooth: never;
+  -webkit-font-smoothing: antialiased;
+  font-smooth: auto;
 }
 .tty-panel__sub { font-size: var(--text-xs); color: var(--text-faint); }
 .tty-panel__body { flex: 1; min-height: 0; padding: var(--sp-4); }
@@ -420,10 +422,11 @@
 .tty-menu__section {
   padding: 10px 10px 4px;
   font-family: var(--font-display);
+  font-weight: var(--weight-display);
   font-size: var(--text-xs);
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
   color: var(--text-faint);
-  -webkit-font-smoothing: none;
-  font-smooth: never;
+  -webkit-font-smoothing: antialiased;
+  font-smooth: auto;
 }

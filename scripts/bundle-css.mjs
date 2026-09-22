@@ -6,10 +6,11 @@
 //
 // ── The problem this solves ────────────────────────────────────────────────
 //
-// src/styles/tty.css is a 1 KB list of 14 `@import` lines. A browser cannot see
-// those imports until it has fetched and parsed that file, so the real stylesheet
-// arrives on a SECOND round trip — 80 KB across 15 render-blocking requests, with
-// the first paint waiting on the whole chain. Measured on the live site.
+// src/styles/tty.css is a 1 KB list of `@import` lines — 14 of them when this was
+// measured, 13 now that the Silkscreen pin is gone. A browser cannot see those
+// imports until it has fetched and parsed that file, so the real stylesheet arrives
+// on a SECOND round trip — 80 KB across 15 render-blocking requests, with the first
+// paint waiting on the whole chain. Measured on the live site.
 //
 // Bundling keeps the authoring split exactly as it is. The @import list stays the
 // source of truth for cascade order: this reads that list rather than globbing the
@@ -19,8 +20,8 @@
 // ── Why a new filename ────────────────────────────────────────────────────
 //
 // The output is styles/tty.bundle.css, not an overwritten styles/tty.css. The
-// import list still ships, and 8 assertions in check-build.sh read it to test the
-// authoring contract (that fonts.css is imported before webfonts.css, for instance).
+// import list still ships, and several assertions in check-build.sh read it to test
+// the authoring contract — that every file it names reaches the bundle, in its order.
 // Overwriting it would delete the thing those assertions are about. dist/ also keeps
 // the individual files, which 96 further assertions read; browsers never fetch them.
 //

@@ -22,7 +22,7 @@ repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 # must not vanish silently. EXPECTED_ASSERTIONS is the total `passes + fails`
 # this script produces today, counted (not guessed) after every change to the
 # assertion list. See the check at the bottom of the file.
-EXPECTED_ASSERTIONS=337
+EXPECTED_ASSERTIONS=340
 
 pass() { printf '  ok   %s\n' "$1"; passes=$((passes + 1)); }
 bad()  { printf '  FAIL %s\n' "$1"; fails=$((fails + 1)); }
@@ -618,31 +618,118 @@ have "styles/tty/tokens/breakpoints.css"
 have "styles/tty/tokens/base.css"
 grep_in "styles/tty/tokens/colors.css" "--yellow: #FFD400" "signal yellow is defined"
 grep_in "styles/tty/tokens/colors.css" "--surface-root: var(--black-000)" "root surface is defined"
-grep_in "styles/tty/tokens/typography.css" '"Silkscreen"' "Silkscreen is the display face"
+grep_in "styles/tty/tokens/typography.css" '"Silkscreen"' \
+  "the vendored type file is unedited — it still names Silkscreen, which layout.css overrides"
 grep_in "styles/tty/tokens/typography.css" '"JetBrains Mono"' "JetBrains Mono is the body face"
 grep_in "styles/tty/tokens/spacing.css" "--measure-prose: 68ch" "reading measure is 68ch"
 grep_in "styles/tty/tokens/motion.css" "steps(2, end)" "stepped easing is defined"
-grep_in "styles/tty/tokens/base.css" "-webkit-font-smoothing: none" "the pixel face is not smoothed"
+grep_in "styles/tty/tokens/base.css" "-webkit-font-smoothing: none" \
+  "the vendored base file is unedited — it still disables smoothing, which layout.css overrides"
 grep_in "styles/tty/tokens/breakpoints.css" "max-width: 1279.98px" "the compact edge is 1280px"
 grep_in "styles/tty.css" '@import "tty/tokens/colors.css"' "the entry stylesheet imports the tokens"
-have "styles/tty/webfonts.css"
-grep_in "styles/tty.css" '@import "tty/webfonts.css"' "the entry stylesheet loads the pinned display face"
-grep_in "styles/tty/webfonts.css" "silkscreen@5.3.0" "the display face is pinned to one version"
-# webfonts.css can, by construction, never contain "@latest" — it is the
-# pinned override. dist/styles/tty/tokens/fonts.css (vendored, unedited) SHIPS
-# silkscreen@latest twice; the site is only correct because tty.css imports
-# tokens/fonts.css before webfonts.css, so two identical @font-face rules
-# resolve to the last one declared and the pin wins. Test that ordering
-# invariant directly instead of grepping the wrong file for a string it can
-# never hold.
-fonts_import_line=$(grep -n -F '@import "tty/tokens/fonts.css"' "$DIST/styles/tty.css" | head -1 | cut -d: -f1)
-webfonts_import_line=$(grep -n -F '@import "tty/webfonts.css"' "$DIST/styles/tty.css" | head -1 | cut -d: -f1)
-if [ -n "${fonts_import_line:-}" ] && [ -n "${webfonts_import_line:-}" ] \
-  && [ "$fonts_import_line" -lt "$webfonts_import_line" ]; then
-  pass "tty.css imports tokens/fonts.css before webfonts.css, so the pinned rule wins"
+# ── The display face ──────────────────────────────────────────────────────
+# Silkscreen is a 1-bit pixel face, and every rule that set it also set
+# `-webkit-font-smoothing: none`. Together they made the site's headings, post
+# titles, wordmark and chrome labels hard to read, so layout.css points
+# --font-display at JetBrains Mono instead. These five assertions hold that in
+# place. There used to be a styles/tty/webfonts.css here, pinning Silkscreen to
+# one version; with no rule matching that family it had nothing left to pin and
+# it is gone, along with its four assertions.
+
+# The bundle also carries the notes that explain these rules, and those notes quote
+# the very strings the assertions below look for — the first draft of assertion 5
+# went red on a comment. A plain grep cannot tell a comment from a declaration, so
+# every assertion here reads a comment-stripped copy. Comments become runs of spaces
+# of the same length, so byte offsets still mean what they meant.
+bundle_bare=$(mktemp)
+perl -0777 -pe 's{/\*.*?\*/}{ q{ } x length($&) }gse' \
+  "$DIST/styles/tty.bundle.css" > "$bundle_bare" 2>/dev/null
+
+# 1. The winning declaration must not name the retired pixel face. A whole-bundle
+#    sweep would always hit the vendored tokens/typography.css, which still
+#    declares it and must stay unedited — so read the LAST declaration, which is
+#    the one the cascade resolves to.
+winning_display=$(grep -o -- '--font-display: *"[^"]*"' "$bundle_bare" 2>/dev/null \
+  | tail -1 | sed 's/.*"\(.*\)"/\1/')
+if [ -n "$winning_display" ] && [ "$winning_display" != "Silkscreen" ]; then
+  pass "the display face the cascade resolves to is not the retired pixel face ($winning_display)"
 else
-  bad "tty.css imports tokens/fonts.css before webfonts.css, so the pinned rule wins"
+  bad "the display face the cascade resolves to is not the retired pixel face (got '${winning_display:-none}')"
 fi
+
+# 2. That only holds while the override sits after the vendored declaration.
+#    Byte offsets in the bundle answer it directly — same shape as the
+#    --text-faint ordering test above.
+vendored_display_at=$(grep -bo -- '--font-display: "Silkscreen"' "$bundle_bare" 2>/dev/null | head -1 | cut -d: -f1)
+override_display_at=$(grep -bo -- '--font-display: "JetBrains Mono"' "$bundle_bare" 2>/dev/null | head -1 | cut -d: -f1)
+if [ -n "${vendored_display_at:-}" ] && [ -n "${override_display_at:-}" ] \
+  && [ "$vendored_display_at" -lt "$override_display_at" ]; then
+  pass "the --font-display override lands after the vendored declaration"
+else
+  bad "the --font-display override lands after the vendored declaration"
+fi
+
+# 3. An outline face at weight 400 does not out-weigh the body copy under it, so
+#    every rule that sets the display face must also set --weight-display. Both
+#    sides come out of the build: this walks the declaration blocks of the four
+#    site-owned stylesheets and compares the count that names the family against
+#    the count that also names the weight. A new display rule that forgets the
+#    weight turns this red, and it needs no edit when one is added correctly.
+#    The vendored tokens/base.css is excluded by construction — it names the
+#    family, cannot be edited to add the weight, and layout.css overrides it
+#    (assertion 4 holds that ordering).
+#    The four files go in through one pipe on purpose: `perl -0777` slurps and runs
+#    per FILE, so passing them as arguments would print four separate tallies.
+weight_pairs=$(cat "$DIST"/styles/tty/core.css "$DIST"/styles/tty/layout.css \
+  "$DIST"/styles/tty/content.css "$DIST"/styles/tty/prose.css 2>/dev/null | perl -0777 -ne '
+  s{/\*.*?\*/}{}gs;
+  my ($tot, $ok) = (0, 0);
+  for my $blk (split /\}/) {
+    $blk =~ s/.*\{//s;
+    next unless $blk =~ /var\(--font-display\)/;
+    $tot++;
+    $ok++ if $blk =~ /var\(--weight-display\)/;
+  }
+  print "$ok $tot";
+')
+weight_ok=${weight_pairs%% *}
+weight_tot=${weight_pairs##* }
+if [ -n "$weight_pairs" ] && [ "${weight_tot:-0}" -gt 0 ] && [ "$weight_ok" -eq "$weight_tot" ]; then
+  pass "every site rule that sets the display face also sets its weight ($weight_tot rules)"
+else
+  bad "every site rule that sets the display face also sets its weight (${weight_ok:-0} of ${weight_tot:-0})"
+fi
+
+# 4. `-webkit-font-smoothing: none` on a vector outline gives hard aliased edges
+#    in Chrome and Safari, which is the whole legibility loss this change undoes.
+#    The vendored tokens/base.css still sets it on h1-h6; layout.css repeats that
+#    selector afterwards with `antialiased`. Only the order makes that work, so
+#    test the order. The site's block is the one whose selector starts a line.
+vendored_smooth_at=$(grep -bo -- "-webkit-font-smoothing: none" "$bundle_bare" 2>/dev/null | head -1 | cut -d: -f1)
+override_smooth_at=$(grep -bo -e '^h1, h2, h3, h4, h5, h6 {' "$bundle_bare" 2>/dev/null | head -1 | cut -d: -f1)
+if [ -n "${vendored_smooth_at:-}" ] && [ -n "${override_smooth_at:-}" ] \
+  && [ "$vendored_smooth_at" -lt "$override_smooth_at" ]; then
+  pass "the heading smoothing override lands after the vendored rule"
+else
+  bad "the heading smoothing override lands after the vendored rule"
+fi
+
+rm -f "$bundle_bare"
+
+# 5. And no site-owned stylesheet may turn smoothing off again. Seventeen rules
+#    did, one per display rule, back when the display face was a pixel font.
+#    Comments are stripped here too: layout.css explains the change in a note that
+#    quotes the declaration, and the first draft of this assertion matched that note.
+for f in core layout content prose; do
+  if [ ! -f "$DIST/styles/tty/$f.css" ]; then
+    bad "$f.css never disables smoothing (file is missing)"
+  elif perl -0777 -ne 's{/\*.*?\*/}{}gs; exit(/-webkit-font-smoothing:\s*none/ ? 1 : 0)' \
+    "$DIST/styles/tty/$f.css"; then
+    pass "$f.css never disables smoothing"
+  else
+    bad "$f.css never disables smoothing"
+  fi
+done
 
 section "core components"
 have "styles/tty/core.css"
@@ -658,7 +745,6 @@ grep_in "styles/tty/core.css" ".tty-input:focus-within" "the input focus state e
 grep_in "styles/tty/core.css" ".tty-menu__cursor" "the menu cursor exists"
 grep_not "styles/tty/core.css" "border-radius: 4px" "no rounded corner slips into core.css"
 grep_not "styles/tty/core.css" "box-shadow: 0 2px" "no soft shadow slips into core.css"
-count_at_least "styles/tty/core.css" "-webkit-font-smoothing: none" 3 "every Silkscreen rule disables smoothing"
 grep_in "styles/tty/core.css" ".tty-tabs__tab:focus-visible" "the focused tab draws its ring inside the scroll container"
 grep_in "styles/tty/core.css" ".tty-tag { height: var(--tap-min)" "the tag reads the touch-target token"
 grep_not "styles/tty/core.css" "height: 32px" "no hard-coded touch target in core.css"

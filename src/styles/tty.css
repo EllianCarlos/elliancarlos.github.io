@@ -7,10 +7,19 @@
    files; re-copy them from the archive when the system ships a new version.
    Everything outside tty/tokens/ is this site's port of the React components.
 
+   There used to be a tty/webfonts.css here, imported right after the tokens. Its
+   only job was to re-declare Silkscreen against `silkscreen@5.3.0`, because
+   tokens/fonts.css names the mutable `@latest` tag. The site no longer sets any
+   text in Silkscreen — layout.css points --font-display at JetBrains Mono, and the
+   note there says why — so there is nothing left to pin. A family that no rule
+   matches is never fetched, so the vendored @font-face rules cost nothing.
+
+   If you ever point a rule back at Silkscreen, restore that pin first. JetBrains
+   Mono needs none: tokens/fonts.css already names jetbrains-mono:vf@5.3.0.
+
    Every `@import` must stay above every rule in this file. CSS drops an
    `@import` that follows a rule. */
 @import "tty/tokens/fonts.css";
-@import "tty/webfonts.css";
 @import "tty/tokens/colors.css";
 @import "tty/tokens/typography.css";
 @import "tty/tokens/spacing.css";

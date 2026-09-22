@@ -49,6 +49,59 @@
      one height at every width, unlike the design system's own header, so a
      tier-varying token would be the wrong value here. */
   --tty-nav-h: 52px;
+
+  /* The display face, moved off Silkscreen. Silkscreen is a 1-bit pixel face, and
+     every rule that set it also set `-webkit-font-smoothing: none`, because a
+     smoothed pixel font is mud. The two together made the words the reader most
+     needs hard to read: post titles, prose headings, the hero, the wordmark and
+     every chrome label. Those carry information, not decoration.
+
+     JetBrains Mono replaces it. It already ships as the body and code face, as one
+     variable file covering weights 100-800, so the swap costs no extra request and
+     the bold weight below is free.
+
+     Measured from the two font files — advance of `A`, and that same glyph's real
+     yMax, both at 1000 units per em:
+
+                      advance   cap height
+       Silkscreen      0.750em    0.625em
+       JetBrains Mono  0.600em    0.730em
+
+     So at one font-size the new face is 20% narrower per character and 17% taller.
+     The --display-* scale is therefore left alone: headings gain optical size,
+     which is the point, and nothing can overflow, because every one of them
+     shrinks in width. A measure written in `ch` does need retuning, because `ch`
+     is the advance — see .tty-h1--hero below, the only such measure on the display
+     face.
+
+     tokens/typography.css is vendored byte-for-byte and must not be edited.
+     layout.css is imported after it, so this declaration wins. Silkscreen's
+     @font-face rules still ship inside tokens/fonts.css; a family no rule matches
+     is never fetched, so they cost nothing. Do not point anything back at that
+     family: those vendored rules name the mutable `silkscreen@latest` tag, and the
+     file that used to pin it to one version is gone. */
+  --font-display: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* The display face needs a weight of its own. Silkscreen had one weight and drew
+     every stem a full pixel wide, so it read as heavy at 400. An outline mono does
+     not: uppercase headings at 400 sit at the same weight as the body copy under
+     them, and the hierarchy flattens. 700 is inside the variable font's range, so
+     it adds no request. Every one of the 17 rules that sets --font-display also
+     sets this, so the weight travels with the family. */
+  --weight-display: var(--weight-bold);
+}
+
+/* tokens/base.css sets every heading in the display face at weight 400 with
+   smoothing off. Both were right for a pixel font and are wrong for an outline
+   one: `-webkit-font-smoothing: none` on a vector face gives hard aliased edges in
+   Chrome and Safari, which is the whole legibility loss this change undoes. That
+   file is vendored, so this repeats its selector afterwards and wins on equal
+   specificity. prose.css comes later still and keeps its own h3-h6 weights. */
+.tty-display,
+h1, h2, h3, h4, h5, h6 {
+  font-weight: var(--weight-display);
+  -webkit-font-smoothing: antialiased;
+  font-smooth: auto;
 }
 
 html { height: 100%; }
@@ -98,12 +151,13 @@ body { overflow-x: clip; }
   align-items: center;
   gap: 1px;
   font-family: var(--font-display);
+  font-weight: var(--weight-display);
   font-size: 18px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--yellow);
-  -webkit-font-smoothing: none;
-  font-smooth: never;
+  -webkit-font-smoothing: antialiased;
+  font-smooth: auto;
   text-decoration: none;
   border: 0;
 }
@@ -139,8 +193,10 @@ body { overflow-x: clip; }
 .tty-nav__search:hover .tty-nav__search-glyph,
 .tty-nav__search:focus-visible .tty-nav__search-glyph { color: var(--yellow); }
 
-/* The wordmark alone is 150px at 18px Silkscreen; on a small phone the tab
-   strip needs the rest of the row, so the mark steps down instead of wrapping.
+/* The wordmark and the tab strip cannot both hold their width on a small phone,
+   so the mark steps down instead of wrapping. Do not re-state the wordmark's width
+   here as a pixel figure: it was "150px at 18px Silkscreen" and went stale the day
+   the display face changed, because the advance changed with it.
    The `/` hint goes with it: there is no `/` key to press on a touch keyboard,
    and the glyph alone still reads as search. The button keeps its aria-label,
    so its accessible name does not change. */
@@ -173,13 +229,14 @@ body { overflow-x: clip; }
 .tty-h1 {
   margin: 0;
   font-family: var(--font-display);
+  font-weight: var(--weight-display);
   font-size: var(--display-md);
   line-height: var(--leading-tight);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text-primary);
-  -webkit-font-smoothing: none;
-  font-smooth: never;
+  -webkit-font-smoothing: antialiased;
+  font-smooth: auto;
 }
 /* The hero headline is one string, not one string per line. `max-width` in `ch`
    caps the measure against the headline's own font size, so it holds at every
@@ -188,9 +245,14 @@ body { overflow-x: clip; }
    hand-split `heroLine` fields and their hard `<br>` tags.
    `balance` is capped at a few lines by every engine that ships it, which is
    the right ceiling for a headline. Where it is unsupported the text still
-   wraps at the same measure — only the line lengths are less even. */
+   wraps at the same measure — only the line lengths are less even.
+
+   `ch` is the advance of `0`, so this measure moved when the display face did.
+   30ch in JetBrains Mono's 0.600em advance is the same physical width 24ch was in
+   Silkscreen's 0.750em: 24 × 0.750 ÷ 0.600 = 30. Without that the headline would
+   have lost a fifth of its measure and wrapped onto an extra line. */
 .tty-h1--hero {
-  max-width: 24ch;
+  max-width: 30ch;
   font-size: var(--display-xl);
   line-height: 1.05;
   letter-spacing: 0.04em;
@@ -199,13 +261,14 @@ body { overflow-x: clip; }
 .tty-h2 {
   margin: 0;
   font-family: var(--font-display);
+  font-weight: var(--weight-display);
   font-size: var(--display-md);
   line-height: var(--leading-tight);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--yellow);
-  -webkit-font-smoothing: none;
-  font-smooth: never;
+  -webkit-font-smoothing: antialiased;
+  font-smooth: auto;
 }
 
 /* ── Screen grids ───────────────────────────────────────────────────────── */
@@ -276,12 +339,13 @@ body { overflow-x: clip; }
 .tty-foot__meta { display: flex; align-items: center; gap: 6px; }
 .tty-foot__mark {
   font-family: var(--font-display);
+  font-weight: var(--weight-display);
   font-size: 12px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-muted);
-  -webkit-font-smoothing: none;
-  font-smooth: never;
+  -webkit-font-smoothing: antialiased;
+  font-smooth: auto;
 }
 
 /* ── Search overlay ─────────────────────────────────────────────────────── */
@@ -416,12 +480,13 @@ html.tty-search-open { overflow: hidden; }
 .tty-post__foot .tty-post__meta { gap: 16px; }
 .tty-post__next {
   font-family: var(--font-display);
+  font-weight: var(--weight-display);
   font-size: var(--display-xs);
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--yellow);
-  -webkit-font-smoothing: none;
-  font-smooth: never;
+  -webkit-font-smoothing: antialiased;
+  font-smooth: auto;
   border-bottom-color: var(--yellow-dim);
 }
 .tty-post__next:hover { color: var(--yellow-bright); }
@@ -438,12 +503,13 @@ html.tty-search-open { overflow: hidden; }
 .tty-note__title {
   display: block;
   font-family: var(--font-display);
+  font-weight: var(--weight-display);
   font-size: 12px;
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
   color: var(--status-warn);
-  -webkit-font-smoothing: none;
-  font-smooth: never;
+  -webkit-font-smoothing: antialiased;
+  font-smooth: auto;
 }
 .tty-note__body {
   margin: var(--sp-2) 0 0;
@@ -486,10 +552,11 @@ html.tty-search-open { overflow: hidden; }
   flex: none;
   width: 34px;
   font-family: var(--font-display);
+  font-weight: var(--weight-display);
   font-size: var(--text-sm);
   color: var(--text-faint);
-  -webkit-font-smoothing: none;
-  font-smooth: never;
+  -webkit-font-smoothing: antialiased;
+  font-smooth: auto;
   transition: color var(--dur-fast) var(--ease-out);
 }
 .tty-paper:hover .tty-paper__index { color: var(--yellow); }
@@ -497,13 +564,14 @@ html.tty-search-open { overflow: hidden; }
 .tty-paper__title {
   margin: 0;
   font-family: var(--font-display);
+  font-weight: var(--weight-display);
   font-size: 17px;
   line-height: var(--leading-tight);
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--text-primary);
-  -webkit-font-smoothing: none;
-  font-smooth: never;
+  -webkit-font-smoothing: antialiased;
+  font-smooth: auto;
   transition: color var(--dur-fast) var(--ease-out);
 }
 .tty-paper:hover .tty-paper__title { color: var(--yellow); }

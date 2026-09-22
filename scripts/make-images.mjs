@@ -64,13 +64,6 @@ const C = {
 // fetch succeeding every time.
 const FONTS = [
   {
-    family: "Silkscreen",
-    weight: 400,
-    style: "normal",
-    file: "Silkscreen-Regular.ttf",
-    url: "https://raw.githubusercontent.com/google/fonts/7e8d490955e9d2629cd3095e8dadd6fafe3c16b8/ofl/silkscreen/Silkscreen-Regular.ttf",
-  },
-  {
     family: "JetBrains Mono",
     weight: 400,
     style: "normal",
@@ -136,8 +129,10 @@ const el = (type, style, children) => ({ type, props: { style, children } });
 // A shell prompt and one lowercase `e`: `> e`. The prompt is upright Bold, the `e`
 // is Bold ITALIC, the way Euler's number is set.
 //
-// Silkscreen is not used even though it is the display font everywhere else: it is
-// caps-only, so a lowercase `e` renders as a capital E.
+// This used to carry a note about why the icon avoided Silkscreen: that face is
+// caps-only, so a lowercase `e` rendered as a capital E. Silkscreen is gone from the
+// site altogether now — see the --font-display note in src/styles/tty/layout.css —
+// so the whole build loads one family, and this reads the same face as the pages do.
 //
 // Two glyphs is the ceiling for a 16px square. `>_e` was tried and abandoned: three
 // glyphs leave about 5px each, and the underscore merges with the `e`'s baseline so
@@ -308,11 +303,18 @@ function thumbElement({ windowName, command, title, meta }) {
               el("div", { display: "flex", alignItems: "center", gap: 8, marginTop: 20 }, [
                 el(
                   "div",
-                  { display: "flex", fontFamily: "Silkscreen", fontSize: 22, color: C.primary },
+                  {
+                    display: "flex",
+                    fontFamily: "JetBrains Mono",
+                    fontWeight: 700,
+                    fontSize: 22,
+                    color: C.primary,
+                  },
                   "elliancarlos",
                 ),
-                // The nav's caret. A box, not a glyph — Silkscreen carries no block
-                // character, and a box keeps its size tied to the text beside it.
+                // The nav's caret. A box, not a glyph: a box keeps its size tied to
+                // the text beside it, rather than to whatever a block character
+                // measures in the face of the day.
                 el("div", { display: "flex", width: 10, height: 22, backgroundColor: C.yellow }, ""),
               ]),
             ],

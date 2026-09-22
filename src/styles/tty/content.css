@@ -27,10 +27,11 @@
   flex: none;
   width: 34px;
   font-family: var(--font-display);
+  font-weight: var(--weight-display);
   font-size: var(--text-sm);
   color: var(--text-faint);
-  -webkit-font-smoothing: none;
-  font-smooth: never;
+  -webkit-font-smoothing: antialiased;
+  font-smooth: auto;
   transition: color var(--dur-fast) var(--ease-out);
 }
 .tty-postrow:hover .tty-postrow__index { color: var(--yellow); }
@@ -38,13 +39,14 @@
 .tty-postrow__title {
   margin: 0;
   font-family: var(--font-display);
+  font-weight: var(--weight-display);
   font-size: 17px;
   line-height: var(--leading-tight);
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--text-primary);
-  -webkit-font-smoothing: none;
-  font-smooth: never;
+  -webkit-font-smoothing: antialiased;
+  font-smooth: auto;
   transition: color var(--dur-fast) var(--ease-out);
 }
 .tty-postrow:hover .tty-postrow__title { color: var(--yellow); }
@@ -166,12 +168,12 @@
   gap: 10px;
   min-height: var(--tap-min);
   padding: 0 2px;
-  font: var(--text-xs)/1 var(--font-display);
+  font: var(--weight-display) var(--text-xs)/1 var(--font-display);
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
   color: var(--text-muted);
-  -webkit-font-smoothing: none;
-  font-smooth: never;
+  -webkit-font-smoothing: antialiased;
+  font-smooth: auto;
   cursor: pointer;
   list-style: none;
 }
