@@ -386,3 +386,75 @@ body.tty-search-open { overflow: hidden; }
   margin-top: 26px;
 }
 .tty-hero__title { margin: 18px 0 0; }
+
+/* ── Paper row (/preprints/) ─────────────────────────────────────────────── */
+/* The same shape as .tty-postrow, but the meta column carries a venue and the
+   row leaves the site, so it ends in an outbound marker. */
+.tty-paper {
+  display: flex;
+  gap: 18px;
+  padding: 14px;
+  color: inherit;
+  background: transparent;
+  text-decoration: none;
+  border: 0;
+  border-top: var(--border-w) solid var(--border-faint);
+  border-left: var(--border-w-thick) solid transparent;
+  transition: background var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+}
+.tty-paper:hover { background: var(--surface-raised); border-left-color: var(--yellow); }
+.tty-paper__index {
+  flex: none;
+  width: 34px;
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  color: var(--text-faint);
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.tty-paper:hover .tty-paper__index { color: var(--yellow); }
+.tty-paper__body { flex: 1; min-width: 0; }
+.tty-paper__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 17px;
+  line-height: var(--leading-tight);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.tty-paper:hover .tty-paper__title { color: var(--yellow); }
+.tty-paper__authors {
+  margin: 7px 0 0;
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--text-muted);
+  text-wrap: pretty;
+}
+.tty-paper__meta {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  font-size: var(--text-xs);
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+.tty-paper__ext { font-family: var(--font-glyph); }
+
+@media (max-width: 430px) {
+  .tty-paper { flex-wrap: wrap; gap: 10px; }
+  .tty-paper__meta {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding-left: 34px;
+  }
+}

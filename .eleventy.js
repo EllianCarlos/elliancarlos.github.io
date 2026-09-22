@@ -163,6 +163,11 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({"public/apple-touch-icon.png": "apple-touch-icon.png"});
   eleventyConfig.addPassthroughCopy({"public/og-image.png": "og-image.png"});
 
+  // Papers live in preprints/ at the repository root, outside src/, because they
+  // are release artefacts rather than site sources. Copy them verbatim; the page
+  // that lists them is generated from src/_data/preprints.js.
+  eleventyConfig.addPassthroughCopy("preprints");
+
   // Plugins
   // Canonical tag slug, shared with lib/tagSlug.js used by the permalink builder.
   eleventyConfig.addFilter("tagSlug", tagSlug);
@@ -354,6 +359,9 @@ module.exports = function (eleventyConfig) {
     });
     return map;
   });
+
+  // Zero-padded three-digit index, for a list that is not a post collection.
+  eleventyConfig.addFilter("pad3", (n) => String(n).padStart(3, "0"));
 
   // The entry after `url`, wrapping to the first. Drives the "next" link on a
   // post page. Returns null when the url is not in the list.

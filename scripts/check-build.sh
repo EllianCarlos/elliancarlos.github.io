@@ -150,7 +150,7 @@ grep_not "posts/index.html" "/styles/blog.css" "the old blog stylesheet is unlin
 grep_in "index.html" '<link rel="stylesheet" href="/styles/tty.css">' "the homepage links tty.css"
 grep_in "index.html" 'class="tty-nav__mark"' "the wordmark is present"
 count_at_least "index.html" 'class="tty-tabs__tab"' 3 "the three live nav tabs render"
-grep_not "index.html" 'href="/preprints/"' "the nav ships no tab for a page the build does not write"
+grep_in "index.html" 'href="/preprints/"' "the nav tab for preprints opens once the page exists"
 grep_in "index.html" 'data-tty-search-open hidden' "the search control stays hidden until a script can open it"
 grep_in "index.html" 'class="tty-foot"' "the new footer is present"
 grep_in "posts/index.html" 'aria-current="page"' "the active tab is marked on /posts/"
@@ -286,6 +286,20 @@ grep_in "posts/tag/linux/index.html" "/posts/archive/" "a tag page links back to
 grep_in "posts/tag/japanese/index.html" '>1 post</span>' "a one-post tag page counts in the singular"
 grep_not "posts/tag/linux/index.html" 'class="tag-pill"' "the old tag pills are gone"
 grep_not "posts/tag/linux/index.html" '<h2 class="blog">' "the old Pico headings are gone"
+
+section "preprints"
+have "preprints/index.html"
+have "preprints/Corporate_Truck_Factor__Firm_Level_Knowledge_Concentration_in_Linux_Kernel_Subsystems.pdf"
+grep_in "preprints/index.html" "Corporate Truck Factor" "the paper title is listed"
+grep_in "preprints/index.html" "Paulo Meirelles" "the author list is listed"
+grep_in "preprints/index.html" 'target="_blank"' "the row opens in a new tab"
+grep_in "preprints/index.html" 'rel="noreferrer noopener"' "the new tab is opened safely"
+grep_in "preprints/index.html" ".pdf" "the row links a PDF"
+grep_in "preprints/index.html" 'class="tty-paper"' "the paper row renders"
+grep_in "preprints/index.html" '>1 paper</span>' "the count reads the singular"
+grep_in "preprints/index.html" 'aria-current="page"' "the preprints tab is marked active"
+grep_in "llms.txt" "/preprints/" "llms.txt points at the preprints page"
+grep_in "styles/tty/layout.css" ".tty-paper__title" "the paper row CSS is present"
 
 printf '\n'
 if [ "$fails" -eq 0 ]; then
