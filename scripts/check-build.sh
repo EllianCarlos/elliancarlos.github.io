@@ -22,7 +22,7 @@ repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 # must not vanish silently. EXPECTED_ASSERTIONS is the total `passes + fails`
 # this script produces today, counted (not guessed) after every change to the
 # assertion list. See the check at the bottom of the file.
-EXPECTED_ASSERTIONS=330
+EXPECTED_ASSERTIONS=334
 
 pass() { printf '  ok   %s\n' "$1"; passes=$((passes + 1)); }
 bad()  { printf '  FAIL %s\n' "$1"; fails=$((fails + 1)); }
@@ -168,6 +168,60 @@ section "data files are not pages"
 # line and a fixed-string match is sound.
 grep_not "sitemap.xml" "search-index" "the sitemap does not list the search index"
 grep_not "sitemap.xml" ".json</loc>" "the sitemap lists no .json file as a page"
+
+section "one stylesheet, one request"
+# src/styles/tty.css is a 1 KB list of 14 @imports. A browser cannot see those
+# imports until it has fetched and parsed that file, so the real stylesheet arrived on
+# a SECOND round trip — 80 KB over 15 render-blocking requests. scripts/bundle-css.mjs
+# concatenates them in the list's own order; the sources stay split for authoring.
+#
+# The import list still ships and is still asserted on above, because it remains the
+# source of truth for cascade order. What must never happen is a PAGE linking it.
+no_entry_link=$(grep -rlF --include='*.html' -e 'href="/styles/tty.css"' "$DIST" | tr '\n' ' ')
+if [ -n "$no_entry_link" ]; then
+  bad "no page links the unbundled import list ($no_entry_link)"
+else
+  pass "no page links the unbundled import list"
+fi
+# A stray @import surviving into the bundle would restore the waterfall silently.
+# Comments are stripped first: the generated header says the word "@import" in prose.
+if [ -f "$DIST/styles/tty.bundle.css" ] \
+  && perl -0777 -ne 's{/\*.*?\*/}{}gs; exit(/^\s*\@import/m ? 1 : 0)' "$DIST/styles/tty.bundle.css"; then
+  pass "the bundle carries no @import"
+else
+  bad "the bundle carries no @import"
+fi
+# Every file the list imports must be IN the bundle. Both sides come from the build:
+# the expected names are read out of the source import list, and each one is looked
+# for in the bundle's own generated section header. A file silently dropped by the
+# bundler fails here, and adding a file to the list needs no change to this script.
+bundle_missing=""
+bundle_want=0
+while IFS= read -r rel; do
+  [ -n "$rel" ] || continue
+  bundle_want=$((bundle_want + 1))
+  grep -qF -- "── $rel ─" "$DIST/styles/tty.bundle.css" 2>/dev/null || bundle_missing="$bundle_missing $rel"
+done <<EOF
+$(grep -oE '^[[:space:]]*@import[[:space:]]+"[^"]+"' "$repo_root/src/styles/tty.css" \
+  | sed -E 's/.*"([^"]+)".*/\1/')
+EOF
+if [ "$bundle_want" -gt 0 ] && [ -z "$bundle_missing" ]; then
+  pass "the bundle carries every imported file ($bundle_want files)"
+else
+  bad "the bundle carries every imported file (missing:${bundle_missing:-none counted})"
+fi
+
+# KaTeX's stylesheet is a third-party render-blocking request. It used to be on every
+# page; exactly one page renders maths. Both sides of this are derived from the build,
+# so writing a post with maths — or removing the only one — needs no change here.
+katex_markup=$(grep -rl --include='*.html' -e 'class="katex' "$DIST" | sort)
+katex_css=$(grep -rl --include='*.html' -e 'katex.min.css' "$DIST" | sort)
+if [ "$katex_markup" = "$katex_css" ]; then
+  n=$(printf '%s\n' "$katex_markup" | grep -c . || true)
+  pass "the katex stylesheet loads on exactly the pages with maths ($n pages)"
+else
+  bad "the katex stylesheet loads on exactly the pages with maths (markup and css disagree)"
+fi
 
 section "structured data"
 # The Person schema must not advertise languages the site does not serve. It used to
@@ -603,7 +657,8 @@ grep_not "posts/index.html" "picocss" "Pico CSS is gone from the blog index"
 grep_not "404.html" "picocss" "Pico CSS is gone from the 404 page"
 grep_not "index.html" "/styles/style.css" "the old stylesheet is unlinked"
 grep_not "posts/index.html" "/styles/blog.css" "the old blog stylesheet is unlinked"
-grep_in "index.html" '<link rel="stylesheet" href="/styles/tty.css">' "the homepage links tty.css"
+grep_in "index.html" '<link rel="stylesheet" href="/styles/tty.bundle.css">' \
+  "the homepage links the bundled stylesheet"
 grep_in "index.html" 'class="tty-nav__mark"' "the wordmark is present"
 count_at_least "index.html" 'class="tty-tabs__tab"' 5 "the four page tabs and the resume tab render"
 grep_in "index.html" 'href="/preprints/"' "the nav tab for preprints opens once the page exists"

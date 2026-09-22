@@ -204,6 +204,26 @@ module.exports = function (eleventyConfig) {
     return content;
   });
 
+  // KaTeX's stylesheet, on the pages that render maths and no others.
+  //
+  // It used to sit unconditionally in layout.njk's <head>. Exactly one page of 39
+  // contains KaTeX markup, so the other 38 blocked first paint on a third-party
+  // request that styled nothing. Same shape as injectPrismPlugins above: look at the
+  // rendered html and add the dependency only where the markup needs it.
+  //
+  // Injected into <head>, not before </body> like the Prism block. A stylesheet at
+  // the end of the body is applied after the maths has already painted unstyled,
+  // which is a visible flash of raw TeX — worse than the request it saves.
+  const KATEX_STYLES =
+    '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/katex.min.css" crossorigin="anonymous">\n';
+
+  eleventyConfig.addTransform("injectKatexStyles", function (content, outputPath) {
+    if (outputPath && outputPath.endsWith(".html") && content.includes('class="katex')) {
+      return content.replace("</head>", KATEX_STYLES + "</head>");
+    }
+    return content;
+  });
+
   // Language-specific post collections
   languages.forEach(lang => {
     eleventyConfig.addCollection(`posts_${lang}`, (collectionApi) => {

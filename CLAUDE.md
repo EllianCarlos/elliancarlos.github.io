@@ -52,6 +52,27 @@ Formatting: Prettier with `printWidth: 80` and `proseWrap: "always"` (see `.pret
 All styling comes from the TTY design system. Read `src/styles/tty.css` first — it is an
 `@import` list and it names every part in load order.
 
+**Pages link `/styles/tty.bundle.css`, never `/styles/tty.css`.** `scripts/bundle-css.mjs`
+concatenates the 14 imported files, in the order that list gives, as the last step of
+`bun run build`. The import list is still the source of truth for cascade order and is
+still asserted on; it is just not what a browser fetches.
+
+The reason is measured, not theoretical: `tty.css` is 1 KB, and a browser cannot see its
+imports until it has fetched and parsed it — so the real stylesheet arrived on a **second
+round trip, 80 KB across 15 render-blocking requests**. It is one request now. Keep
+authoring in the split files; only delivery is joined. `check-build.sh` fails if any page
+links the import list, if an `@import` survives into the bundle, or if the bundle is
+missing any file the list names.
+
+**Third-party stylesheets load only on the pages that need them.** KaTeX's CSS used to sit
+in `layout.njk`'s `<head>` unconditionally — and exactly one page of 39 renders maths, so 38
+blocked first paint on a request that styled nothing. The `injectKatexStyles` transform adds
+it to pages containing KaTeX markup, the same way `injectPrismPlugins` handles Prism. It is
+injected into `<head>`, not before `</body>`: a stylesheet at the end of the body applies
+after the maths has already painted as raw TeX. `check-build.sh` compares the set of pages
+carrying the markup against the set carrying the stylesheet, so both sides come from the
+build and adding a post with maths needs no change.
+
 - `src/styles/tty/tokens/` — **eight files copied byte-for-byte from the design system
   archive.** Do not edit them and do not run Prettier over them. To take a new version of
   the system, re-copy all eight.

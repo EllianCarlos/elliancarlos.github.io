@@ -71,9 +71,22 @@ type: index
   <!-- Both webfonts and the maths stylesheet come from jsdelivr. -->
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
-  <!-- Stylesheets: tty.css is the whole design system. -->
-  <link rel="stylesheet" href="/styles/tty.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/katex.min.css" crossorigin="anonymous">
+  {#
+    tty.bundle.css is the whole design system in ONE request, written by
+    scripts/bundle-css.mjs from the @import list in src/styles/tty.css.
+
+    Do not link /styles/tty.css here. That file is the authoring list of 14
+    `@import`s: a browser cannot see those imports until it has fetched and parsed
+    it, so the real stylesheet arrived on a second round trip — 80 KB over 15
+    render-blocking requests. The sources stay split; only the delivery is joined.
+
+    The KaTeX stylesheet used to sit on this line, on every page. Exactly one page in
+    39 renders any maths, so 38 pages blocked first paint on a third-party request for
+    nothing. It is injected by the `injectKatexStyles` transform now, into the pages
+    that actually contain KaTeX markup — the same approach `injectPrismPlugins` takes
+    for Prism.
+  #}
+  <link rel="stylesheet" href="/styles/tty.bundle.css">
 
   <!-- Structured Data -->
   {% include "structuredData.njk" %}
