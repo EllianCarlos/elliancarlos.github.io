@@ -1,15 +1,12 @@
 /* Long-form reading inside .tty-prose.
 
-   The design system Post screen sets h1 and h2 in the display face and leaves the
+   The design system Post screen sets h1 and h2 in Silkscreen and leaves the
    body plain. Three posts open sections with `# ` — 22 headings in all — and the
-   posts nest headings four deep. So h1 and h2 both keep the display face in
-   yellow, h1 one step up the display scale, and h3 to h6 step down into the body
-   face at their own weights. tokens/base.css puts every h1-h6 in the display face
-   and uppercases them, so each of those rules has to switch the family, and one
-   more rule has to put the case back for inline code inside a heading.
-
-   The display face is no longer a pixel font — see the note on --font-display in
-   layout.css — so nothing here turns smoothing off any more.
+   posts nest headings four deep. So h1 and h2 both keep Silkscreen in yellow,
+   h1 one step up the display scale, and h3 to h6 step down into JetBrains Mono.
+   tokens/base.css puts every h1-h6 in the pixel face and uppercases them, so
+   each of those rules has to switch the family and turn smoothing back on, and
+   one more rule has to put the case back for inline code inside a heading.
 
    The system says there is no imagery, by design. That rule is about
    decoration. These posts carry real figures — screenshots and plots — so a
@@ -36,33 +33,31 @@
 }
 
 /* Three posts use `# ` for their section headings. With no rule here those fall
-   through to tokens/base.css and the UA default: 2em grey display face, which is
+   through to tokens/base.css and the UA default: 2em grey Silkscreen, which is
    both larger and dimmer than the h2 under it. h1 gets the top of the display
    scale so the hierarchy reads down. */
 .tty-prose h1 {
   margin: var(--sp-12) 0 var(--sp-4);
   font-family: var(--font-display);
-  font-weight: var(--weight-display);
   font-size: var(--display-md);
   line-height: var(--leading-tight);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--yellow);
-  -webkit-font-smoothing: antialiased;
-  font-smooth: auto;
+  -webkit-font-smoothing: none;
+  font-smooth: never;
 }
 
 .tty-prose h2 {
   margin: var(--sp-10) 0 var(--sp-4);
   font-family: var(--font-display);
-  font-weight: var(--weight-display);
   font-size: var(--display-sm);
   line-height: var(--leading-tight);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--yellow);
-  -webkit-font-smoothing: antialiased;
-  font-smooth: auto;
+  -webkit-font-smoothing: none;
+  font-smooth: never;
 }
 
 .tty-prose h3 {
@@ -222,14 +217,14 @@
   height: 26px;
   padding: 0 10px;
   text-align: left;
-  font: var(--weight-display) var(--text-xs)/1 var(--font-display);
+  font: var(--text-xs)/1 var(--font-display);
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
   color: var(--text-faint);
   background: var(--surface-raised);
   border-bottom: var(--border-w) solid var(--border-default);
-  -webkit-font-smoothing: antialiased;
-  font-smooth: auto;
+  -webkit-font-smoothing: none;
+  font-smooth: never;
 }
 .tty-prose tbody tr { height: var(--row-h); }
 .tty-prose tbody tr:nth-child(even) { background: var(--surface-raised); }

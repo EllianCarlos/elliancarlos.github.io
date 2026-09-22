@@ -53,8 +53,7 @@ All styling comes from the TTY design system. Read `src/styles/tty.css` first �
 `@import` list and it names every part in load order.
 
 **Pages link `/styles/tty.bundle.css`, never `/styles/tty.css`.** `scripts/bundle-css.mjs`
-concatenates the imported files (13 of them today, 14 before the Silkscreen pin went away),
-in the order that list gives, as the last step of
+concatenates the 14 imported files, in the order that list gives, as the last step of
 `bun run build`. The import list is still the source of truth for cascade order and is
 still asserted on; it is just not what a browser fetches.
 
@@ -77,14 +76,12 @@ build and adding a post with maths needs no change.
 - `src/styles/tty/tokens/` — **eight files copied byte-for-byte from the design system
   archive.** Do not edit them and do not run Prettier over them. To take a new version of
   the system, re-copy all eight.
-  Keep every `@import` line at the top of `tty.css`, above any rule — an `@import` after a
-  style rule is ignored.
-- There used to be a `src/styles/tty/webfonts.css` here, pinning Silkscreen against
-  `silkscreen@5.3.0` because `tokens/fonts.css` names the mutable `@latest` tag. **The site
-  sets no text in Silkscreen any more** (see "One font" below), so that file had nothing
-  left to pin and it is gone. A family no rule matches is never fetched, so the vendored
-  `@font-face` rules cost nothing. JetBrains Mono needs no such override:
-  `tokens/fonts.css` already names `jetbrains-mono:vf@5.3.0`.
+- `src/styles/tty/webfonts.css` — **this site's own file, not a copied one.**
+  `tokens/fonts.css` fetches Silkscreen from the jsdelivr `@latest` tag, which is mutable,
+  so this file re-declares the two faces against `silkscreen@5.3.0`. It must stay imported
+  after the tokens: two `@font-face` rules for the same family, weight and style resolve to
+  the last one declared. Keep every `@import` line at the top of `tty.css`, above any rule —
+  an `@import` after a style rule is ignored.
 - `src/styles/tty/core.css` — Button, Tag, Badge, KeyHint, Divider, Panel, Tabs, Input,
   MenuList as `.tty-*` classes. One rule draws every key cap: `.tty-keyhint kbd,
   .tty-kbd`. Use `.tty-kbd` for a key inside a sentence (the "press `/` anywhere" hint on
@@ -93,16 +90,12 @@ build and adding a post with maths needs no change.
 - `src/styles/tty/content.css` — the post row, terminal window, foldout, caret and prose
   wrapper.
 - `src/styles/tty/layout.css` — the page shell, screen grids, and the per-screen blocks
-  (post, hero, list, paper row, search overlay). It also declares this site's own
+  (post, hero, list, paper row, search overlay). It also declares this site's own two
   non-vendored tokens on `:root`: `--tty-nav-h` (the nav height, read at three sites here
   and one in `prose.css`) and `--tty-prose-size` (the reading size, read by `.tty-prose` in
   `content.css` and by the post column here — both must read it, or `68ch` resolves to a
   width the text is not actually set in), plus `--font-marker`, the fallback stack for the
-  Unicode glyphs that the latin web-font subset does not carry, and the two display-face
-  tokens described under "One font" below. It is also where the two vendored-token
-  overrides live: `--text-faint` and `--font-display`. `tokens/` is byte-for-byte copied
-  and must not be edited, and `layout.css` is imported after it, so an override belongs
-  here.
+  Unicode glyphs that the latin web-font subset does not carry.
 - `src/styles/tty/prose.css` — the Markdown body treatment.
 - `src/styles/tty/prism-tty.css` — Prism token colours and the code-block chrome. It owns
   the toolbar CSS that used to come from the CDN, because `.eleventy.js` injects its Prism
@@ -113,58 +106,10 @@ Macros mirror the CSS: `src/_includes/tty/core.njk` (`btn`, `tag`, `badge`, `key
 `panel`, `terminal` and `foldout` take their body through `caller()`, so call them with
 `{% call %}`. A class that appears in a macro must exist in the matching CSS file.
 
-The rules that matter when you write new markup: one font, one accent colour
+The rules that matter when you write new markup: two fonts, one accent colour
 (`--yellow`), square corners, 1px rules or `--shadow-hard` instead of soft shadows,
 stepped easing, no emoji, no SVG icons — Unicode glyphs only. Two layouts, not five:
 compact below 1280px and desktop at 1280px and up.
-
-**One font.** The design system ships two: Silkscreen for display and JetBrains Mono for
-everything else. This site now sets both in **JetBrains Mono**, and the reason is
-legibility, not taste. Silkscreen is a 1-bit pixel face, and every rule that used it also
-set `-webkit-font-smoothing: none`, because a smoothed pixel font is mud. Together they
-made the words a reader most needs hard to read: post titles, prose headings, the hero,
-the wordmark and every chrome label. Those carry information, not decoration.
-
-`layout.css` declares two tokens for it:
-
-- `--font-display` — overrides the vendored `tokens/typography.css` value. JetBrains Mono
-  is already loaded as the body and code face, as one variable file covering weights
-  100-800, so the swap costs **no extra request**.
-- `--weight-display` (`700`) — the display face needs a weight of its own. Silkscreen had
-  one weight and drew every stem a full pixel wide, so it read as heavy at 400; an outline
-  mono at 400 would sit at the same weight as the body copy under it and the hierarchy
-  would flatten. **Every rule that sets `--font-display` must also set this**, and
-  `check-build.sh` walks the four site stylesheets' declaration blocks to enforce it.
-
-The uppercase and the tracked-out letter-spacing stay. What changed is the face, the
-weight, and smoothing.
-
-The `--display-*` size scale is deliberately **left alone**, and that is an arithmetic
-result rather than a guess. Measured from the two font files — advance of `A`, and that
-same glyph's real `yMax`, both at 1000 units per em:
-
-| face | advance | cap height |
-|---|---|---|
-| Silkscreen | 0.750em | 0.625em |
-| JetBrains Mono | 0.600em | 0.730em |
-
-So at one `font-size` the new face is **20% narrower per character and 17% taller**.
-Headings gain optical size, which is the point, and nothing can overflow, because every
-one of them shrinks in width. A measure written in `ch` does move, though, because `ch`
-*is* the advance: `.tty-h1--hero` went from `24ch` to `30ch` (24 × 0.750 ÷ 0.600) to hold
-the same physical measure. That is the only `ch` measure on the display face — the `68ch`
-prose measure reads the body face, which did not change.
-
-Do not point a rule back at Silkscreen. If you ever do, restore the version pin first —
-the vendored `@font-face` rules name the mutable `silkscreen@latest` tag, and the file
-that pinned it is gone.
-
-Five assertions hold all of this, and all five were mutation-tested. Two read the winning
-`--font-display` out of the bundle and check its byte offset against the vendored
-declaration; one compares display rules against display rules that also set the weight;
-two hold the smoothing override. **They read a comment-stripped copy of the bundle**,
-because the notes that explain the change quote the very declarations being searched for —
-the first draft of one assertion went red on a comment rather than on CSS.
 
 An icon is a Unicode character in `--font-marker`, on a fixed `1ch` cell, and
 `aria-hidden`. Two live examples: the list markers in `prose.css` (`▪ ○ ●`) and the nav
@@ -485,13 +430,10 @@ one. `src/en/posts/posts.11tydata.js` still falls back to `seo.defaultImage`, an
 `check-build.sh` asserts every `og:image` resolves to a real file.
 
 The icon is `> e` — an upright Bold `>` beside a Bold Italic `e`, the way Euler's number is
-set. This used to carry a note on why the icon avoided Silkscreen: that face is caps-only,
-so a lowercase `e` rendered as a capital E. Silkscreen is gone from the whole build now
-(see "One font" above), so the generator loads one family and the social card's wordmark
-reads the same face the pages do. Two glyphs is the ceiling for a 16px square; `>_e` and a
-stacked `>_` over `e` were both tried and both collapse, and the script says so. Centring
-comes from flex layout, never from a hand-tuned baseline offset — the first version used a
-fixed nudge and sat visibly low.
+set. **Not Silkscreen**: it is caps-only, so a lowercase `e` renders as a capital E. Two
+glyphs is the ceiling for a 16px square; `>_e` and a stacked `>_` over `e` were both tried
+and both collapse, and the script says so. Centring comes from flex layout, never from a
+hand-tuned baseline offset — the first version used a fixed nudge and sat visibly low.
 
 The site default is **`/og/site.png`**, not `/og-image.png`. That old path served a
 different image for years, so every platform that had scraped it kept showing the stale

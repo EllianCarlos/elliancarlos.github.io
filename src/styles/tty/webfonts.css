@@ -1,0 +1,26 @@
+/* Silkscreen, pinned.
+
+   tokens/fonts.css declares this family against silkscreen's mutable jsdelivr
+   "latest" tag. Two @font-face rules with the same family, weight and style
+   resolve to the last one declared, and tty.css imports this file after the
+   tokens, so these two rules win.
+
+   5.3.0 is the fontsource version that mutable tag resolved to on 2026-09-21.
+   Every other third-party reference on this site is pinned the same way:
+   katex@0.16.47, flexsearch@0.7.31, prismjs@1.30.0 (.eleventy.js). JetBrains
+   Mono needs no override — the token file already pins it at
+   jetbrains-mono:vf@5.3.0. */
+@font-face {
+  font-family: "Silkscreen";
+  src: url("https://cdn.jsdelivr.net/fontsource/fonts/silkscreen@5.3.0/latin-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Silkscreen";
+  src: url("https://cdn.jsdelivr.net/fontsource/fonts/silkscreen@5.3.0/latin-700-normal.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
