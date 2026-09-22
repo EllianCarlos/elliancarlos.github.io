@@ -247,21 +247,31 @@ modified: 2025-08-01  # optional; shows "updated on"
 
 ### The contact address
 
-`src/en/contact.njk` writes the email address as HTML numeric character references, in the
-template as well as in the built page. Encoding only the output is pointless: this
-repository is public, so a harvester that regex-scans for `something@something.tld` would
-find the address in the source instead. Keep both encoded.
+`src/en/contact.njk` spells the separators out in words — `elliancarlos [at] gmail [dot]
+com` — inside a `<span data-contact-email>`. There is **no address on the page in any
+encoding, and no `mailto:` link**.
 
-A browser decodes the references before it builds the DOM, so the link works, copy and
-paste works, and a screen reader reads the address normally. This raises the cost for a
-naive scanner. It does not stop a scraper that parses HTML properly — do not describe it
-as protection.
+**Never put the address on that page in a reversible form.** That is the rule, and it rules
+out every clever fix: HTML numeric or hex character references, a reversed string with
+`unicode-bidi`, percent-escapes in a `mailto:`, a data URI, ROT13. Each is one transform
+away from plain text, so each hands a scraper the address for the cost of a single line.
+This page did use numeric character references for one commit; `html.unescape` undoes them,
+which is why it changed.
 
-To change the address, re-encode it; never type it in plain form into the template. The
-template's own comment carries the two commands. `check-build.sh` decodes the built href
-and asserts it is a valid `mailto:`, and separately asserts that no plain address and no
-plain `mailto:` survive on the page. None of those assertions writes the address down, so
-they stay correct when it changes.
+The cost is real and deliberate: the address is not clickable, and a reader retypes it.
+Restoring the click means assembling the address in the browser at click time, which needs
+a fourth script — and `check-build.sh` asserts the script count, so that is an explicit
+decision rather than a quiet one.
+
+Do **not** add an `aria-label` carrying the plain address to make the row read better
+aloud. That puts the address back in the markup. A screen reader reads the words as
+written, which is verbose but unambiguous.
+
+`data-contact-email` is the assertion hook and carries no CSS. `check-build.sh` reads that
+element's text and asserts it says something AND that what it says does not parse as an
+address; it also asserts the page holds no `mailto:`, no `&#` character reference, and no
+plain address anywhere. No assertion writes the address or the separators down, so both can
+be rewritten freely.
 
 ### Links to the resume PDF
 

@@ -5,29 +5,34 @@ layout: layouts/layout.njk
 ---
 {% import "tty/core.njk" as tty %}
 {#
-  The email row is written as HTML numeric character references, not as text.
-  The address is real, and the encoding is deliberate at two levels:
+  The email row spells the separators out in words. There is no address on this
+  page, in any encoding, and no `mailto:` link.
 
-    - in the OUTPUT, so a harvester that regex-scans the page for
-      `something@something.tld` finds nothing to match;
-    - in this SOURCE, so the same regex finds nothing in the public repository
-      either. Encoding only the output would leave the address in plain sight
-      one click away on GitHub, which defeats the point.
+  This replaced an HTML-numeric-character-reference version of the address. That
+  version was weak for the reason the owner gave: an encoding is a reversible
+  map, so `html.unescape` — one line — turns it straight back into a harvestable
+  address. Words are not a map. A scraper has to guess that `[at]` means `@` and
+  `[dot]` means `.`, and guess it for every variant every site invents.
 
-  A browser decodes the references before it builds the DOM, so the link works,
-  copy-and-paste works, and a screen reader reads the address normally. This
-  stops a naive scanner, not a scraper that parses HTML properly. Treat it as
-  raising the cost, not as a guarantee.
+  So the rule here is: never put the address on this page in ANY reversible
+  form. That rules out numeric entities, hex entities, a reversed string with
+  `unicode-bidi`, a `mailto:` with percent-escapes, and a data URI. Each of
+  those is one transform away from plain text.
 
-  To read or change it, decode and re-encode with the entities, never by typing
-  the address in plain form:
+  What this costs: the address is not clickable, and a reader has to retype it.
+  That is the trade the owner chose. To give the click back, the address has to
+  be assembled in the browser at click time, which means a fourth script — and
+  `check-build.sh` asserts the script count, so that is a deliberate change, not
+  a quiet one.
 
-    python3 -c 'import html,sys; print(html.unescape(sys.argv[1]))' '<blob>'
-    python3 -c 'import sys; print("".join("&#%d;"%ord(c) for c in sys.argv[1]))' '<addr>'
+  A screen reader reads this literally: "elliancarlos bracket at bracket gmail
+  bracket dot bracket com". That is verbose but unambiguous. Do NOT add an
+  `aria-label` with the plain address to tidy it up — that puts the address back
+  in the markup and undoes the whole point.
 
-  `check-build.sh` decodes the built href and asserts it is a valid mailto. It
-  never writes the address down, so this comment and that assertion stay true
-  when the address changes.
+  `data-contact-email` is the assertion's hook, not a styling one. It carries no
+  CSS. `check-build.sh` reads the element's text and asserts it does NOT parse as
+  an address, so the separators can be rewritten without turning CI red.
 #}
 <div class="tty-screen">
   <section>
@@ -35,7 +40,7 @@ layout: layouts/layout.njk
     <div class="tty-linklist" style="margin-top: 22px">
       <div class="tty-linklist__row">
         <span class="tty-linklist__key">{{ i18n.en.contact.email }}</span>
-        <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#101;&#108;&#108;&#105;&#97;&#110;&#99;&#97;&#114;&#108;&#111;&#115;&#64;&#103;&#109;&#97;&#105;&#108;&#46;&#99;&#111;&#109;">&#101;&#108;&#108;&#105;&#97;&#110;&#99;&#97;&#114;&#108;&#111;&#115;&#64;&#103;&#109;&#97;&#105;&#108;&#46;&#99;&#111;&#109;</a>
+        <span data-contact-email>elliancarlos [at] gmail [dot] com</span>
       </div>
       <div class="tty-linklist__row">
         <span class="tty-linklist__key">git</span>
