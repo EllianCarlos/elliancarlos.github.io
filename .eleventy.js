@@ -89,6 +89,58 @@ module.exports = function (eleventyConfig) {
     });
     // Server-side LaTeX math rendering ($inline$ and $$display$$) via KaTeX
     mdLib.use(require("@vscode/markdown-it-katex").default);
+
+    // A wide table must scroll, not disappear. tokens/breakpoints.css ends with
+    // `html, body { overflow-x: hidden }`, which clips anything wider than the
+    // measure, so every table gets a scroll container of its own.
+    const tableOpen = mdLib.renderer.rules.table_open;
+    mdLib.renderer.rules.table_open = function (tokens, idx, options, env, self) {
+      const rendered = tableOpen
+        ? tableOpen(tokens, idx, options, env, self)
+        : self.renderToken(tokens, idx, options);
+      return '<div class="tty-scroll">' + rendered;
+    };
+    const tableClose = mdLib.renderer.rules.table_close;
+    mdLib.renderer.rules.table_close = function (tokens, idx, options, env, self) {
+      const rendered = tableClose
+        ? tableClose(tokens, idx, options, env, self)
+        : self.renderToken(tokens, idx, options);
+      return rendered + "</div>";
+    };
+
+    // `- [ ] text` and `- [x] text` become glyph-marked list items.
+    // No checkbox element: a disabled control on a static page is dead furniture,
+    // and the design system marks state with glyphs. The `[ ]` prefix is stripped
+    // from the text so it cannot sit next to the marker CSS draws.
+    mdLib.core.ruler.after("inline", "tty_task_glyphs", (state) => {
+      const tokens = state.tokens;
+      for (let i = 2; i < tokens.length; i += 1) {
+        if (tokens[i].type !== "inline") continue;
+        // markdown-it always wraps list item content in a paragraph. In a tight
+        // list that paragraph is still emitted, only flagged `hidden`. So the
+        // <li> token is two back, never one back.
+        if (tokens[i - 1].type !== "paragraph_open") continue;
+        const li = tokens[i - 2];
+        if (li.type !== "list_item_open") continue;
+        // Bullet lists only. `markup` holds the bullet character in a bullet
+        // list and the delimiter (`.` or `)`) in an ordered one, and the CSS
+        // below draws a marker for `ul > li` only.
+        if ("-*+".indexOf(li.markup) === -1) continue;
+        const children = tokens[i].children;
+        if (!children || children.length === 0) continue;
+        const first = children[0];
+        if (first.type !== "text") continue;
+        const match = /^\[([ xX])\]\s+/.exec(first.content);
+        if (!match) continue;
+        first.content = first.content.slice(match[0].length);
+        li.attrJoin("class", "tty-task");
+        li.attrJoin(
+          "class",
+          match[1] === " " ? "tty-task--off" : "tty-task--on"
+        );
+      }
+      return true;
+    });
   });
 
   eleventyConfig.addPassthroughCopy("src/Ellian_Carlos_Resume.pdf");

@@ -231,3 +231,87 @@
   overflow-x: auto;
   overflow-y: hidden;
 }
+
+/* ── Markdown the posts actually contain ────────────────────────────────── */
+
+/* A long URL or a long identifier must fold inside the 68ch measure rather than
+   push the column wider than the page. */
+.tty-prose { overflow-wrap: break-word; }
+.tty-prose code:not([class*="language-"]) { overflow-wrap: anywhere; }
+
+/* Table scroll container, added by the table_open rule in .eleventy.js.
+   tokens/breakpoints.css clips page-level overflow, so a wide table needs a
+   scroller of its own or its last columns are unreachable. */
+.tty-scroll {
+  margin: 0 0 var(--sp-6);
+  overflow-x: auto;
+  border-bottom: var(--border-w) solid var(--border-faint);
+}
+.tty-scroll > table { margin-bottom: 0; width: 100%; min-width: min-content; }
+/* The header row stays on one line. Body cells wrap, so a table scrolls only
+   when its min-content width really exceeds the measure. The wide table in the
+   kernel-contribution post has a full sentence in its first column: nowrap
+   there would make it about twice the reading measure and force a sideways
+   scroll to read every row, which is worse than the Pico version. */
+.tty-scroll > table thead th { white-space: nowrap; }
+
+/* List markers. `▪` (U+25AA), `○` (U+25CB) and `●` (U+25CF) are Geometric
+   Shapes. tokens/fonts.css loads only the latin subset of JetBrains Mono, so
+   none of the three is in the web font, and `--font-glyph` alone hands them to
+   an unknown system face at an unknown advance and cap height. No web font is
+   added: the output stays static files with no new runtime dependency. Instead
+   the stack names the faces that do carry the block, and the marker gets a
+   fixed one-character cell so a fallback advance cannot push it off the grid. */
+.tty-prose {
+  --font-marker: "JetBrains Mono", "DejaVu Sans Mono", "Noto Sans Symbols 2",
+    "Segoe UI Symbol", "Apple Symbols", ui-monospace, monospace;
+}
+.tty-prose ul > li::before {
+  font-family: var(--font-marker);
+  font-size: 0.85em;
+  line-height: var(--leading-body);
+  width: 1ch;
+  text-align: center;
+}
+
+/* Task list items. The `[ ]` text is already stripped by the tty_task_glyphs
+   rule, so these only replace the default block marker, and they inherit the
+   face and the cell from the rule above. Both glyphs are in the design system's
+   vocabulary. Order matters: --on has the same specificity as .tty-task, so it
+   must come second to win. */
+.tty-prose ul > li.tty-task::before { content: "○"; color: var(--text-muted); }
+.tty-prose ul > li.tty-task--on::before { content: "●"; color: var(--yellow); }
+
+/* Figure captions.
+   The attribute selectors match the inline-styled blocks already written into
+   the posts, so no post has to be edited. New posts should use the classes:
+   <div class="tty-figure"> … </div> and <p class="tty-caption">…</p>. */
+.tty-prose .tty-figure,
+.tty-prose div[style*="justify-content: center"] {
+  display: flex;
+  justify-content: center;
+  margin: var(--sp-8) 0 0;
+}
+.tty-prose .tty-figure img,
+.tty-prose div[style*="justify-content: center"] img { margin: 0; }
+
+.tty-prose .tty-caption,
+.tty-prose p[style*="text-align: center"] {
+  max-width: var(--measure-prose);
+  margin: var(--sp-3) auto var(--sp-8);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--text-faint);
+  text-align: center;
+  text-wrap: pretty;
+}
+.tty-prose .tty-caption em,
+.tty-prose p[style*="text-align: center"] em { font-style: normal; }
+
+/* The figure breakout is NOT here. Task 4 puts it in content.css, next to the
+   .tty-prose measure it overrides, using `position: relative` and a negative
+   `left`. Do not add a second implementation: this file is imported after
+   content.css at equal specificity, so a `margin-left`/`transform` version
+   would stack on top of the `left` offset, push every figure off centre, and
+   clip it on the right. The rules above set `display`, `margin` and the caption
+   only, which the Task 4 rules never touch. */

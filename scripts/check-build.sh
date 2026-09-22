@@ -249,6 +249,20 @@ grep_in "posts/my-tools-2024/index.html" 'class="tty-note tty-note--warn"' "the 
 grep_not "posts/my-tools-2025/index.html" 'class="tty-note tty-note--warn"' "an active post shows no banner"
 grep_in "styles/tty/layout.css" ".tty-post__progress" "the post screen CSS is present"
 
+section "markdown fidelity"
+grep_in "posts/notes-on-the-contribution-for-the-linux-kernel/index.html" '<div class="tty-scroll"><table>' "every table is wrapped in a scroller"
+grep_in "styles/tty/prose.css" ".tty-scroll" "the scroll wrapper is styled"
+grep_in "styles/tty/prose.css" "thead th { white-space: nowrap" "table headers stay on one line"
+grep_not "styles/tty/prose.css" "tbody td { white-space: nowrap" "body cells are free to wrap"
+grep_in "posts/how-to-succeed-in-ai-assisted-coding-interviews/index.html" 'class="tty-task tty-task--off"' "an open task item is marked"
+grep_not "posts/how-to-succeed-in-ai-assisted-coding-interviews/index.html" '<li>[ ] AI-assisted' "the literal checkbox text is gone"
+grep_not "posts/how-to-succeed-in-ai-assisted-coding-interviews/index.html" 'type="checkbox"' "no dead checkbox control is emitted"
+grep_in "styles/tty/prose.css" 'content: "●"' "a completed task shows the filled glyph"
+grep_in "styles/tty/prose.css" "--font-marker" "the list marker glyphs have a fallback stack"
+grep_in "styles/tty/content.css" "var(--measure-wide)" "a figure may exceed the text measure (Task 4 owns this rule)"
+grep_in "styles/tty/prose.css" 'text-align: center' "the existing centred captions are matched"
+grep_in "styles/tty/prose.css" "overflow-wrap" "long urls wrap inside the measure"
+
 printf '\n'
 if [ "$fails" -eq 0 ]; then
   printf 'check-build: all assertions passed\n'
