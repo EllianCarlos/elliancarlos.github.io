@@ -3,4 +3,10 @@ permalink: /sitemap.xml
 layout: null
 eleventyExcludeFromCollections: true
 ---
-{% sitemap collections.all %}
+{#
+  `collections.sitemapPages`, not `collections.all`: the plugin mangles a
+  paginated template's URLs, which used to put a 404 (`/tag/`) in the sitemap and
+  keep every real tag page out of it. The collection in .eleventy.js explains why
+  in full.
+#}
+{% sitemap collections.sitemapPages %}
