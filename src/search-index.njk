@@ -1,5 +1,11 @@
 ---
 layout: null
+# This template writes a data file, not a page: /scripts/tty-search.js fetches
+# it. Without this flag it lands in collections.all, which sitemap.njk hands to
+# the sitemap plugin whole — so the JSON was listed as a crawlable URL.
+# feed.njk, llms.njk and sitemap.njk itself all set the same flag. The file is
+# still written: the flag governs collection membership, not output.
+eleventyExcludeFromCollections: true
 pagination:
   data: languages
   size: 1
