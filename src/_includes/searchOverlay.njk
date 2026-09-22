@@ -18,12 +18,14 @@
         <span class="tty-input__prefix" aria-hidden="true">/</span>
         <input id="tty-search-input" type="search" autocomplete="off" spellcheck="false"
                placeholder="{{ i18n[locale].search.placeholder }}"
-               aria-label="{{ i18n[locale].search.open }}">
+               aria-label="{{ i18n[locale].search.open }}"
+               role="combobox" aria-autocomplete="list" aria-expanded="true"
+               aria-controls="tty-search-results">
       </div>
     </div>
-    <ul class="tty-menu" id="tty-search-results"></ul>
+    <ul class="tty-menu" id="tty-search-results" role="listbox"></ul>
     <div class="tty-search__foot">
-      <span id="tty-search-count"></span>
+      <span id="tty-search-count" role="status" aria-live="polite"></span>
       <span class="tty-spacer"></span>
       {{ tty.keyhint(["↵"], i18n[locale].search.openHint) }}
       {{ tty.keyhint(["esc"], i18n[locale].search.closeHint) }}

@@ -11,6 +11,7 @@
   var overlay = document.getElementById("tty-search");
   if (!overlay) return;
 
+  var panel = overlay.querySelector(".tty-search__panel");
   var input = document.getElementById("tty-search-input");
   var results = document.getElementById("tty-search-results");
   var countEl = document.getElementById("tty-search-count");
@@ -122,17 +123,22 @@
     if (list.length === 0) {
       var empty = document.createElement("li");
       empty.className = "tty-search__empty";
+      empty.setAttribute("role", "presentation");
       empty.textContent = LABEL.none;
       results.appendChild(empty);
       countEl.textContent = LABEL.none;
+      input.removeAttribute("aria-activedescendant");
       return;
     }
 
     list.forEach(function (doc, i) {
       var li = document.createElement("li");
+      li.setAttribute("role", "presentation");
       var a = document.createElement("a");
       a.className = "tty-menu__item";
       a.href = doc.url;
+      a.id = "tty-search-option-" + i;
+      a.setAttribute("role", "option");
       if (i === 0) a.setAttribute("aria-selected", "true");
 
       var cursor = document.createElement("span");
@@ -168,6 +174,7 @@
     });
 
     countEl.textContent = list.length + " " + (list.length === 1 ? LABEL.one : LABEL.many);
+    input.setAttribute("aria-activedescendant", "tty-search-option-0");
   }
 
   function items() {
@@ -181,6 +188,7 @@
     hi = (hi + delta + all.length) % all.length;
     all[hi].setAttribute("aria-selected", "true");
     all[hi].scrollIntoView({ block: "nearest" });
+    input.setAttribute("aria-activedescendant", all[hi].id);
   }
 
   function openHighlighted() {
@@ -233,6 +241,32 @@
     }
   }
 
+  /* The overlay is role="dialog" aria-modal="true" with no focus trap, and it
+     is included after the footer — so Shift+Tab from the input used to land
+     on footer links hidden behind the scrim. Keep focus inside the panel
+     while it is open: only the query field and the rendered result links are
+     ever focusable in here, so wrap Tab between the first and last of those. */
+  function focusableInPanel() {
+    return panel.querySelectorAll("input, a[href]");
+  }
+
+  function trapTab(e) {
+    var focusable = focusableInPanel();
+    if (focusable.length === 0) return;
+    var first = focusable[0];
+    var last = focusable[focusable.length - 1];
+    var active = document.activeElement;
+    if (e.shiftKey) {
+      if (active === first || !panel.contains(active)) {
+        e.preventDefault();
+        last.focus();
+      }
+    } else if (active === last || !panel.contains(active)) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+
   /* ── wiring ───────────────────────────────────────────────────────────── */
 
   var openers = document.querySelectorAll("[data-tty-search-open]");
@@ -274,6 +308,7 @@
 
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape" && isOpen()) { e.preventDefault(); close(); return; }
+    if (e.key === "Tab" && isOpen()) { trapTab(e); return; }
     if (e.key !== "/" || isOpen()) return;
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     if (typingInAField(document.activeElement)) return;

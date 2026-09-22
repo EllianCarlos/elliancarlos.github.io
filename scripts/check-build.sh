@@ -15,7 +15,7 @@ passes=0
 # must not vanish silently. EXPECTED_ASSERTIONS is the total `passes + fails`
 # this script produces today, counted (not guessed) after every change to the
 # assertion list. See the check at the bottom of the file.
-EXPECTED_ASSERTIONS=243
+EXPECTED_ASSERTIONS=248
 
 pass() { printf '  ok   %s\n' "$1"; passes=$((passes + 1)); }
 bad()  { printf '  FAIL %s\n' "$1"; fails=$((fails + 1)); }
@@ -260,6 +260,14 @@ grep_not "posts/index.html" "/scripts/search.js" "the old search script is unlin
 grep_in "scripts/tty-search.js" "flexsearch.bundle.js" "FlexSearch still backs the query"
 grep_in "scripts/tty-search.js" "tty-menu__hint" "each result row carries its date"
 grep_in "search-index-en.json" '"date":' "the search index carries a date for every post"
+# I6: `grep -rn 'aria-live|role="status"' src/ dist/` used to return nothing —
+# a reader typing a query was told nothing at all, not the count, not that
+# anything happened.
+grep_in "index.html" 'aria-live="polite"' "the result count is announced to a screen reader"
+grep_in "index.html" 'role="status"' "the result count region has a status role"
+grep_in "index.html" 'id="tty-search-results" role="listbox"' "the results are a real listbox"
+grep_in "index.html" 'role="combobox"' "the query field is a combobox"
+grep_in "index.html" 'aria-controls="tty-search-results"' "the combobox points at its listbox"
 
 section "archive view"
 have "posts/archive/index.html"
