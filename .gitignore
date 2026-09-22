@@ -6,3 +6,4 @@ dist
 devenv.local.nix
 .direnv
 .worktrees
+.fonts-cache
