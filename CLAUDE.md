@@ -300,10 +300,16 @@ The page lists six channels: the address, git, work, social, academic cv, orcid.
 that leaves the site carries `target="_blank" rel="noreferrer noopener"`, and
 `check-build.sh` counts both sides so a seventh row cannot skip it.
 
-The research curriculum is called **"academic cv"** everywhere — never "lattes". The label
-is `i18n[locale].nav.academicCv` at all three sites that link it (footer, homepage, contact
-page), and the URL is `seo.social.lattes` at all three, so neither the name nor the address
-can drift. "Lattes" is the host, and it appears only inside the URL text.
+The research curriculum is called **"academic cv"** everywhere — never "lattes", never
+"cv". The label is `i18n[locale].nav.academicCv` at all three sites that link it (footer,
+homepage, contact page), and the URL is `seo.social.lattes` at all three, so neither the
+name nor the address can drift. "Lattes" is the host, and appears only inside the URL text.
+`check-build.sh` sweeps every built page for both retired labels.
+
+Every `.tty-linklist` row on both pages reads **name → address**: the key column names the
+channel, the link text is the URL (`git` → `github.com/elliancarlos`, `feed` → `feed.xml`).
+Do not invert it. The academic-cv row used to, on the homepage, with an abbreviation in the
+key and a name in the link.
 
 `data-contact-email` is the assertion hook and carries no CSS. `check-build.sh` reads that
 element's text and asserts it says something AND that what it says does not parse as an

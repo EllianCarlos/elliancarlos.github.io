@@ -15,7 +15,7 @@ passes=0
 # must not vanish silently. EXPECTED_ASSERTIONS is the total `passes + fails`
 # this script produces today, counted (not guessed) after every change to the
 # assertion list. See the check at the bottom of the file.
-EXPECTED_ASSERTIONS=308
+EXPECTED_ASSERTIONS=310
 
 pass() { printf '  ok   %s\n' "$1"; passes=$((passes + 1)); }
 bad()  { printf '  FAIL %s\n' "$1"; fails=$((fails + 1)); }
@@ -205,11 +205,20 @@ fi
 # Six channels today. `at_least`, so adding a seventh is an ordinary authoring
 # action and only losing one turns CI red.
 count_at_least "$contact" 'class="tty-linklist__row"' 6 "the contact page lists every channel"
-# The research curriculum is called "academic cv" everywhere on this site, from
-# i18n nav.academicCv. This row was briefly labelled "lattes", which gave one URL
-# two names. The needle is an exact label cell, so the URL text "lattes.cnpq.br/…"
-# cannot match it — and it names the retired term, not the owner's copy.
-grep_not "$contact" '>lattes<' "the research curriculum is not labelled twice over"
+# The research curriculum is called "academic cv" on every page, from i18n
+# nav.academicCv. It was briefly "lattes" on the contact page and "cv" on the
+# homepage — one URL under three names. The sweep is site-wide, not per page,
+# because that is the scope of the decision.
+# ">lattes<" is an exact label cell, so the URL text "lattes.cnpq.br/…" cannot
+# match it. Both needles name a RETIRED term, never the owner's current copy.
+for dead_label in '>lattes<' '>cv<'; do
+  dead_hits=$(grep -rlF --include='*.html' -e "$dead_label" "$DIST" | tr '\n' ' ')
+  if [ -n "$dead_hits" ]; then
+    bad "no page labels the research curriculum '$dead_label' ($dead_hits)"
+  else
+    pass "no page labels the research curriculum '$dead_label'"
+  fi
+done
 # Every channel that leaves the site must leave it safely. Both sides are counted
 # out of the page, so a new row cannot quietly skip the rel — and no URL is named,
 # so the owner can change any profile link.
@@ -219,16 +228,23 @@ grep_not "$contact" '>lattes<' "the research curriculum is not labelled twice ov
 # both sides, the totals still agree, and the assertion goes vacuous for exactly
 # the link it should be watching. That happened here: the footer's source link was
 # split over two lines and silently escaped the check.
-out_links=$(tr '\n' ' ' < "$DIST/$contact" \
-  | grep -oE '<a href="https?://[^"]*"[^>]*>' | wc -l || true)
-out_safe=$(tr '\n' ' ' < "$DIST/$contact" \
-  | grep -oE '<a href="https?://[^"]*" target="_blank" rel="[^"]*noreferrer[^"]*noopener[^"]*">' \
-  | wc -l || true)
-if [ "$out_links" -gt 0 ] && [ "$out_safe" -eq "$out_links" ]; then
-  pass "every outbound contact link opens safely ($out_links links)"
-else
-  bad "every outbound contact link opens safely ($out_safe of $out_links)"
-fi
+#
+# Both link-list pages are checked, not just the contact page: the homepage carries
+# the same channels in the same component, so a rule that held on one page and not
+# the other would be no rule at all. This cannot widen to every page — a post body
+# links outward through Markdown, which renders a bare <a> by design.
+for page in "$contact" "index.html"; do
+  out_links=$(tr '\n' ' ' < "$DIST/$page" \
+    | grep -oE '<a href="https?://[^"]*"[^>]*>' | wc -l || true)
+  out_safe=$(tr '\n' ' ' < "$DIST/$page" \
+    | grep -oE '<a href="https?://[^"]*" target="_blank" rel="[^"]*noreferrer[^"]*noopener[^"]*">' \
+    | wc -l || true)
+  if [ "$out_links" -gt 0 ] && [ "$out_safe" -eq "$out_links" ]; then
+    pass "every outbound link on /$page opens safely ($out_links links)"
+  else
+    bad "every outbound link on /$page opens safely ($out_safe of $out_links)"
+  fi
+done
 
 # The resume PDF is linked from the header, the footer and the homepage. It used to
 # open in a new tab from the header only, so the same file replaced the page from
@@ -853,7 +869,13 @@ grep_in "index.html" 'class="tty-linklist"' "the elsewhere list is present"
 # this green. Key the needle to the rail's own modifier class instead.
 grep_in "index.html" 'class="tty-menu tty-menu--dense"' "the recent rail is present"
 grep_in "index.html" 'class="tty-linklist__key">resume<' "the elsewhere list carries the resume row"
-grep_in "index.html" 'class="tty-linklist__key">cv<' "the elsewhere list carries the academic cv row"
+# This replaced `grep_in ... '__key">cv<'`, which pinned the label of one row — and
+# the owner then renamed that label to "academic cv" for consistency with the
+# contact page, so the assertion failed on a change it should never have noticed.
+# That is finding I3 in miniature. Seven rows today: git, work, social, orcid,
+# academic cv, resume, feed. `at_least`, so adding a channel is an ordinary
+# authoring action, and only losing one turns CI red.
+count_at_least "index.html" 'class="tty-linklist__row"' 7 "the elsewhere list keeps every row"
 grep_in "index.html" "Brazilian software engineer" "the biography text survives"
 grep_in "index.html" "I love languages" "the rest of the biography survives"
 grep_in "index.html" "other topics I like to discuss" "the closing biography sentence survives"
