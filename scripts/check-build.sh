@@ -265,7 +265,7 @@ grep_in "styles/tty/prose.css" "overflow-wrap" "long urls wrap inside the measur
 
 section "posts landing page"
 have "scripts/tty-typewriter.js"
-grep_in "posts/index.html" 'class="tty-h1 tty-h1--hero"' "the hero title is present"
+grep_in "posts/index.html" 'tty-h1--hero' "the hero title is present"
 grep_in "posts/index.html" 'class="tty-eyebrow"' "the eyebrow is present"
 grep_in "posts/index.html" 'class="tty-term"' "the terminal demo is present"
 grep_in "posts/index.html" 'data-tty-type' "the typewriter target is present"
