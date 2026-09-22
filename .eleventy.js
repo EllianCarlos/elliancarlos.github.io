@@ -161,6 +161,18 @@ module.exports = function (eleventyConfig) {
     });
   });
 
+  // Posts that still belong on the /posts/ landing page.
+  // `archived: true` in a post's frontmatter drops it from here. The post keeps
+  // its URL and stays in the feed, the sitemap, llms.txt and the search index —
+  // only the landing page hides it, and /posts/archive/ marks it.
+  languages.forEach((lang) => {
+    eleventyConfig.addCollection(`postsActive_${lang}`, (collectionApi) => {
+      return collectionApi.getFilteredByGlob(`src/${lang}/posts/**/*.md`)
+        .filter((post) => post.data.archived !== true)
+        .sort((a, b) => b.data.date - a.data.date);
+    });
+  });
+
   // Map of language -> list of available HTML page URLs.
   // Consumed by languageRedirect.njk so we only auto-redirect when the
   // translated page actually exists, avoiding the /pt/pt/pt/... loop
@@ -243,6 +255,58 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addFilter("filterByTag", (posts, tag) => {
     if (!Array.isArray(posts) || !tag) return [];
     return posts.filter((p) => (p.data.tags || []).includes(tag));
+  });
+
+  /** Words in a rendered HTML string, tags stripped. */
+  function wordCount(html) {
+    return String(html || "")
+      .replace(/<[^>]+>/g, " ")
+      .split(/\s+/)
+      .filter(Boolean).length;
+  }
+
+  // Reading time at 200 words a minute, floored at one minute.
+  // Takes either a collection item (from a list page) or the rendered HTML
+  // string (from inside a post layout, where only `content` is in scope).
+  eleventyConfig.addFilter("readingTime", (input) => {
+    const html = typeof input === "string"
+      ? input
+      : (input && (input.templateContent || input.content)) || "";
+    return `${Math.max(1, Math.round(wordCount(html) / 200))} min`;
+  });
+
+  // [{ year, posts }], newest year first, input order kept inside each year.
+  eleventyConfig.addFilter("groupByYear", (posts) => {
+    const groups = new Map();
+    (posts || []).forEach((post) => {
+      const year = String(post.date.getFullYear());
+      if (!groups.has(year)) groups.set(year, []);
+      groups.get(year).push(post);
+    });
+    return [...groups.entries()]
+      .sort((a, b) => b[0].localeCompare(a[0]))
+      .map(([year, items]) => ({ year, posts: items }));
+  });
+
+  // url -> "013". The index counts down, so the newest post carries the highest
+  // number. Templates that group by year still need a global index, which is why
+  // this is a map and not a loop counter.
+  eleventyConfig.addFilter("postIndexes", (posts) => {
+    const map = {};
+    const list = posts || [];
+    list.forEach((post, i) => {
+      map[post.url] = String(list.length - i).padStart(3, "0");
+    });
+    return map;
+  });
+
+  // The entry after `url`, wrapping to the first. Drives the "next" link on a
+  // post page. Returns null when the url is not in the list.
+  eleventyConfig.addFilter("nextPost", (posts, url) => {
+    if (!Array.isArray(posts) || posts.length === 0) return null;
+    const i = posts.findIndex((post) => post.url === url);
+    if (i < 0) return null;
+    return posts[(i + 1) % posts.length] || null;
   });
 
   // i18n URL filter

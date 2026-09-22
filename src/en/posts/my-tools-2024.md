@@ -4,6 +4,7 @@ date: 2024-06-25
 layout: layouts/post.njk
 language: en 
 place: brazil
+archived: true
 description: "A look at the development tools and software I've been using in 2024, including NixOS, Hyprland, Neovim, and more."
 tags:
   - tools

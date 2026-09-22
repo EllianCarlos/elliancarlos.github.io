@@ -177,6 +177,18 @@ grep_in "posts/how-to-setup-lkd-notes/index.html" 'class="language-' "the post s
 grep_not "posts/how-to-setup-lkd-notes/index.html" "prism-toolbar.min.css" "the CDN toolbar stylesheet is gone"
 grep_in "posts/how-to-setup-lkd-notes/index.html" "prism-toolbar.min.js" "the toolbar script is still injected"
 
+section "archive flag and data layer"
+grep_not "posts/index.html" "Tools I use 2024" "the archived post is off the posts landing page"
+# These assertions read the built HTML, not the frontmatter. Nunjucks escapes the
+# apostrophe in "Tools I've been using - 2025" to `&#39;`, so grep the part of the
+# title that has no apostrophe in it. That stays correct if the escaping changes.
+grep_in "posts/index.html" "been using - 2025" "the active posts are still listed"
+have "posts/my-tools-2024/index.html"
+grep_in "feed.xml" "Tools I use 2024" "the archived post stays in the feed"
+grep_in "llms.txt" "Tools I use 2024" "the archived post stays in llms.txt"
+grep_in "search-index-en.json" "Tools I use 2024" "the archived post stays searchable"
+grep_in "sitemap.xml" "/posts/my-tools-2024/" "the archived post stays in the sitemap"
+
 printf '\n'
 if [ "$fails" -eq 0 ]; then
   printf 'check-build: all assertions passed\n'
