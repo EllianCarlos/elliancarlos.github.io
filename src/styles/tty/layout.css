@@ -268,12 +268,12 @@ html:has(body.tty-search-open),
 html.tty-search-open { overflow: hidden; }
 /* Do NOT add `body.tty-search-open { overflow: hidden; }` here. `overflow` is
    the shorthand for both axes, so it would set body's `overflow-x` to
-   `hidden`, silently overriding line 24's `overflow-x: clip` (higher
-   specificity, later in source) — and unlike `clip`, `hidden` makes body a
-   scroll container. tty-search.js sets this class on <html> too, and the two
-   rules above already lock scrolling from there; body only needs to carry
-   the class so `html:has(body.tty-search-open)` above has something to
-   match — it must not carry its own overflow rule. */
+   `hidden`, silently overriding the `body { overflow-x: clip }` rule near the
+   top of this file — higher specificity, later in source — and unlike `clip`,
+   `hidden` makes body a scroll container. tty-search.js sets this class on
+   <html> too, and the two rules above already lock scrolling from there; body
+   only needs to carry the class so `html:has(body.tty-search-open)` above has
+   something to match — it must not carry its own overflow rule. */
 
 /* ── Archive screen (ui_kits/blog/Archive.jsx) ──────────────────────────── */
 .tty-archive__head {
