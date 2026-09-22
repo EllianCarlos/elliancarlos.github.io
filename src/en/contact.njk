@@ -3,16 +3,36 @@ title: Contact
 description: Get in touch with Ellian Carlos via email or social media.
 layout: layouts/layout.njk
 ---
-<h1>{{ i18n[locale].contact.title }}</h1>
-
-<h2>{{ i18n[locale].contact.email }}</h2>
-<p>
-    Feel free to reach out via email: <a href="mailto:elliancarlos@example.com">elliancarlos@example.com</a>
-</p>
-
-<h2>{{ i18n[locale].contact.social }}</h2>
-<ul>
-    <li><a href="https://www.github.com/elliancarlos" target="_blank" rel="noreferrer noopener">GitHub</a></li>
-    <li><a href="https://www.linkedin.com/in/elliancarlos" target="_blank" rel="noreferrer noopener">LinkedIn</a></li>
-    <li><a href="https://www.mastodon.social/@elliancarlos" target="_blank" rel="me noreferrer noopener">Mastodon</a></li>
-</ul>
+{% import "tty/core.njk" as tty %}
+{#
+  The email address below is the one this page has always shown. It looks like a
+  placeholder; changing a published address is the owner's call, not this
+  migration's. Ask before you touch it.
+#}
+<div class="tty-screen">
+  <section>
+    <h1 class="tty-h1">{{ i18n.en.contact.title }}</h1>
+    <div class="tty-linklist" style="margin-top: 22px">
+      <div class="tty-linklist__row">
+        <span class="tty-linklist__key">{{ i18n.en.contact.email }}</span>
+        <a href="mailto:elliancarlos@example.com">elliancarlos@example.com</a>
+      </div>
+      <div class="tty-linklist__row">
+        <span class="tty-linklist__key">git</span>
+        <a href="{{ seo.social.github }}" target="_blank" rel="noreferrer noopener">github.com/elliancarlos</a>
+      </div>
+      <div class="tty-linklist__row">
+        <span class="tty-linklist__key">work</span>
+        <a href="{{ seo.social.linkedin }}" target="_blank" rel="noreferrer noopener">linkedin.com/in/elliancarlos</a>
+      </div>
+      <div class="tty-linklist__row">
+        <span class="tty-linklist__key">social</span>
+        <a href="{{ seo.social.mastodon }}" target="_blank" rel="me noreferrer noopener">mastodon.social/@elliancarlos</a>
+      </div>
+      <div class="tty-linklist__row">
+        <span class="tty-linklist__key">orcid</span>
+        <a href="{{ seo.social.orcid }}" target="_blank" rel="noreferrer noopener">orcid.org/0009-0004-9135-8207</a>
+      </div>
+    </div>
+  </section>
+</div>

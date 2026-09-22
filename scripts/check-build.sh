@@ -351,6 +351,17 @@ for f in index.html 404.html posts/index.html posts/archive/index.html preprints
   if has_emoji "$DIST/$f" ; then bad "no emoji in $f"; else pass "no emoji in $f"; fi
 done
 
+section "contact and error pages"
+have "contact/index.html"
+grep_in "contact/index.html" 'class="tty-linklist"' "contact uses the key/value list"
+grep_in "contact/index.html" 'class="tty-h1"' "contact has a display title"
+grep_not "contact/index.html" "<ul>" "the old plain list is gone from contact"
+grep_in "404.html" 'class="tty-h1"' "the 404 page has a display title"
+grep_in "404.html" 'class="tty-btn' "the 404 page offers a way home"
+grep_not "404.html" "language-select" "the dead language selector script is gone"
+grep_not "404.html" "page-header-content" "the dead page header lookup is gone"
+grep_in "404.html" "strippedPath" "the language-prefix redirect survives"
+
 printf '\n'
 if [ "$fails" -eq 0 ]; then
   printf 'check-build: all assertions passed\n'
