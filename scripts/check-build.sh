@@ -15,7 +15,7 @@ passes=0
 # must not vanish silently. EXPECTED_ASSERTIONS is the total `passes + fails`
 # this script produces today, counted (not guessed) after every change to the
 # assertion list. See the check at the bottom of the file.
-EXPECTED_ASSERTIONS=248
+EXPECTED_ASSERTIONS=251
 
 pass() { printf '  ok   %s\n' "$1"; passes=$((passes + 1)); }
 bad()  { printf '  FAIL %s\n' "$1"; fails=$((fails + 1)); }
@@ -229,6 +229,12 @@ grep_not "styles/tty/prism-tty.css" "position: absolute" "no chrome floats over 
 grep_in "styles/tty/prism-tty.css" "button:focus-visible" "the copy button keeps a focus ring"
 grep_in "styles/tty/prism-tty.css" "text-shadow: none" "the Prism theme text shadow is off"
 grep_not "styles/tty/prism-tty.css" "border-radius: 0.25rem" "code blocks are square"
+# I9: --text-faint is 2.67:1 on --surface-raised (the code block background) --
+# fails WCAG AA at 11-13px. The Copy button is the only affordance on a code
+# block and was near-invisible until hovered. The token is vendored; raise
+# the usage to --text-muted (5.15:1 on raised) instead.
+grep_in "styles/tty/prism-tty.css" "> button {" "the copy button's own color rule exists"
+grep_in "styles/tty/prism-tty.css" "  color: var(--text-muted);" "the copy button clears WCAG AA contrast"
 
 grep_in "posts/how-to-setup-lkd-notes/index.html" 'class="language-' "the post still ships highlighted code"
 grep_not "posts/how-to-setup-lkd-notes/index.html" "prism-toolbar.min.css" "the CDN toolbar stylesheet is gone"
@@ -326,6 +332,19 @@ grep_in "styles/tty/prose.css" "--font-marker" "the list marker glyphs have a fa
 grep_in "styles/tty/content.css" "var(--measure-wide)" "a figure may exceed the text measure (Task 4 owns this rule)"
 grep_in "styles/tty/prose.css" 'text-align: center' "the existing centred captions are matched"
 grep_in "styles/tty/prose.css" "overflow-wrap" "long urls wrap inside the measure"
+# I9: --text-faint is 3.04:1 on --surface-root -- fails WCAG AA at this size.
+# A caption is real prose content on 15 figures, not metadata, so it is
+# raised to --text-muted (5.85:1 on root) instead of left at --text-faint.
+# --text-muted also backs an unrelated, pre-existing rule (the completed-task
+# marker), so a plain grep_in for "color: var(--text-muted)" would pass even
+# without this fix. Scope the check to the caption's own rule block.
+caption_block=$(awk '/\.tty-prose \.tty-caption,/{f=1} f{print; if (/^}/) exit}' \
+  "$DIST/styles/tty/prose.css" 2>/dev/null)
+if printf '%s\n' "$caption_block" | grep -qF 'color: var(--text-muted);'; then
+  pass "the figure caption clears WCAG AA contrast (--text-muted)"
+else
+  bad "the figure caption clears WCAG AA contrast (--text-muted)"
+fi
 
 section "posts landing page"
 have "scripts/tty-typewriter.js"

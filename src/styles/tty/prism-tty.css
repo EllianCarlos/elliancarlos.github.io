@@ -133,6 +133,16 @@ div.code-toolbar > .toolbar > .toolbar-item > span {
   cursor: pointer;
   user-select: none;
 }
+/* --text-faint is 2.67:1 on --surface-raised (the code block's background) --
+   fails WCAG AA (needs 4.5:1 at this size), and the Copy button is the only
+   affordance on a code block: near-invisible until hovered. The token is
+   vendored and must not be edited, so raise the usage instead. The language
+   badge (the toolbar's <span>, from show-language) stays --text-faint on
+   purpose -- it is metadata, deferred with the rest (post-row dates, index
+   numbers, table headers, the eyebrow) as a recorded design-system property. */
+div.code-toolbar > .toolbar > .toolbar-item > button {
+  color: var(--text-muted);
+}
 div.code-toolbar > .toolbar > .toolbar-item > a:hover,
 div.code-toolbar > .toolbar > .toolbar-item > button:hover {
   color: var(--yellow);
