@@ -15,7 +15,7 @@ passes=0
 # must not vanish silently. EXPECTED_ASSERTIONS is the total `passes + fails`
 # this script produces today, counted (not guessed) after every change to the
 # assertion list. See the check at the bottom of the file.
-EXPECTED_ASSERTIONS=274
+EXPECTED_ASSERTIONS=278
 
 pass() { printf '  ok   %s\n' "$1"; passes=$((passes + 1)); }
 bad()  { printf '  FAIL %s\n' "$1"; fails=$((fails + 1)); }
@@ -114,6 +114,26 @@ absent ".htaccess" "no server config file"
 runtime=$(find "$DIST" -type f \( -name '*.php' -o -name '*.cgi' -o -name '*.rb' \
   -o -name '*.py' \) | tr '\n' ' ')
 if [ -n "$runtime" ]; then bad "no server-side script ($runtime)"; else pass "no server-side script"; fi
+
+section "data files are not pages"
+# sitemap.njk renders the whole of collections.all, so any template that forgets
+# `eleventyExcludeFromCollections: true` is advertised to crawlers as a page.
+# search-index.njk forgot it, and the sitemap listed the search index JSON.
+# The first assertion names that one file; the second is the general rule, and
+# catches the next data file to repeat the mistake. The sitemap is pretty-printed
+# by a transform that only breaks lines between `><`, so a <loc> stays on one
+# line and a fixed-string match is sound.
+grep_not "sitemap.xml" "search-index" "the sitemap does not list the search index"
+grep_not "sitemap.xml" ".json</loc>" "the sitemap lists no .json file as a page"
+# The flag governs collection membership, not output: the file must still be
+# written, and must still hold records. Keyed to the index's own shape — the
+# `url` key and the `/posts/` prefix the permalink logic produces — never to a
+# post count or a title, so writing or deleting a post cannot turn this red.
+count_at_least "search-index-en.json" '"url":"/posts/' 1 \
+  "the search index still holds post records"
+# The converse guard: over-applying the exclude flag would empty the sitemap
+# rather than fix it. At least one page must still be listed.
+count_at_least "sitemap.xml" "<loc>https://" 1 "the sitemap still lists pages"
 
 section "design system tokens"
 have "styles/tty.css"
