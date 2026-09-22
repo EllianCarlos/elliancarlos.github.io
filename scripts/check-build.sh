@@ -263,6 +263,21 @@ grep_in "styles/tty/content.css" "var(--measure-wide)" "a figure may exceed the 
 grep_in "styles/tty/prose.css" 'text-align: center' "the existing centred captions are matched"
 grep_in "styles/tty/prose.css" "overflow-wrap" "long urls wrap inside the measure"
 
+section "posts landing page"
+have "scripts/tty-typewriter.js"
+grep_in "posts/index.html" 'class="tty-h1 tty-h1--hero"' "the hero title is present"
+grep_in "posts/index.html" 'class="tty-eyebrow"' "the eyebrow is present"
+grep_in "posts/index.html" 'class="tty-term"' "the terminal demo is present"
+grep_in "posts/index.html" 'data-tty-type' "the typewriter target is present"
+grep_in "posts/index.html" '/scripts/tty-typewriter.js' "the typewriter script is loaded"
+grep_in "posts/index.html" 'class="tty-postrow"' "post rows use the design system row"
+grep_in "posts/index.html" '/posts/archive/' "the archive is linked from the hero"
+grep_in "posts/index.html" 'class="tty-panel__title"' "the feeds panel is present"
+grep_in "posts/index.html" "3 endpoints" "the feeds panel counts only its endpoints"
+grep_not "posts/index.html" '<h2 class="blog">' "the old Pico post headings are gone"
+count_at_least "posts/index.html" 'class="tty-term__path"' 3 "the terminal lists three recent slugs"
+count_at_least "posts/index.html" 'class="tty-postrow"' 13 "every active post is listed (13 today)"
+
 printf '\n'
 if [ "$fails" -eq 0 ]; then
   printf 'check-build: all assertions passed\n'

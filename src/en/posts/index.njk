@@ -1,24 +1,86 @@
 ---
 layout: layouts/layout.njk
-relative_path: ..
 type: blog
-title: Blog
+title: Posts
 description: Thoughts on software engineering, tools, languages, and technology.
 ---
-{% for post in collections.postsActive_en %}
-  <article>
-    <h2 class="blog">
-      <a class="blog" href="{{ post.url }}">{{ post.data.title }}</a>
-    </h2>
-    <small>{{ post.data.place + " -" }} {{ post.data.date | postDate }} ( {{ post.data.language }} )</small>
-    {% if post.data.tags and post.data.tags.length %}
-    <div class="post-tags">
-      {% for tag in post.data.tags %}
-      <a href="/posts/tag/{{ tag | tagSlug }}/" class="tag-pill">{{ tag }}</a>
-      {% endfor %}
+{% import "tty/core.njk" as tty %}
+{% import "tty/content.njk" as ttyc %}
+{%- set posts = collections.postsActive_en -%}
+{%- set idx = posts | postIndexes -%}
+<div class="tty-screen">
+
+  <section class="tty-split">
+    <div>
+      <p class="tty-eyebrow">{{ i18n.en.blog.eyebrow }}</p>
+      <h1 class="tty-h1 tty-h1--hero">
+        {{ i18n.en.blog.heroLine1 }}<br>
+        {{ i18n.en.blog.heroLine2 }}<br>
+        <span class="tty-accent">{{ i18n.en.blog.heroLine3 }}</span>
+      </h1>
+      <p class="tty-hero__lead">{{ i18n.en.blog.lead }}</p>
+      <div class="tty-hero__actions">
+        {{ tty.btn(i18n.en.blog.readArchive, "/posts/archive/", "primary") }}
+        {{ tty.btn(i18n.en.blog.latestPost, posts[0].url) }}
+      </div>
     </div>
-    {% endif %}
-    <br />
-    <p>{{ post | sneakPeakPost }}</p>
-  </article>
-{% endfor %}
+
+    {% call ttyc.terminal("~/posts") %}
+      <div class="tty-term__line">
+        <span class="tty-term__prompt" aria-hidden="true">$</span>
+        <span data-tty-type data-text="ellian posts --recent 3" data-speed="55">ellian posts --recent 3</span>
+      </div>
+      <div class="tty-term__out" style="margin-top: 10px">
+        {%- for post in posts.slice(0, 3) -%}
+        <div class="tty-term__line">
+          <span class="tty-term__date">{{ post.date | postDate }}</span>
+          <span class="tty-term__path">{{ post.fileSlug }}</span>
+        </div>
+        {%- endfor -%}
+      </div>
+    {% endcall %}
+  </section>
+
+  <section>
+    {{ tty.divider(i18n.en.blog.recent) }}
+    <div style="margin-top: 14px">
+      {%- for post in posts.slice(0, 4) -%}
+        {{ ttyc.postrow(post, idx[post.url]) }}
+      {%- endfor -%}
+    </div>
+  </section>
+
+  {% if posts.length > 4 %}
+  <section>
+    {{ tty.divider(i18n.en.blog.allPosts) }}
+    <div style="margin-top: 14px">
+      {%- for post in posts.slice(4) -%}
+        {{ ttyc.postrow(post, idx[post.url]) }}
+      {%- endfor -%}
+    </div>
+  </section>
+  {% endif %}
+
+  {% call tty.panel(i18n.en.blog.feeds, i18n.en.blog.feedsHint) %}
+    <div class="tty-linklist">
+      <div class="tty-linklist__row">
+        <span class="tty-linklist__key">atom</span>
+        <a href="/feed.xml">/feed.xml</a>
+      </div>
+      <div class="tty-linklist__row">
+        <span class="tty-linklist__key">llms</span>
+        <a href="/llms.txt">/llms.txt</a>
+      </div>
+      <div class="tty-linklist__row">
+        <span class="tty-linklist__key">index</span>
+        <a href="/sitemap.xml">/sitemap.xml</a>
+      </div>
+      <div class="tty-linklist__row">
+        <span class="tty-linklist__key">search</span>
+        <span>{{ i18n.en.blog.searchHint }}</span>
+      </div>
+    </div>
+  {% endcall %}
+
+</div>
+<script defer src="/scripts/tty-typewriter.js"></script>

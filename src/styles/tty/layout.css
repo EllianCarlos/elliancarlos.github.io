@@ -369,3 +369,20 @@ body.tty-search-open { overflow: hidden; }
   line-height: 1.6;
   color: var(--text-muted);
 }
+
+/* ── Hero (ui_kits/blog/Home.jsx) ───────────────────────────────────────── */
+.tty-hero__lead {
+  max-width: 52ch;
+  margin: 22px 0 0;
+  font-size: var(--text-md);
+  line-height: 1.8;
+  color: var(--text-muted);
+  text-wrap: pretty;
+}
+.tty-hero__actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 26px;
+}
+.tty-hero__title { margin: 18px 0 0; }
