@@ -5,3 +5,4 @@ dist
 .devenv*
 devenv.local.nix
 .direnv
+.worktrees
