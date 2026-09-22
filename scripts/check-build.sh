@@ -296,8 +296,20 @@ count_at_least "posts/archive/index.html" 'class="tty-postrow"' 14 "every post a
 # reorders the DOM instead (tty-archive.js), so this now guards against the
 # CSS-only flip coming back rather than asserting it exists.
 grep_not "styles/tty/layout.css" "column-reverse" "the sort toggle is not a CSS-only paint flip (focus order must match paint order)"
-grep_in "styles/tty/layout.css" "scroll-margin-top: calc(52px + var(--sp-4))" "the year anchors clear the sticky nav"
-grep_in "styles/tty/layout.css" ".tty-archive .tty-menu--dense .tty-menu__item" "the compact rail keeps the full row height"
+# +23: 52px was hard-coded at .tty-nav's height, the sticky rail's `top` and
+# the year anchors' `scroll-margin-top` (plus prose.css's own heading
+# scroll-margin-top and this file's old pinned string) -- a future nav-height
+# change that missed one would land an anchor with its target hidden under
+# the pinned bar. One token, used at all three sites in this file.
+count_at_least "styles/tty/layout.css" "var(--tty-nav-h)" 3 \
+  "the nav-height token backs .tty-nav, the sticky rail and the year anchors"
+# L14: this selector used to carry a no-op override -- core.css's unconditional
+# `.tty-menu__item { min-height: var(--row-h) }` already applies below 1280px,
+# since core.css's own dense-specific rule is gated to min-width: 1280px,
+# mutually exclusive with this rule's old max-width: 1279.98px. Guard against
+# that dead rule coming back.
+grep_not "styles/tty/layout.css" ".tty-archive .tty-menu--dense .tty-menu__item" \
+  "the no-op compact-row override (L14) has not come back"
 # Carried finding from Task 5's review: /posts/ and /posts/archive/ are both
 # live nav tabs, and /posts/archive/ is a URL prefix match for both. nav.njk
 # must pick the longest matching prefix so only one tab carries

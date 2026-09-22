@@ -26,7 +26,10 @@
 .tty-prose h4,
 .tty-prose h5,
 .tty-prose h6 {
-  scroll-margin-top: calc(52px + var(--sp-4));
+  /* --tty-nav-h is defined in layout.css, not the vendored token tree — see
+     the comment there. Keep this in step with .tty-archive__year's own
+     scroll-margin-top in layout.css. */
+  scroll-margin-top: calc(var(--tty-nav-h) + var(--sp-4));
 }
 
 /* Three posts use `# ` for their section headings. With no rule here those fall

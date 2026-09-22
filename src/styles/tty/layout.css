@@ -2,6 +2,21 @@
    Home, Archive and About screens share. The search overlay lives here too,
    because it is shell furniture, not a component. */
 
+:root {
+  /* 52px was hard-coded at four sites (.tty-nav's real height, the sticky
+     rail's `top`, and two `scroll-margin-top` offsets whose only job is to
+     clear the nav) plus a fifth in scripts/check-build.sh. A future height
+     change that missed one would make an in-page anchor land with its target
+     hidden under the pinned nav — silent and hard to attribute. One token,
+     used at all four sites, fixes that.
+
+     This is intentionally NOT the vendored --app-header-h (38/48/40px across
+     breakpoints.css's tiers, see tokens/breakpoints.css) — this blog's nav is
+     one height at every width, unlike the design system's own header, so a
+     tier-varying token would be the wrong value here. */
+  --tty-nav-h: 52px;
+}
+
 html { height: 100%; }
 
 /* tokens/breakpoints.css ends with `html, body { overflow-x: hidden; }`. That line
@@ -38,7 +53,7 @@ body { overflow-x: clip; }
   display: flex;
   align-items: center;
   gap: 16px;
-  height: 52px;
+  height: var(--tty-nav-h);
   padding: 0 var(--gutter);
   background: var(--surface-root);
   border-bottom: var(--border-w) solid var(--border-faint);
@@ -139,7 +154,7 @@ body { overflow-x: clip; }
 
 .tty-rail { display: flex; flex-direction: column; gap: 20px; }
 @media (min-width: 1280px) {
-  .tty-rail--sticky { position: sticky; top: calc(52px + var(--sp-6)); }
+  .tty-rail--sticky { position: sticky; top: calc(var(--tty-nav-h) + var(--sp-6)); }
 }
 
 /* Two layouts, not five: the rail is an aside on desktop and a <details> under
@@ -251,7 +266,14 @@ body { overflow-x: clip; }
 html { scrollbar-gutter: stable; }
 html:has(body.tty-search-open),
 html.tty-search-open { overflow: hidden; }
-body.tty-search-open { overflow: hidden; }
+/* Do NOT add `body.tty-search-open { overflow: hidden; }` here. `overflow` is
+   the shorthand for both axes, so it would set body's `overflow-x` to
+   `hidden`, silently overriding line 24's `overflow-x: clip` (higher
+   specificity, later in source) — and unlike `clip`, `hidden` makes body a
+   scroll container. tty-search.js sets this class on <html> too, and the two
+   rules above already lock scrolling from there; body only needs to carry
+   the class so `html:has(body.tty-search-open)` above has something to
+   match — it must not carry its own overflow rule. */
 
 /* ── Archive screen (ui_kits/blog/Archive.jsx) ──────────────────────────── */
 .tty-archive__head {
@@ -266,23 +288,15 @@ body.tty-search-open { overflow: hidden; }
 
 .tty-archive__years { display: flex; flex-direction: column; gap: var(--sp-8); }
 /* The by-year rail jumps to these sections, so a year heading must clear the
-   52px sticky nav. Same arithmetic as the prose headings in prose.css — keep the
-   two in step. */
+   sticky nav (--tty-nav-h). Same arithmetic as the prose headings in
+   prose.css — keep the two in step. */
 .tty-archive__year {
   display: flex;
   flex-direction: column;
-  scroll-margin-top: calc(52px + var(--sp-4));
+  scroll-margin-top: calc(var(--tty-nav-h) + var(--sp-4));
 }
 .tty-archive__year .tty-divider { margin-bottom: 12px; }
 .tty-archive__rows { display: flex; flex-direction: column; }
-
-/* Dense is a desktop density: Archive.jsx passes dense={!bp.compact}. The rail
-   macro renders one class for both layouts, so the compact row height is
-   corrected here instead of with a template branch. var(--row-h) is 44px on
-   touch and 32px for a fine pointer, which is what the component does. */
-@media (max-width: 1279.98px) {
-  .tty-archive .tty-menu--dense .tty-menu__item { min-height: var(--row-h); }
-}
 
 /* ── Post screen (ui_kits/blog/Post.jsx) ────────────────────────────────── */
 .tty-post { display: flex; flex-direction: column; align-items: center; }
