@@ -97,7 +97,10 @@ layout: layouts/layout.njk
       {{ tty.divider(i18n.en.footer.elsewhere) }}
       <div class="tty-linklist" style="margin-top: 14px">
         <div class="tty-linklist__row">
-          <span class="tty-linklist__key">git</span>
+          {# "github", not "git": this row links a forge account, and git is a
+             different thing entirely — a version control system with no account
+             to link. Same key on the contact page. #}
+          <span class="tty-linklist__key">github</span>
           <a href="{{ seo.social.github }}" target="_blank" rel="noreferrer noopener">github.com/elliancarlos</a>
         </div>
         <div class="tty-linklist__row">

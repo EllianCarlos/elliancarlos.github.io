@@ -43,7 +43,9 @@ layout: layouts/layout.njk
         <span data-contact-email>elliancarlos [at] gmail [dot] com</span>
       </div>
       <div class="tty-linklist__row">
-        <span class="tty-linklist__key">git</span>
+        {# "github", not "git" — the row links a forge account, and git is a
+           version control system, not an account. Same key on the homepage. #}
+        <span class="tty-linklist__key">github</span>
         <a href="{{ seo.social.github }}" target="_blank" rel="noreferrer noopener">github.com/elliancarlos</a>
       </div>
       <div class="tty-linklist__row">

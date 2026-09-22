@@ -15,7 +15,7 @@ passes=0
 # must not vanish silently. EXPECTED_ASSERTIONS is the total `passes + fails`
 # this script produces today, counted (not guessed) after every change to the
 # assertion list. See the check at the bottom of the file.
-EXPECTED_ASSERTIONS=312
+EXPECTED_ASSERTIONS=313
 
 pass() { printf '  ok   %s\n' "$1"; passes=$((passes + 1)); }
 bad()  { printf '  FAIL %s\n' "$1"; fails=$((fails + 1)); }
@@ -223,12 +223,17 @@ fi
 # because that is the scope of the decision.
 # ">lattes<" is an exact label cell, so the URL text "lattes.cnpq.br/…" cannot
 # match it. Both needles name a RETIRED term, never the owner's current copy.
-for dead_label in '>lattes<' '>cv<'; do
+#
+# The third needle is a different retired label on the same component: the row that
+# links a GitHub account was keyed "git", and git is a version control system, not
+# an account. That needle is scoped to the key cell, because "git" on its own is
+# ordinary prose in several posts.
+for dead_label in '>lattes<' '>cv<' 'class="tty-linklist__key">git<'; do
   dead_hits=$(grep -rlF --include='*.html' -e "$dead_label" "$DIST" | tr '\n' ' ')
   if [ -n "$dead_hits" ]; then
-    bad "no page labels the research curriculum '$dead_label' ($dead_hits)"
+    bad "no page uses the retired label '$dead_label' ($dead_hits)"
   else
-    pass "no page labels the research curriculum '$dead_label'"
+    pass "no page uses the retired label '$dead_label'"
   fi
 done
 # Every channel that leaves the site must leave it safely. Both sides are counted
