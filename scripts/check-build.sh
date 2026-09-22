@@ -15,7 +15,7 @@ passes=0
 # must not vanish silently. EXPECTED_ASSERTIONS is the total `passes + fails`
 # this script produces today, counted (not guessed) after every change to the
 # assertion list. See the check at the bottom of the file.
-EXPECTED_ASSERTIONS=278
+EXPECTED_ASSERTIONS=286
 
 pass() { printf '  ok   %s\n' "$1"; passes=$((passes + 1)); }
 bad()  { printf '  FAIL %s\n' "$1"; fails=$((fails + 1)); }
@@ -219,7 +219,7 @@ grep_not "index.html" "/styles/style.css" "the old stylesheet is unlinked"
 grep_not "posts/index.html" "/styles/blog.css" "the old blog stylesheet is unlinked"
 grep_in "index.html" '<link rel="stylesheet" href="/styles/tty.css">' "the homepage links tty.css"
 grep_in "index.html" 'class="tty-nav__mark"' "the wordmark is present"
-count_at_least "index.html" 'class="tty-tabs__tab"' 3 "the three live nav tabs render"
+count_at_least "index.html" 'class="tty-tabs__tab"' 5 "the four page tabs and the resume tab render"
 grep_in "index.html" 'href="/preprints/"' "the nav tab for preprints opens once the page exists"
 grep_in "index.html" 'data-tty-search-open hidden' "the search control stays hidden until a script can open it"
 grep_in "index.html" 'class="tty-foot"' "the new footer is present"
@@ -227,6 +227,116 @@ grep_in "posts/index.html" 'aria-current="page"' "the active tab is marked on /p
 grep_in "index.html" 'content="#0A0A09"' "the theme colour is the root surface"
 grep_not "index.html" "mobile-menu-toggle" "the old hamburger is gone"
 grep_not "index.html" "page-header-content" "the old page header is gone"
+
+# The resume is the one nav item whose target is not a page. .eleventy.js passes
+# the PDF through, so it never enters collections.all, and nav.njk's `liveUrls`
+# gate — which hides a tab whose page the build did not write — would hide it
+# forever. `asset: true` opts it out of that gate, so the gate no longer guards
+# this URL and these assertions take that job over: the tab exists, it reaches
+# every page, it opens safely, its accessible name is honest, and a file really
+# sits at the href it points to.
+#
+# The filename is written nowhere in this script. It is read back out of the
+# built nav, so renaming the PDF stays a one-line edit in nav.njk instead of a
+# two-file edit that turns CI red in between. Every other needle is
+# template-owned markup: a class name, an attribute, a phrase nav.njk itself
+# writes.
+section "resume in the header menu"
+resume_link=$(grep -oE '<a class="tty-tabs__tab" href="[^"]*\.pdf"[^>]*>[^<]*</a>' \
+  "$DIST/index.html" 2>/dev/null | head -1)
+resume_href=$(printf '%s' "$resume_link" | sed -ne 's/.*href="\([^"]*\)".*/\1/p')
+if [ -n "$resume_href" ]; then
+  pass "the header menu carries a tab that links a PDF ($resume_href)"
+else
+  bad "the header menu carries a tab that links a PDF (no .pdf tab in the strip)"
+fi
+
+# A nav partial that renders on one page and not another is the failure this
+# guards: grep -L lists the pages that DO NOT carry the tab, and every HTML page
+# the build writes carries the nav. An empty $resume_href would turn the needle
+# into `href=""`, which matches nothing and would make -L report no offenders at
+# all, so the empty case fails on its own instead.
+#
+# The needle carries the tab's class, not the URL alone: footer.njk links the
+# same PDF on every page, so a bare href needle passes with the nav tab deleted.
+# A mutation test caught exactly that.
+if [ -z "$resume_href" ]; then
+  bad "the resume tab reaches every page with a nav (there is no tab to look for)"
+else
+  pages_without_resume=$(grep -rLF --include='*.html' \
+    -e "class=\"tty-tabs__tab\" href=\"$resume_href\"" "$DIST" | tr '\n' ' ')
+  if [ -n "$pages_without_resume" ]; then
+    bad "the resume tab reaches every page with a nav ($pages_without_resume)"
+  else
+    pass "the resume tab reaches every page with a nav"
+  fi
+fi
+
+# Scoped to the resume tab's own opening tag. A bare grep of index.html for
+# `target="_blank"` would be satisfied by any other new-tab link on the page —
+# which is exactly how a page-wide needle goes quietly green after the markup it
+# was written for is gone.
+if printf '%s\n' "$resume_link" | grep -qF 'target="_blank"'; then
+  pass "the resume tab opens in a new tab"
+else
+  bad "the resume tab opens in a new tab"
+fi
+if printf '%s\n' "$resume_link" | grep -qF 'rel="noreferrer noopener"'; then
+  pass "the new tab is opened safely (noreferrer and noopener)"
+else
+  bad "the new tab is opened safely (noreferrer and noopener)"
+fi
+
+# A link that opens a PDF in a new tab has to say so to a reader who cannot see
+# the strip. nav.njk does that with aria-label, which REPLACES the accessible
+# name, so two things must hold: the name still contains the visible label (WCAG
+# 2.5.3, Label in Name — voice control users say what they read), and it adds
+# the two facts the visible text cannot carry.
+resume_name=$(printf '%s' "$resume_link" | sed -ne 's/.*aria-label="\([^"]*\)".*/\1/p')
+resume_text=$(printf '%s' "$resume_link" | sed -e 's|.*">||' -e 's|</a>||')
+# Both halves must be non-empty before the containment test: an empty needle is
+# contained in every string, so a vanished tab would otherwise read as a pass
+# here (the assertions above are the ones that fail loudly in that case).
+if [ -n "$resume_name" ] && [ -n "$resume_text" ] \
+  && [ "${resume_name#*"$resume_text"}" != "$resume_name" ]; then
+  pass "the resume tab's accessible name keeps its visible label"
+else
+  bad "the resume tab's accessible name keeps its visible label (name='$resume_name' label='$resume_text')"
+fi
+case "$resume_name" in
+  *PDF*"new tab"*) pass "the accessible name says it is a PDF that opens in a new tab" ;;
+  *) bad "the accessible name says it is a PDF that opens in a new tab (name='$resume_name')" ;;
+esac
+
+# The gate's own job, done here instead: a tab pointing at a file the build did
+# not write is a 404 in the header of every page.
+if [ -n "$resume_href" ] && [ -f "$DIST/${resume_href#/}" ]; then
+  pass "the resume tab points at a file the build wrote (${resume_href})"
+else
+  bad "the resume tab points at a file the build wrote (href=${resume_href:-none})"
+fi
+
+# The owner asked for the "(14)" post count to go. The count is removed, so the
+# class it hung on must be removed too — markup, CSS and all. dist/styles is a
+# verbatim passthrough of src/styles, so this sweep covers both trees.
+count_class_hits=$(grep -rlF --include='*.html' --include='*.css' -e 'tty-tabs__count' "$DIST" | tr '\n' ' ')
+if [ -n "$count_class_hits" ]; then
+  bad "no tty-tabs__count survives anywhere in the output ($count_class_hits)"
+else
+  pass "no tty-tabs__count survives anywhere in the output"
+fi
+# The one source-side assertion in this file, and it is deliberate: the sweep
+# above reads a dist/ that may predate an edit, so a rule re-added to
+# src/styles/ for a class no markup uses would sit there unnoticed until the
+# next build. The repository root is resolved from this script's own location,
+# so the check does not depend on the caller's working directory.
+repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+src_count_hits=$(grep -rlF -e 'tty-tabs__count' "$repo_root/src/styles" | tr '\n' ' ')
+if [ -n "$src_count_hits" ]; then
+  bad "no tty-tabs__count rule survives in src/styles ($src_count_hits)"
+else
+  pass "no tty-tabs__count rule survives in src/styles"
+fi
 
 section "prose and code"
 have "styles/tty/prose.css"
@@ -464,10 +574,11 @@ all_post_pages=$(find "$DIST/posts" -mindepth 2 -maxdepth 2 -name index.html 2>/
 total_posts=$(printf '%s\n' "$all_post_pages" | grep -c . || true)
 count_exactly "posts/index.html" 'class="tty-postrow"' "$total_posts" \
   "every post the build wrote is listed ($total_posts posts)"
-# The nav tab counts the same collection the page lists, so the two must agree.
-# A mismatch means one of them started reading a filtered collection again.
-grep_in "posts/index.html" "tty-tabs__count\">($total_posts)" \
-  "the nav tab's count matches the number of rows on the page"
+# There used to be a second assertion here, pinning the nav tab's "(14)" count to
+# this same number. The count is gone from the nav at the owner's request — and
+# it was a content-pinned needle of exactly the kind finding I3 is about, so it
+# leaves nothing to replace. The class's absence is asserted in the "resume in
+# the header menu" section.
 
 section "tag pages"
 have "posts/tag/linux/index.html"
@@ -487,8 +598,21 @@ have "preprints/index.html"
 have "preprints/Corporate_Truck_Factor__Firm_Level_Knowledge_Concentration_in_Linux_Kernel_Subsystems.pdf"
 grep_in "preprints/index.html" "Corporate Truck Factor" "the paper title is listed"
 grep_in "preprints/index.html" "Paulo Meirelles" "the author list is listed"
-grep_in "preprints/index.html" 'target="_blank"' "the row opens in a new tab"
-grep_in "preprints/index.html" 'rel="noreferrer noopener"' "the new tab is opened safely"
+# Scoped to the paper row's own tag. These two used to grep the whole page, and
+# the header's resume tab now carries both attributes on every page — so the
+# page-wide form would stay green with the paper row's attributes deleted.
+paper_link=$(grep -oE '<a class="tty-paper" href="[^"]*"[^>]*>' \
+  "$DIST/preprints/index.html" 2>/dev/null | head -1)
+if printf '%s\n' "$paper_link" | grep -qF 'target="_blank"'; then
+  pass "the row opens in a new tab"
+else
+  bad "the row opens in a new tab"
+fi
+if printf '%s\n' "$paper_link" | grep -qF 'rel="noreferrer noopener"'; then
+  pass "the new tab is opened safely"
+else
+  bad "the new tab is opened safely"
+fi
 grep_in "preprints/index.html" ".pdf" "the row links a PDF"
 grep_in "preprints/index.html" 'class="tty-paper"' "the paper row renders"
 # I3: was pinned to the exact string "1 paper", which failed CI the moment a

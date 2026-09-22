@@ -287,7 +287,6 @@
   color: var(--yellow);
   border-bottom-color: var(--yellow);
 }
-.tty-tabs__count { opacity: 0.6; }
 /* .tty-tabs is a scroll container: `overflow-x: auto` makes `overflow-y` compute
    to `auto` too, so the outset `--focus-ring` box-shadow base.css puts on a
    focused tab is clipped at the top and bottom edges of the strip, and
