@@ -117,6 +117,20 @@ search glyph in `layout.css` (`⌕`, U+2315). Never reach for an SVG or an emoji
 let a glyph carry meaning that no text also carries — the search button's name comes from
 its `aria-label`.
 
+**Contrast.** `layout.css` overrides `--text-faint` to `#7A7A71` (4.57:1 on
+`--surface-root`). The vendored value is `--grey-600` `#5E5E58`, which is **3.04:1** — AA
+for large text only, while all 28 of its uses are 12-15px metadata: dates, index numbers,
+key caps, hint labels. Those are information, not decoration.
+
+Measured ratios on `--surface-root`: `--text-primary` 16.11:1, `--text-secondary` 9.49:1,
+`--text-muted` 5.85:1, `--text-faint` 4.57:1 after the override. `--grey-500` is 2.22:1 and
+must never carry text.
+
+**Never pair a text colour with `opacity` below 1.** Opacity composites toward the
+background and undoes the colour: even `--text-muted` at `opacity: .8` is only 4.09:1.
+`.tty-foot__row--quiet` did exactly that, and `check-build.sh` now sweeps the source for
+it. Make text quieter with a colour, never with opacity.
+
 Reading sizes: `--tty-prose-size` (18px to 20px) is the body size for every post and for
 the biography. The vendored `--text-lg` tops out at 17px, which is a UI size — do not set
 body copy in it. Code blocks, tables and post-row descriptions read `--text-md` (15px).

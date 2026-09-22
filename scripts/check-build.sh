@@ -22,7 +22,7 @@ repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 # must not vanish silently. EXPECTED_ASSERTIONS is the total `passes + fails`
 # this script produces today, counted (not guessed) after every change to the
 # assertion list. See the check at the bottom of the file.
-EXPECTED_ASSERTIONS=334
+EXPECTED_ASSERTIONS=337
 
 pass() { printf '  ok   %s\n' "$1"; passes=$((passes + 1)); }
 bad()  { printf '  FAIL %s\n' "$1"; fails=$((fails + 1)); }
@@ -168,6 +168,37 @@ section "data files are not pages"
 # line and a fixed-string match is sound.
 grep_not "sitemap.xml" "search-index" "the sitemap does not list the search index"
 grep_not "sitemap.xml" ".json</loc>" "the sitemap lists no .json file as a page"
+
+section "text contrast"
+# --text-faint is this site's lowest-contrast text token, and every one of its 28 uses
+# sets `color` on 12-15px metadata: dates, index numbers, key caps, hint labels. The
+# vendored value is --grey-600 (#5E5E58), which is 3.04:1 on --surface-root — enough
+# for large text only. Dates and counts are information, so 3:1 is not defensible.
+#
+# layout.css overrides it to #7A7A71 (4.57:1). tokens/colors.css is vendored
+# byte-for-byte and cannot be edited, and layout.css is imported after it, so the
+# override wins. Asserted on the BUNDLE, which is what a browser actually applies.
+grep_in "styles/tty.bundle.css" "--text-faint: #7A7A71" \
+  "the faint text token is raised to clear WCAG AA"
+# Ordering matters or the override does nothing: the vendored declaration must come
+# first and this one must come after. Byte offsets in the bundle answer that directly.
+vendored_at=$(grep -bo -- "--text-faint: var(--grey-600)" "$DIST/styles/tty.bundle.css" 2>/dev/null | head -1 | cut -d: -f1)
+override_at=$(grep -bo -- "--text-faint: #7A7A71" "$DIST/styles/tty.bundle.css" 2>/dev/null | head -1 | cut -d: -f1)
+if [ -n "$vendored_at" ] && [ -n "$override_at" ] && [ "$override_at" -gt "$vendored_at" ]; then
+  pass "the faint override comes after the vendored token, so it wins"
+else
+  bad "the faint override comes after the vendored token, so it wins (vendored@${vendored_at:-none} override@${override_at:-none})"
+fi
+# An opacity below 1 composites text toward the background and undoes the raise —
+# even --text-muted at opacity .8 is only 4.09:1. .tty-foot__row--quiet did exactly
+# that. Sweep the source for any rule that sets this token AND an opacity on one line.
+faint_opacity=$(grep -rn "var(--text-faint)" "$repo_root/src/styles" \
+  | grep -E 'opacity:[[:space:]]*(0|\.[0-9])' | tr '\n' ' ')
+if [ -n "$faint_opacity" ]; then
+  bad "no rule dims the faint token with opacity ($faint_opacity)"
+else
+  pass "no rule dims the faint token with opacity"
+fi
 
 section "one stylesheet, one request"
 # src/styles/tty.css is a 1 KB list of 14 @imports. A browser cannot see those

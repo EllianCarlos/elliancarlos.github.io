@@ -13,12 +13,19 @@ concurrency:
 permissions:
   contents: read
 
+# Runner image: ubuntu-latest is deliberately NOT pinned, even though GitHub warns it
+# moves to Ubuntu 26 on 2026-10-19. This build has no system-package dependency to
+# break: eleventy runs on bun, and the image generator renders with satori and
+# @resvg/resvg-js, both pinned in package.json with prebuilt binaries. Pinning would
+# add upgrade maintenance to guard against a risk that was removed when the build
+# stopped shelling out to ImageMagick. Revisit only if a step gains a system binary.
+
 jobs:
   build:
     name: Build (bun)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -32,7 +39,7 @@ jobs:
       # change for correctness — it only saves the fetch. A cache miss costs one
       # download; a font CDN outage with a warm cache costs nothing.
       - name: Cache the generator's fonts
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: .fonts-cache
           key: fonts-${{ hashFiles('scripts/make-images.mjs') }}
@@ -47,7 +54,7 @@ jobs:
       - name: Check the build output
         run: ./scripts/check-build.sh
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v7
         with:
           name: dist
           path: dist
@@ -57,14 +64,14 @@ jobs:
     name: Dev environment (devenv)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: cachix/install-nix-action@v31
         with:
           extra_nix_config: |
             accept-flake-config = true
 
-      - uses: cachix/cachix-action@v16
+      - uses: cachix/cachix-action@v17
         with:
           name: devenv
 
@@ -104,16 +111,16 @@ jobs:
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - name: Download the dist artifact from the build job
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: dist
           path: dist
 
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v6
 
-      - uses: actions/upload-pages-artifact@v4
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
 
       - id: deploy
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

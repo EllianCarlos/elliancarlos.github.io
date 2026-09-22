@@ -1,8 +1,4 @@
 {
-  "language": {
-    "name": "English",
-    "code": "en"
-  },
   "nav": {
     "about": "about",
     "posts": "posts",
@@ -45,7 +41,6 @@
       "title": "automatic translation",
       "message": "A language model translated this post from English. It may contain inaccuracies, or nuances lost in translation."
     },
-    "publishedOn": "published",
     "updatedOn": "updated",
     "backToPosts": "posts",
     "next": "next"
@@ -59,8 +54,7 @@
   },
   "contact": {
     "title": "contact",
-    "email": "email",
-    "social": "social"
+    "email": "email"
   },
   "error": {
     "title": "page not found",

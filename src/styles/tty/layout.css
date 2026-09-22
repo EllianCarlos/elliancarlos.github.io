@@ -13,6 +13,22 @@
   --font-marker: "JetBrains Mono", "DejaVu Sans Mono", "Noto Sans Symbols 2",
     "Segoe UI Symbol", "Apple Symbols", ui-monospace, monospace;
 
+  /* --text-faint, raised to clear WCAG AA. The vendored value is --grey-600
+     (#5E5E58), which is 3.04:1 on --surface-root: enough for large text only, and
+     every one of its 28 usages is 12-15px metadata. Dates, index numbers, key caps
+     and hint labels are all information, not decoration, so 3:1 is not defensible.
+
+     #7A7A71 is 4.57:1 — over the 4.5:1 AA threshold for normal text, and still
+     clearly fainter than --text-muted at 5.85:1, so the four-step grey hierarchy
+     survives. One override fixes all 28 call sites at once; tokens/colors.css is
+     vendored byte-for-byte and must not be edited, and layout.css is imported
+     after it, so this wins the cascade.
+
+     Do not pair this token with opacity. An opacity below 1 composites toward the
+     background and undoes the fix: even --text-muted at opacity .8 lands at
+     4.09:1. .tty-foot__row--quiet used to do exactly that. */
+  --text-faint: #7A7A71;
+
   /* The long-form reading size. The vendored --text-lg tops out at 17px, which
      is a UI size, not a reading size: the biography and every post body were
      hard to read at it. This is the one size the prose wrapper and the post
@@ -251,7 +267,10 @@ body { overflow-x: clip; }
   font-size: var(--text-xs);
   color: var(--text-faint);
 }
-.tty-foot__row--quiet { color: var(--text-faint); opacity: 0.8; }
+/* No opacity here. It used to carry `opacity: 0.8`, which composited the text
+   toward the background and dropped it to 3.32:1 even with the raised token.
+   The colour already makes the row quiet; the opacity only made it unreadable. */
+.tty-foot__row--quiet { color: var(--text-faint); }
 .tty-foot__cmd { font-family: var(--font-code); }
 .tty-foot__links { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .tty-foot__meta { display: flex; align-items: center; gap: 6px; }
