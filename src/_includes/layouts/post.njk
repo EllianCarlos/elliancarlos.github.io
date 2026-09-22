@@ -1,29 +1,54 @@
 ---
 layout: layouts/layout.njk
-relative_path: '../..'
 type: blogPost
 ogType: article
 ---
-{% include "translationWarning.njk" %}
-<article>
-    <h1>{{ title }}</h1>
-    <div class="post-meta">
-        <time datetime="{{ date.toISOString() }}">
-            {{ i18n[locale].post.publishedOn }}: {{ date | postDate }}
-        </time>
-        {% if modified %}
-        <span class="separator">•</span>
-        <time datetime="{{ modified.toISOString() }}">
-            {{ i18n[locale].post.updatedOn }}: {{ modified | postDate }}
-        </time>
-        {% endif %}
+{% import "tty/core.njk" as tty %}
+{%- set siblings = collections['postsActive_' + (locale or 'en')] -%}
+{%- set next = siblings | nextPost(page.url) -%}
+<article class="tty-post">
+  <header class="tty-post__head">
+    <div class="tty-post__meta">
+      <a class="tty-post__back" href="{{ '/posts' | i18nUrl(locale) }}/">← {{ i18n[locale].post.backToPosts }}</a>
+      <span aria-hidden="true">·</span>
+      <time datetime="{{ date.toISOString() }}">{{ date | postDate }}</time>
+      {% if modified %}
+      <span aria-hidden="true">·</span>
+      <time datetime="{{ modified.toISOString() }}">{{ i18n[locale].post.updatedOn }} {{ modified | postDate }}</time>
+      {% endif %}
+      <span aria-hidden="true">·</span>
+      <span>{{ content | readingTime }}</span>
+      <span class="tty-spacer"></span>
+      <span class="tty-post__progress" data-tty-progress aria-hidden="true"></span>
     </div>
-    {{ content | safe }}
+    <h1 class="tty-h1">{{ title }}</h1>
     {% if tags and tags.length %}
-    <p class="post-tags-label">{{ i18n[locale].blog.tagged }}
-      {% for tag in tags %}
-      <a href="{% if locale == 'en' %}/posts/tag/{% else %}/{{ locale }}/posts/tag/{% endif %}{{ tag | tagSlug }}/" class="tag-pill">{{ tag }}</a>{% if not loop.last %} {% endif %}
-      {% endfor %}
-    </p>
+    <div class="tty-post__tags">
+      {%- for tag in tags -%}
+        {{ tty.tag(tag, ('/posts/tag/' | i18nUrl(locale)) + (tag | tagSlug) + '/') }}
+      {%- endfor -%}
+    </div>
     {% endif %}
+    <hr class="tty-rule">
+  </header>
+
+  <div class="tty-post__body">
+    {% include "archivedBanner.njk" %}
+    {% include "translationWarning.njk" %}
+    <div class="tty-prose">
+      {{ content | safe }}
+    </div>
+  </div>
+
+  {% if next %}
+  <footer class="tty-post__foot">
+    <hr class="tty-rule">
+    <div class="tty-post__meta">
+      <span>{{ i18n[locale].post.next }}</span>
+      <a class="tty-post__next" href="{{ next.url }}">{{ next.data.title }}</a>
+      <span class="tty-caret" aria-hidden="true"></span>
+    </div>
+  </footer>
+  {% endif %}
 </article>
+<script defer src="/scripts/tty-progress.js"></script>

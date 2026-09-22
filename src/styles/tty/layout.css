@@ -289,3 +289,83 @@ body.tty-search-open { overflow: hidden; }
    attached to their post, so 001 sits at the top when oldest is chosen. */
 .tty-archive--oldest .tty-archive__years,
 .tty-archive--oldest .tty-archive__rows { flex-direction: column-reverse; }
+
+/* ── Post screen (ui_kits/blog/Post.jsx) ────────────────────────────────── */
+.tty-post { display: flex; flex-direction: column; align-items: center; }
+/* 68ch must be counted in the reading face. The head, the body and the foot all
+   carry --text-lg, so the three columns come out at the same width. Every child
+   sets its own font-size, so nothing else grows. */
+.tty-post__head,
+.tty-post__body,
+.tty-post__foot { width: 100%; max-width: var(--measure-prose); font-size: var(--text-lg); }
+/* One measure, not two: .tty-prose must not constrain this column again. */
+.tty-post__body .tty-prose { max-width: none; }
+
+.tty-post__meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: var(--text-xs);
+  color: var(--text-faint);
+}
+.tty-post__back { color: var(--text-muted); border-bottom-color: var(--border-default); }
+.tty-post__back:hover { color: var(--yellow); }
+/* The one live number on a reading page. It ships empty, so it holds its own
+   width and the meta row does not reflow when the script fills it. */
+.tty-post__progress {
+  min-width: 4ch;
+  text-align: right;
+  color: var(--yellow);
+  font-variant-numeric: tabular-nums;
+}
+
+.tty-post__head .tty-h1 {
+  margin: 20px 0 0;
+  font-size: var(--display-lg);
+  line-height: 1.15;
+  letter-spacing: 0.04em;
+}
+.tty-post__tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 18px; }
+.tty-post__head .tty-rule { margin: 26px 0 30px; }
+
+.tty-post__foot { margin-top: var(--sp-12); }
+.tty-post__foot .tty-rule { margin-bottom: 20px; }
+.tty-post__foot .tty-post__meta { gap: 16px; }
+.tty-post__next {
+  font-family: var(--font-display);
+  font-size: var(--display-xs);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--yellow);
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+  border-bottom-color: var(--yellow-dim);
+}
+.tty-post__next:hover { color: var(--yellow-bright); }
+
+/* ── Note banner (archived post, machine-translated post) ───────────────── */
+.tty-note {
+  margin: 0 0 var(--sp-8);
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--surface-panel);
+  border: var(--border-w) solid var(--border-default);
+  border-left: var(--border-w-thick) solid var(--border-strong);
+}
+.tty-note--warn { border-left-color: var(--status-warn); }
+.tty-note__title {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--status-warn);
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+}
+.tty-note__body {
+  margin: var(--sp-2) 0 0;
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--text-muted);
+}

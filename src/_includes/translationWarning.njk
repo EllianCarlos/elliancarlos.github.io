@@ -1,8 +1,6 @@
 {% if locale and locale != "en" %}
-<article class="translation-warning" role="alert">
-  <header>
-    <strong>🤖 {{ i18n[locale].post.translationWarning.title }}</strong>
-  </header>
-  <p>{{ i18n[locale].post.translationWarning.message }}</p>
-</article>
+<aside class="tty-note tty-note--warn" role="note">
+  <span class="tty-note__title">{{ i18n[locale].post.translationWarning.title }}</span>
+  <p class="tty-note__body">{{ i18n[locale].post.translationWarning.message }}</p>
+</aside>
 {% endif %}

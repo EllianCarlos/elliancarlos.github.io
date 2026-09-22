@@ -234,6 +234,21 @@ grep_in "styles/tty/layout.css" ".tty-archive .tty-menu--dense .tty-menu__item" 
 # aria-current="page" here — two would be an invalid ARIA state.
 count_exactly "posts/archive/index.html" 'aria-current="page"' 1 "exactly one nav tab is current on the archive page"
 
+section "post page"
+have "scripts/tty-progress.js"
+grep_in "posts/my-tools-2025/index.html" 'class="tty-post"' "the post screen wrapper is present"
+grep_in "posts/my-tools-2025/index.html" 'data-tty-progress' "the reading progress readout is present"
+grep_in "posts/my-tools-2025/index.html" 'class="tty-prose' "the body is inside the prose wrapper"
+grep_in "posts/my-tools-2025/index.html" 'class="tty-post__next"' "the next-post link is present"
+grep_in "posts/my-tools-2025/index.html" 'class="tty-caret"' "the caret closes the post"
+grep_in "posts/my-tools-2025/index.html" '/posts/tag/' "tag links are present"
+grep_in "posts/my-tools-2025/index.html" '/scripts/tty-progress.js' "the progress script is loaded"
+grep_not "posts/my-tools-2025/index.html" 'class="post-meta"' "the old Pico meta row is gone"
+grep_not "posts/my-tools-2025/index.html" 'class="tag-pill"' "the old tag pills are gone"
+grep_in "posts/my-tools-2024/index.html" 'class="tty-note tty-note--warn"' "the archived post shows a banner"
+grep_not "posts/my-tools-2025/index.html" 'class="tty-note tty-note--warn"' "an active post shows no banner"
+grep_in "styles/tty/layout.css" ".tty-post__progress" "the post screen CSS is present"
+
 printf '\n'
 if [ "$fails" -eq 0 ]; then
   printf 'check-build: all assertions passed\n'
