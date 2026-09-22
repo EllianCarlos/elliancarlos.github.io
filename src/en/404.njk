@@ -9,12 +9,17 @@ permalink: /404.html
 ---
 {% import "tty/core.njk" as tty %}
 <div class="tty-screen">
-  <section>
+  {#
+    id="error-404" is not decorative — it is the sole guard in
+    languageRedirect.njk against a redirect loop on an untranslated
+    language-prefixed 404 (e.g. /pt/pt/pt/...). Do not remove it.
+  #}
+  <section id="error-404">
     <p class="tty-eyebrow">status 404</p>
-    <h1 class="tty-h1" id="error-title" style="margin-top: 18px">{{ i18n.en.error.title }}</h1>
-    <p class="tty-prose tty-prose--md" id="error-message" style="margin-top: 18px">{{ i18n.en.error.message }}</p>
+    <h1 class="tty-h1" style="margin-top: 18px">{{ i18n.en.error.title }}</h1>
+    <p class="tty-prose tty-prose--md" style="margin-top: 18px">{{ i18n.en.error.message }}</p>
     <div style="margin-top: 26px">
-      <a class="tty-btn tty-btn--primary" id="error-link" href="/">{{ i18n.en.error.home }}</a>
+      <a class="tty-btn tty-btn--primary" href="/">{{ i18n.en.error.home }}</a>
     </div>
   </section>
 </div>

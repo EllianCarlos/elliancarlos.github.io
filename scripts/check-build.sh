@@ -15,7 +15,7 @@ passes=0
 # must not vanish silently. EXPECTED_ASSERTIONS is the total `passes + fails`
 # this script produces today, counted (not guessed) after every change to the
 # assertion list. See the check at the bottom of the file.
-EXPECTED_ASSERTIONS=242
+EXPECTED_ASSERTIONS=243
 
 pass() { printf '  ok   %s\n' "$1"; passes=$((passes + 1)); }
 bad()  { printf '  FAIL %s\n' "$1"; fails=$((fails + 1)); }
@@ -446,6 +446,10 @@ grep_in "404.html" 'class="tty-btn' "the 404 page offers a way home"
 grep_not "404.html" "language-select" "the dead language selector script is gone"
 grep_not "404.html" "page-header-content" "the dead page header lookup is gone"
 grep_in "404.html" "strippedPath" "the language-prefix redirect survives"
+# I2: id="error-404" is the sole guard in languageRedirect.njk against the
+# documented /pt/pt/pt/... redirect loop on an untranslated 404. It is inert
+# while i18n is disabled, but it must not silently disappear again.
+grep_in "404.html" 'id="error-404"' "the redirect-loop guard id survives on the 404 page"
 
 section "dead code is gone"
 if [ -f "$DIST/styles/style.css" ]; then bad "styles/style.css is deleted"; else pass "styles/style.css is deleted"; fi
