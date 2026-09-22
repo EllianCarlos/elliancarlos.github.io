@@ -22,7 +22,7 @@ repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 # must not vanish silently. EXPECTED_ASSERTIONS is the total `passes + fails`
 # this script produces today, counted (not guessed) after every change to the
 # assertion list. See the check at the bottom of the file.
-EXPECTED_ASSERTIONS=328
+EXPECTED_ASSERTIONS=330
 
 pass() { printf '  ok   %s\n' "$1"; passes=$((passes + 1)); }
 bad()  { printf '  FAIL %s\n' "$1"; fails=$((fails + 1)); }
@@ -168,6 +168,38 @@ section "data files are not pages"
 # line and a fixed-string match is sound.
 grep_not "sitemap.xml" "search-index" "the sitemap does not list the search index"
 grep_not "sitemap.xml" ".json</loc>" "the sitemap lists no .json file as a page"
+
+section "structured data"
+# The Person schema must not advertise languages the site does not serve. It used to
+# hard-code ["en", "pt", "es", "ja"] — the i18n plan's four — and kept claiming them
+# long after the site went English-only, so a reader following the claim found no page
+# in three of them.
+#
+# The first assertion is the rule itself. The second proves the JSON-LD still PARSES:
+# the tag is emitted by a conditional with a leading comma, and a stray or missing
+# comma is exactly the kind of break that leaves valid-looking markup and invalid
+# JSON, which no grep would notice.
+grep_not "index.html" '"knowsLanguage"' "the schema claims no language the site does not serve"
+ld_bad=""
+for f in "$DIST/index.html" "$DIST/posts/index.html" "$DIST/contact/index.html"; do
+  [ -f "$f" ] || continue
+  if ! python3 - "$f" >/dev/null 2>&1 <<'PY'
+import json, re, sys
+html = open(sys.argv[1], encoding="utf-8").read()
+blocks = re.findall(r'<script type="application/ld\+json">(.*?)</script>', html, re.S)
+assert blocks, "no ld+json block"
+for b in blocks:
+    json.loads(b)
+PY
+  then
+    ld_bad="$ld_bad $(basename "$(dirname "$f")")/$(basename "$f")"
+  fi
+done
+if [ -z "$ld_bad" ]; then
+  pass "every JSON-LD block parses as JSON"
+else
+  bad "every JSON-LD block parses as JSON (broken:$ld_bad)"
+fi
 
 section "icons and social thumbnails"
 # These are BUILD OUTPUT, not repository content: `bun run build` regenerates them

@@ -31,8 +31,27 @@
     "name": {{ seo.author.affiliation | dump | safe }}
   },
   "knowsAbout": {{ seo.author.knowsAbout | dump | safe }},
-  "sameAs": {{ sameAs | dump | safe }},
-  "knowsLanguage": ["en", "pt", "es", "ja"]
+  "sameAs": {{ sameAs | dump | safe }}
+  {#
+    knowsLanguage was hard-coded as ["en", "pt", "es", "ja"] — the i18n plan's four
+    languages. It outlived the plan: the site has built English-only since the
+    Cleanup commit, so the claim was advertising three languages a reader could not
+    find a single page in.
+
+    It is derived and gated now, not deleted outright, so it cannot go stale a second
+    time. `languages` comes from .eleventy.js and is `["en"]` while I18N_ENABLED is
+    false, which is why the gate is on i18nEnabled rather than on the list: one
+    language is not a multilingual claim worth making, and flipping the flag back on
+    restores the tag with whatever languages actually exist.
+
+    Note for whoever revisits this: schema.org knowsLanguage describes the PERSON,
+    not the site's translations. A deliberate claim about languages the author speaks
+    would be legitimate even with i18n off — it would just belong in seo.js as data,
+    beside knowsAbout, rather than being inferred from the build.
+  #}
+  {%- if i18nEnabled and languages.length > 1 %},
+  "knowsLanguage": {{ languages | dump | safe }}
+  {%- endif %}
 }
 </script>
 {% endif %}
