@@ -7,7 +7,11 @@
  *   venue    where the paper was published: the workshop, conference or journal
  *            that accepted it, with its year — or "preprint" if nothing has
  *            accepted it yet
- *   date     YYYY-MM-DD
+ *   date     YYYY-MM-DD. The day the paper was PRESENTED at `venue` — not the
+ *            day this entry was written, and not the camera-ready date. For a
+ *            workshop, that is the workshop's own day, which is often one day
+ *            inside a longer `host` conference. Take it from the venue's own
+ *            published programme, never from a previous year's schedule.
  *   pdf      site-absolute URL under /preprints/, matching a file in the
  *            repository-root preprints/ directory
  *
@@ -30,7 +34,11 @@ module.exports = [
     venue: "VEM 2026",
     host: "CBSOFT 2026",
     kind: "short paper",
-    date: "2026-09-21",
+    // VEM 2026 runs on 11 September 2026, one day inside CBSOFT 2026
+    // (8-11 September 2026, IME-USP, Sao Paulo). Confirmed on the workshop's own
+    // programme at https://vemworkshop.github.io/vem2026 and on the CBSOFT
+    // schedule. The previous value, 2026-09-21, matched neither.
+    date: "2026-09-11",
     pdf: "/preprints/Corporate_Truck_Factor__Firm_Level_Knowledge_Concentration_in_Linux_Kernel_Subsystems.pdf",
   },
 ];

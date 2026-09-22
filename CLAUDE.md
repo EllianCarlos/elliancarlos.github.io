@@ -209,6 +209,12 @@ renders as a tag beside the date. Leave a key out to omit it. The data file docu
 seven fields; `check-build.sh` keys its assertions to the template's own class names and
 separator, never to a venue or a kind, so renaming either never turns CI red.
 
+`date` is the day the paper was **presented**, not the day the entry was written and not
+the camera-ready date. A workshop usually runs on one day inside a longer `host`
+conference, so take the day from the venue's own published programme and cite it in a
+comment beside the value. Never carry a date over from a previous year's schedule. This
+is an academic record: a wrong date is worse than a missing one.
+
 ### Post frontmatter
 
 ```yaml
@@ -238,6 +244,43 @@ modified: 2025-08-01  # optional; shows "updated on"
   newlines. Sitemap hostname is hardcoded to `https://elliancarlos.com.br`. The
   site canonicalises on the apex domain, with no `www`: `.eleventy.js`,
   `src/_data/seo.js` and `CNAME` must all agree on it.
+
+### The contact address
+
+`src/en/contact.njk` writes the email address as HTML numeric character references, in the
+template as well as in the built page. Encoding only the output is pointless: this
+repository is public, so a harvester that regex-scans for `something@something.tld` would
+find the address in the source instead. Keep both encoded.
+
+A browser decodes the references before it builds the DOM, so the link works, copy and
+paste works, and a screen reader reads the address normally. This raises the cost for a
+naive scanner. It does not stop a scraper that parses HTML properly — do not describe it
+as protection.
+
+To change the address, re-encode it; never type it in plain form into the template. The
+template's own comment carries the two commands. `check-build.sh` decodes the built href
+and asserts it is a valid `mailto:`, and separately asserts that no plain address and no
+plain `mailto:` survive on the page. None of those assertions writes the address down, so
+they stay correct when it changes.
+
+### Links to the resume PDF
+
+`/Ellian_Carlos_Resume.pdf` is a passthrough copy linked from three places: the header
+nav, the footer, and the homepage link list. **Every link to it opens a new tab**, with
+`target="_blank" rel="noreferrer noopener"`, because a PDF that replaces the page is a
+dead end. It used to open a new tab from the header only.
+
+A new-tab link must also say so to a screen reader. The accessible name is the visible
+label followed by `i18n[locale].nav.opensPdfNewTab` — or `nav.opensNewTab` where the
+visible text already ends in `.pdf`, so the word is not read twice. Keep the visible label
+first in the accessible name, or WCAG 2.5.3 Label in Name breaks for voice control.
+
+`check-build.sh` counts every link to the PDF and asserts that the same number carry both
+attributes, so a fourth link cannot escape the rule.
+
+Because the nav ships a new-tab link on every page, a whole-page grep for `target="_blank"`
+now passes everywhere. Any assertion about a specific element's new-tab attributes must be
+scoped to that element's own tag.
 
 ## Deployment
 

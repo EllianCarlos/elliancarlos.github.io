@@ -15,7 +15,7 @@ passes=0
 # must not vanish silently. EXPECTED_ASSERTIONS is the total `passes + fails`
 # this script produces today, counted (not guessed) after every change to the
 # assertion list. See the check at the bottom of the file.
-EXPECTED_ASSERTIONS=294
+EXPECTED_ASSERTIONS=300
 
 pass() { printf '  ok   %s\n' "$1"; passes=$((passes + 1)); }
 bad()  { printf '  FAIL %s\n' "$1"; fails=$((fails + 1)); }
@@ -161,6 +161,53 @@ section "data files are not pages"
 # line and a fixed-string match is sound.
 grep_not "sitemap.xml" "search-index" "the sitemap does not list the search index"
 grep_not "sitemap.xml" ".json</loc>" "the sitemap lists no .json file as a page"
+
+section "the contact address and the outbound PDF"
+# The contact address is written as HTML numeric character references, in the
+# template as well as in the output, so neither this repository nor the built page
+# gives a harvester an address to regex out. The first three assertions test that
+# property from three sides; none of them writes the address down, so the owner can
+# change it without touching this file.
+contact="contact/index.html"
+grep_not "$contact" "mailto:" "the contact address ships no plain mailto"
+grep_not "$contact" "example.com" "the placeholder contact domain is gone"
+# The mastodon row legitimately carries "/@elliancarlos", which this pattern cannot
+# match: it demands a dot-separated domain after the @.
+if [ -f "$DIST/$contact" ] \
+  && grep -qE '[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.[A-Za-z]{2,}' "$DIST/$contact"; then
+  bad "no plain address survives on the contact page"
+else
+  pass "no plain address survives on the contact page"
+fi
+# Encoding is worthless if it encodes something broken, so decode the href back and
+# check it is a real mailto. The pattern names a shape, never an address.
+mail_href=$(grep -oE 'href="(&#[0-9]+;)+"' "$DIST/$contact" 2>/dev/null | head -1 \
+  | sed -E 's/^href="//; s/"$//' | perl -pe 's/&#(\d+);/chr($1)/ge')
+if printf '%s' "$mail_href" | grep -qE '^mailto:[^@[:space:]]+@[^@[:space:]]+\.[A-Za-z]{2,}$'; then
+  pass "the encoded contact href decodes to a valid mailto"
+else
+  bad "the encoded contact href decodes to a valid mailto (got '${mail_href:-none}')"
+fi
+
+# The resume PDF is linked from the header, the footer and the homepage. It used to
+# open in a new tab from the header only, so the same file replaced the page from
+# the other two. Both sides of each count are derived from the build, so adding a
+# fourth link to the PDF cannot quietly escape the rule.
+resume_href='href="/Ellian_Carlos_Resume.pdf"'
+resume_links=$(grep -rhoF --include='*.html' -e "$resume_href" "$DIST" | wc -l || true)
+resume_blank=$(grep -rhoF --include='*.html' -e "$resume_href target=\"_blank\"" "$DIST" | wc -l || true)
+resume_safe=$(grep -rhoF --include='*.html' \
+  -e "$resume_href target=\"_blank\" rel=\"noreferrer noopener\"" "$DIST" | wc -l || true)
+if [ "$resume_links" -gt 0 ] && [ "$resume_blank" -eq "$resume_links" ]; then
+  pass "every link to the resume opens a new tab ($resume_links links)"
+else
+  bad "every link to the resume opens a new tab ($resume_blank of $resume_links)"
+fi
+if [ "$resume_links" -gt 0 ] && [ "$resume_safe" -eq "$resume_links" ]; then
+  pass "every link to the resume opens that tab safely ($resume_links links)"
+else
+  bad "every link to the resume opens that tab safely ($resume_safe of $resume_links)"
+fi
 # The flag governs collection membership, not output: the file must still be
 # written, and must still hold records. Keyed to the index's own shape — the
 # `url` key and the `/posts/` prefix the permalink logic produces — never to a

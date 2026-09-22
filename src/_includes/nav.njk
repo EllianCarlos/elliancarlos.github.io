@@ -53,7 +53,7 @@
     {%- for item in navItems -%}
       {%- if item.asset or liveUrls.indexOf(" " + item.url + " ") >= 0 -%}
       {%- set on = (page.url == item.url) or (item.url != "/" and page.url.indexOf(item.url) == 0) -%}
-      <a class="tty-tabs__tab" href="{{ item.url }}"{% if item.asset %} target="_blank" rel="noreferrer noopener" aria-label="{{ item.label }} (PDF, opens in a new tab)"{% endif %}{% if on %} aria-current="page"{% endif %}>{{ item.label }}</a>
+      <a class="tty-tabs__tab" href="{{ item.url }}"{% if item.asset %} target="_blank" rel="noreferrer noopener" aria-label="{{ item.label }} {{ i18n[locale].nav.opensPdfNewTab }}"{% endif %}{% if on %} aria-current="page"{% endif %}>{{ item.label }}</a>
       {%- endif -%}
     {%- endfor -%}
   </nav>

@@ -12,7 +12,7 @@ layout: layouts/layout.njk
 <div class="tty-rail">
   {% call ttyc.terminal("whoami", "dots") %}
     <div class="tty-term__line"><span class="tty-term__prompt" aria-hidden="true">$</span> <span>whoami</span></div>
-    <div class="tty-term__out">ellian</div>
+    <div class="tty-term__out">elliancarlos</div>
     <div class="tty-term__line" style="margin-top: 8px"><span class="tty-term__prompt" aria-hidden="true">$</span> <span>pwd</span></div>
     <div class="tty-term__out">/brazil/sao-paulo</div>
     <div class="tty-term__line" style="margin-top: 8px"><span class="tty-term__prompt" aria-hidden="true">$</span> <span>groups</span></div>
@@ -118,7 +118,10 @@ layout: layouts/layout.njk
         </div>
         <div class="tty-linklist__row">
           <span class="tty-linklist__key">resume</span>
-          <a href="/Ellian_Carlos_Resume.pdf">Ellian_Carlos_Resume.pdf</a>
+          {# The visible text already ends in .pdf, so the accessible name adds
+             only the new-tab fact — saying "PDF" twice reads badly aloud. #}
+          <a href="/Ellian_Carlos_Resume.pdf" target="_blank" rel="noreferrer noopener"
+             aria-label="Ellian_Carlos_Resume.pdf {{ i18n.en.nav.opensNewTab }}">Ellian_Carlos_Resume.pdf</a>
         </div>
         <div class="tty-linklist__row">
           <span class="tty-linklist__key">feed</span>

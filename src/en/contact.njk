@@ -5,9 +5,29 @@ layout: layouts/layout.njk
 ---
 {% import "tty/core.njk" as tty %}
 {#
-  The email address below is the one this page has always shown. It looks like a
-  placeholder; changing a published address is the owner's call, not this
-  migration's. Ask before you touch it.
+  The email row is written as HTML numeric character references, not as text.
+  The address is real, and the encoding is deliberate at two levels:
+
+    - in the OUTPUT, so a harvester that regex-scans the page for
+      `something@something.tld` finds nothing to match;
+    - in this SOURCE, so the same regex finds nothing in the public repository
+      either. Encoding only the output would leave the address in plain sight
+      one click away on GitHub, which defeats the point.
+
+  A browser decodes the references before it builds the DOM, so the link works,
+  copy-and-paste works, and a screen reader reads the address normally. This
+  stops a naive scanner, not a scraper that parses HTML properly. Treat it as
+  raising the cost, not as a guarantee.
+
+  To read or change it, decode and re-encode with the entities, never by typing
+  the address in plain form:
+
+    python3 -c 'import html,sys; print(html.unescape(sys.argv[1]))' '<blob>'
+    python3 -c 'import sys; print("".join("&#%d;"%ord(c) for c in sys.argv[1]))' '<addr>'
+
+  `check-build.sh` decodes the built href and asserts it is a valid mailto. It
+  never writes the address down, so this comment and that assertion stay true
+  when the address changes.
 #}
 <div class="tty-screen">
   <section>
@@ -15,7 +35,7 @@ layout: layouts/layout.njk
     <div class="tty-linklist" style="margin-top: 22px">
       <div class="tty-linklist__row">
         <span class="tty-linklist__key">{{ i18n.en.contact.email }}</span>
-        <a href="mailto:elliancarlos@example.com">elliancarlos@example.com</a>
+        <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#101;&#108;&#108;&#105;&#97;&#110;&#99;&#97;&#114;&#108;&#111;&#115;&#64;&#103;&#109;&#97;&#105;&#108;&#46;&#99;&#111;&#109;">&#101;&#108;&#108;&#105;&#97;&#110;&#99;&#97;&#114;&#108;&#111;&#115;&#64;&#103;&#109;&#97;&#105;&#108;&#46;&#99;&#111;&#109;</a>
       </div>
       <div class="tty-linklist__row">
         <span class="tty-linklist__key">git</span>

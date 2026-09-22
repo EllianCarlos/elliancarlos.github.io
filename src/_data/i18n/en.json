@@ -9,7 +9,9 @@
     "preprints": "preprints",
     "contact": "contact",
     "resume": "resume",
-    "academicCv": "academic cv"
+    "academicCv": "academic cv",
+    "opensPdfNewTab": "(PDF, opens in a new tab)",
+    "opensNewTab": "(opens in a new tab)"
   },
   "search": {
     "open": "Search posts",
