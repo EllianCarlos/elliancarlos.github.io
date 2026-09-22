@@ -126,7 +126,7 @@ be revisited if this schema gets another pass.
 ### Templates & layouts
 
 - `src/_includes/layouts/layout.njk` — base HTML (SEO meta, Open Graph, hreflang,
-  the TTY stylesheet, Prism theme, GA). `post.njk` extends it for blog posts.
+  the TTY stylesheet, GA). `post.njk` extends it for blog posts.
 - Layout aliases: `layouts/post.njk` → `post`, `layouts/base.njk` → `base`.
 - `src/_data/seo.js` — site-wide SEO/social constants (siteName, baseUrl, author).
 - Styling: the **TTY design system** — see "Design system (TTY)" above.

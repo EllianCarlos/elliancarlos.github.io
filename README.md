@@ -7,16 +7,16 @@ Personal website and blog of Ellian Carlos. The site is live at
 
 ## Stack
 
-| Part                    | Tool                                                             |
-| ----------------------- | ---------------------------------------------------------------- |
-| Static site generator   | [Eleventy](https://www.11ty.dev/) 2.x                            |
-| Templates               | Nunjucks and Markdown                                            |
-| Package manager         | [Bun](https://bun.sh/)                                           |
-| Styles                  | TTY design system (vendored, `src/styles/tty/`)                   |
-| Client-side search      | [FlexSearch](https://github.com/nextapps-de/flexsearch)          |
-| Development environment | Nix, [devenv](https://devenv.sh/), [direnv](https://direnv.net/) |
-| Hosting                 | Netlify                                                          |
-| Build check             | `scripts/check-build.sh` (assertions over `dist/`)                |
+| Part                    | Tool|
+| ----------------------- | ----------------------------------------------------------------|
+| Static site generator   | [Eleventy](https://www.11ty.dev/) 2.x|
+| Templates               | Nunjucks and Markdown|
+| Package manager         | [Bun](https://bun.sh/)|
+| Styles                  | TTY design system (vendored, `src/styles/tty/`)|
+| Client-side search      | [FlexSearch](https://github.com/nextapps-de/flexsearch)|
+| Development environment | Nix, [devenv](https://devenv.sh/), [direnv](https://direnv.net/)|
+| Hosting                 | Netlify|
+| Build check             | `scripts/check-build.sh` (assertions over `dist/`)|
 
 ## Prerequisites
 
@@ -79,11 +79,11 @@ After setup, direnv loads the environment each time you enter the directory.
 
 ## Commands
 
-| Command         | Action                                                     |
-| --------------- | ---------------------------------------------------------- |
-| `bun run start` | Start the development server with live reload on port 8080 |
-| `bun run build` | Build the production site into `dist/`                     |
-| `bun run clean` | Delete the `dist/` folder                                  |
+| Command         | Action|
+| --------------- | ----------------------------------------------------------|
+| `bun run start` | Start the development server with live reload on port 8080|
+| `bun run build` | Build the production site into `dist/`|
+| `bun run clean` | Delete the `dist/` folder|
 
 The devenv shell also exposes `build` and `clean` as bare scripts. The
 `processes.dev.exec` process runs `bun run start`.
