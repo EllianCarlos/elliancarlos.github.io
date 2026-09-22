@@ -296,11 +296,14 @@ Do **not** add an `aria-label` carrying the plain address to make the row read b
 aloud. That puts the address back in the markup. A screen reader reads the words as
 written, which is verbose but unambiguous.
 
-The page lists six channels: the address, git, work, social, lattes, orcid. Every one that
-leaves the site carries `target="_blank" rel="noreferrer noopener"`, and `check-build.sh`
-counts both sides so a seventh row cannot skip it. The Lattes URL comes from
-`seo.social.lattes`, the same constant the footer's "academic cv" link uses, so the two
-cannot drift.
+The page lists six channels: the address, git, work, social, academic cv, orcid. Every one
+that leaves the site carries `target="_blank" rel="noreferrer noopener"`, and
+`check-build.sh` counts both sides so a seventh row cannot skip it.
+
+The research curriculum is called **"academic cv"** everywhere — never "lattes". The label
+is `i18n[locale].nav.academicCv` at all three sites that link it (footer, homepage, contact
+page), and the URL is `seo.social.lattes` at all three, so neither the name nor the address
+can drift. "Lattes" is the host, and it appears only inside the URL text.
 
 `data-contact-email` is the assertion hook and carries no CSS. `check-build.sh` reads that
 element's text and asserts it says something AND that what it says does not parse as an

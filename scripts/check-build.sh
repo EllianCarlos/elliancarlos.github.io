@@ -15,7 +15,7 @@ passes=0
 # must not vanish silently. EXPECTED_ASSERTIONS is the total `passes + fails`
 # this script produces today, counted (not guessed) after every change to the
 # assertion list. See the check at the bottom of the file.
-EXPECTED_ASSERTIONS=307
+EXPECTED_ASSERTIONS=308
 
 pass() { printf '  ok   %s\n' "$1"; passes=$((passes + 1)); }
 bad()  { printf '  FAIL %s\n' "$1"; fails=$((fails + 1)); }
@@ -202,9 +202,14 @@ if [ -n "$email_text" ] \
 else
   pass "the contact row does not parse as an address"
 fi
-# Six channels today: the address, git, work, social, lattes, orcid. `at_least`, so
-# adding a seventh is an ordinary authoring action and only losing one turns CI red.
+# Six channels today. `at_least`, so adding a seventh is an ordinary authoring
+# action and only losing one turns CI red.
 count_at_least "$contact" 'class="tty-linklist__row"' 6 "the contact page lists every channel"
+# The research curriculum is called "academic cv" everywhere on this site, from
+# i18n nav.academicCv. This row was briefly labelled "lattes", which gave one URL
+# two names. The needle is an exact label cell, so the URL text "lattes.cnpq.br/…"
+# cannot match it — and it names the retired term, not the owner's copy.
+grep_not "$contact" '>lattes<' "the research curriculum is not labelled twice over"
 # Every channel that leaves the site must leave it safely. Both sides are counted
 # out of the page, so a new row cannot quietly skip the rel — and no URL is named,
 # so the owner can change any profile link.

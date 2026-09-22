@@ -54,12 +54,19 @@ layout: layouts/layout.njk
         <span class="tty-linklist__key">social</span>
         <a href="{{ seo.social.mastodon }}" target="_blank" rel="me noreferrer noopener">mastodon.social/@elliancarlos</a>
       </div>
-      {# Lattes is the Brazilian research curriculum. The URL comes from
-         seo.social.lattes, which the footer's "academic cv" link already uses, so
-         the two can never drift. That constant is https; the CNPq site also
-         answers on http, and there is no reason to ship the weaker scheme. #}
+      {# The Brazilian research curriculum, hosted on Lattes. The site calls this
+         "academic cv" and nothing else: the label is i18n[locale].nav.academicCv,
+         the same string the footer and the homepage use. It was briefly labelled
+         "lattes" here, which gave one URL two names on one site.
+
+         The URL itself comes from seo.social.lattes, so no template holds a second
+         copy of it. That constant is https; CNPq also answers on http, and there is
+         no reason to ship the weaker scheme.
+
+         The visible text is the URL, following every other row on this page. Only
+         the key column carries the name. #}
       <div class="tty-linklist__row">
-        <span class="tty-linklist__key">lattes</span>
+        <span class="tty-linklist__key">{{ i18n.en.nav.academicCv }}</span>
         <a href="{{ seo.social.lattes }}" target="_blank" rel="noreferrer noopener">lattes.cnpq.br/3423853440338718</a>
       </div>
       <div class="tty-linklist__row">
