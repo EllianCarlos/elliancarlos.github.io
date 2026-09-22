@@ -114,22 +114,59 @@ async function ensureFonts() {
 }
 
 // ── Icons ─────────────────────────────────────────────────────────────────
-// One lowercase `e`, the way Euler's number is set: JetBrains Mono Bold Italic.
+// A shell prompt and one lowercase `e`: `> e`. The prompt is upright Bold, the `e`
+// is Bold ITALIC, the way Euler's number is set. Two styles composed as two images,
+// not one string — a single -annotate can only carry one font.
 //
-// Silkscreen cannot do this. It is a caps-only pixel font, so a lowercase `e`
-// comes out as a capital E — which is why the display font is not used here even
-// though it is the display font everywhere else.
+// Silkscreen is not used even though it is the display font everywhere else: it is
+// caps-only, so a lowercase `e` comes out as a capital E.
 //
-// Every size is supersampled from 512px rather than drawn at its final size. A
-// 16px `e` drawn directly loses its counter to antialiasing and reads as a blob;
-// downscaling from 512 keeps the counter open. `-level` restores the contrast the
+// Two glyphs is the ceiling for a 16px square. `>_e` was tried and abandoned: three
+// glyphs leave about 5px each, and the underscore merges with the `e`'s baseline so
+// it reads as a face rather than a prompt. Stacking `>_` above the `e` makes the
+// prompt a speck. Do not re-add a third glyph without looking at 16px first.
+//
+// Centring is done by TRIMMING to the ink and centring that, never by nudging a
+// baseline offset. The first version used a fixed +28px nudge to compensate for the
+// font's ascender padding; it overshot, and the icon sat low. Ink-trimming makes
+// font metrics irrelevant.
+//
+// Every size is supersampled from 512px. A 16px glyph drawn directly loses its
+// counter to antialiasing and reads as a blob; `-level` restores the contrast the
 // downscale costs, and it is needed most at the smallest size.
 function renderIcons() {
+  const raw = (fontKey, text, out) => {
+    const tmp = join(TMP, "raw.png");
+    magick([
+      "-size", "1400x900", "xc:none",
+      "-font", font(fontKey), "-pointsize", 480, "-fill", C.yellow,
+      "-gravity", "center", "-annotate", "+0+0", text,
+      tmp,
+    ]);
+    magick([tmp, "-trim", "+repage", out]);
+  };
+
+  const prompt = join(TMP, "prompt-glyph.png");
+  const letter = join(TMP, "letter-glyph.png");
+  raw("bold", ">", prompt);
+  raw("boldItalic", "e", letter);
+
+  // The prompt is set shorter than the letter, as it is in a real terminal line.
+  magick([prompt, "-resize", "x220", prompt]);
+  magick([letter, "-resize", "x300", letter]);
+
+  // +smush joins them horizontally with a gap, ignoring their own canvas offsets.
+  const pair = join(TMP, "pair.png");
+  magick([prompt, letter, "-background", "none", "-gravity", "center", "+smush", 64, pair]);
+
+  // `-alpha remove` composites onto the root surface. Without it the square stays
+  // transparent and the glyph sits on whatever the browser paints behind a tab —
+  // which looked correct in a flattened JPEG preview and would have shipped wrong.
   const master = join(TMP, "icon-master.png");
   magick([
-    "-size", "512x512", `xc:${C.root}`,
-    "-font", font("boldItalic"), "-pointsize", 380,
-    "-fill", C.yellow, "-gravity", "center", "-annotate", "+0+28", "e",
+    pair, "-resize", "420x420",
+    "-background", C.root, "-gravity", "center", "-extent", "512x512",
+    "-alpha", "remove", "-alpha", "off",
     master,
   ]);
 
