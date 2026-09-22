@@ -7,7 +7,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Personal website/blog (elliancarlos.com.br) built with **Eleventy (11ty) 2.x**, Nunjucks
 templates, and Markdown content. **Bun** is the package manager (not npm/pnpm). The dev
 environment is provisioned via **Nix + devenv + direnv** — entering the directory
-auto-loads the shell and installs Bun + dependencies.
+auto-loads the shell and installs Bun + dependencies. The visual layer is the **TTY
+design system** — a TUI-flavoured system vendored into `src/styles/tty/`. Pico CSS was
+removed in the design system migration.
 
 ## Commands
 
@@ -18,10 +20,56 @@ bun run clean    # rm -rf dist
 ```
 
 Inside the devenv shell, `build` and `clean` are also exposed as bare scripts, and
-`processes.dev.exec` runs `bun run start`. There is **no test suite, linter, or
-typecheck** — verification means running `bun run build` and inspecting `dist/`.
+`processes.dev.exec` runs `bun run start`.
+
+There is **no unit test suite, linter, or typecheck**. Verification is
+`bun run build && ./scripts/check-build.sh` — an assertion harness over the built `dist/`
+tree. It never builds, so it cannot fight `eleventy --serve`; stop the dev server before
+you build. Inside the devenv shell, `check` does both steps. CI runs the same script.
+
+**Add an assertion to `scripts/check-build.sh` for every change you make.** It is the only
+regression net this repository has.
 
 Formatting: Prettier with `printWidth: 80` and `proseWrap: "always"` (see `.prettierrc`).
+
+## Design system (TTY)
+
+All styling comes from the TTY design system. Read `src/styles/tty.css` first — it is an
+`@import` list and it names every part in load order.
+
+- `src/styles/tty/tokens/` — **eight files copied byte-for-byte from the design system
+  archive.** Do not edit them and do not run Prettier over them. To take a new version of
+  the system, re-copy all eight.
+- `src/styles/tty/webfonts.css` — **this site's own file, not a copied one.**
+  `tokens/fonts.css` fetches Silkscreen from the jsdelivr `@latest` tag, which is mutable,
+  so this file re-declares the two faces against `silkscreen@5.3.0`. It must stay imported
+  after the tokens: two `@font-face` rules for the same family, weight and style resolve to
+  the last one declared. Keep every `@import` line at the top of `tty.css`, above any rule —
+  an `@import` after a style rule is ignored.
+- `src/styles/tty/core.css` — Button, Tag, Badge, KeyHint, Divider, Panel, Tabs, Input,
+  MenuList as `.tty-*` classes.
+- `src/styles/tty/content.css` — the post row, terminal window, foldout, caret and prose
+  wrapper.
+- `src/styles/tty/layout.css` — the page shell, screen grids, and the per-screen blocks
+  (post, hero, archive, paper row, search overlay).
+- `src/styles/tty/prose.css` — the Markdown body treatment.
+- `src/styles/tty/prism-tty.css` — Prism token colours and the code-block chrome. It owns
+  the toolbar CSS that used to come from the CDN, because `.eleventy.js` injects its Prism
+  block before `</body>` and a CDN stylesheet there wins every tie.
+
+Macros mirror the CSS: `src/_includes/tty/core.njk` (`btn`, `tag`, `badge`, `keyhint`,
+`divider`, `panel`) and `src/_includes/tty/content.njk` (`postrow`, `terminal`, `foldout`).
+`panel`, `terminal` and `foldout` take their body through `caller()`, so call them with
+`{% call %}`. A class that appears in a macro must exist in the matching CSS file.
+
+The rules that matter when you write new markup: two fonts, one accent colour
+(`--yellow`), square corners, 1px rules or `--shadow-hard` instead of soft shadows,
+stepped easing, no emoji, no SVG icons — Unicode glyphs only. Two layouts, not five:
+compact below 1280px and desktop at 1280px and up.
+
+Four scripts, each loaded only by the page that needs it except the first:
+`tty-search.js` (the `/` overlay, on every page), `tty-progress.js` (post pages),
+`tty-typewriter.js` (`/posts/`), `tty-archive.js` (`/posts/archive/`).
 
 ## Architecture
 
@@ -54,9 +102,9 @@ machinery behaves and how to bring a language back, not the site's current outpu
   `en`. The plain `posts` collection is an English-only alias kept for backward
   compatibility.
 - **Translations are linked by `translationKey`** in post frontmatter — the same key
-  across `src/en/posts/x.md` and `src/pt/posts/x.md` marks them as the same post. The
-  `postInLanguage` filter checks whether a translation exists. Not meaningful today
-  since no translated posts exist, but the field is harmless to set on new posts.
+  across `src/en/posts/x.md` and `src/pt/posts/x.md` marks them as the same post. Not
+  meaningful today since no translated posts exist, but the field is harmless to set on
+  new posts.
 - **Untranslated fallback**: non-English post pages show `translationWarning.njk`
   (a banner) when viewing an English post under a translated path.
 - **`switchLanguage` / `i18nUrl` filters** rewrite URLs between locales (used for the
@@ -78,11 +126,10 @@ be revisited if this schema gets another pass.
 ### Templates & layouts
 
 - `src/_includes/layouts/layout.njk` — base HTML (SEO meta, Open Graph, hreflang,
-  Pico CSS, Prism theme, GA). `post.njk` extends it for blog posts.
+  the TTY stylesheet, Prism theme, GA). `post.njk` extends it for blog posts.
 - Layout aliases: `layouts/post.njk` → `post`, `layouts/base.njk` → `base`.
 - `src/_data/seo.js` — site-wide SEO/social constants (siteName, baseUrl, author).
-- Styling: **Pico CSS 2** (CDN) + `src/styles/style.css` and `blog.css`. Dark theme
-  is forced via `data-theme="dark"` on `<html>`.
+- Styling: the **TTY design system** — see "Design system (TTY)" above.
 
 ### Blog features
 
@@ -91,13 +138,33 @@ be revisited if this schema gets another pass.
   computes each page's permalink and locale.
 - **Search**: client-side via **FlexSearch**. `search-index.njk` emits one JSON file
   per language (`/search-index-<lang>.json`) from the `searchIndex_<lang>` collection;
-  `src/scripts/search.js` loads and queries it. The index's `contentExcerpt` is built by
-  reading each post's raw file in `.eleventy.js` (truncated to 2500 chars).
+  `tty-search.js` (the `/` overlay, see "Design system (TTY)" above) loads and queries
+  it. The index's `contentExcerpt` is built by reading each post's raw file in
+  `.eleventy.js` (truncated to 2500 chars).
 - **Syntax highlighting**: server-side via `@11ty/eleventy-plugin-syntaxhighlight`, plus
   an `injectPrismPlugins` transform that appends Prism toolbar/copy-button scripts to any
   HTML page containing highlighted code.
 - **Heading anchors**: `markdown-it-anchor` with a custom `slugifyHeading` (must match
   the TOC slug logic in `.eleventy.js`).
+
+### Archived posts
+
+A post with `archived: true` in its frontmatter leaves the `/posts/` landing page and
+nothing else. It keeps its URL, stays in `feed.xml`, `sitemap.xml`, `llms.txt` and the
+search index, shows a banner on its own page, and appears on `/posts/archive/` with an
+`ARCHIVED` badge. The `postsActive_<lang>` collection is the filtered one; `posts_<lang>`
+is still everything.
+
+`/posts/archive/` is the full record: every post, numbered, grouped by year, with a tag
+rail that links to the existing `/posts/tag/<slug>/` pages and a sort toggle that is a CSS
+flip rather than a re-sort.
+
+### Preprints
+
+`/preprints/` lists papers from `src/_data/preprints.js`. Each row links straight to a PDF
+in a new tab. The PDFs live in `preprints/` at the repository root and reach `dist/` through
+a passthrough copy. Adding a paper is two steps: drop the PDF in `preprints/`, add an entry
+to the data file.
 
 ### Post frontmatter
 
@@ -113,6 +180,7 @@ translationKey: my-post   # links translations across languages; inert while i18
 description: "..."    # used for SEO + search index
 tags: [tools]
 modified: 2025-08-01  # optional; shows "updated on"
+archived: true        # optional; drops the post from /posts/ only, see "Archived posts"
 ---
 ```
 

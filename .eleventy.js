@@ -33,32 +33,6 @@ function contentExcerptForSearch(raw, maxLength = 2500) {
   return text.length <= maxLength ? text : text.slice(0, maxLength);
 }
 
-const sneakPeak = (postText, imagePostUrl, textBeforeImage, textAfterImage) => {
-  let firstText = postText.replace(/<[^>]+>/g, "").slice(0, 255) + "...";
-
-  let imagePost = "";
-  let lastText = "";
-
-  if (textBeforeImage) {
-    firstText = textBeforeImage;
-  }
-
-  if (textAfterImage) {
-    lastText = textAfterImage;
-  }
-
-  if (imagePostUrl) {
-    imagePost = `<img src="${imagePostUrl}" />`;
-  } else {
-    const imgReg = new RegExp('<\s*?img\s+[^>]*?\s*src\s*=\s*(["\'])((\\?+.)*?)\1[^>]*?>');
-    // const imgReg = new RegExp('<\\s*?img\\s+[^>]*?\\s*src\\s*=\\s*(["\'])(([\\x3F]+.)*?)\\1[^>]*?>');
-    if (postText.match(imgReg)) imagePost = imgReg.exec(postText)[0];
-  }
-
-
-  return `${firstText}\n${imagePost}\n${lastText}`;
-}
-
 module.exports = function (eleventyConfig) {
 
   // i18n Configuration
@@ -405,13 +379,6 @@ module.exports = function (eleventyConfig) {
     return newUrl;
   });
 
-  // Check if post translation exists
-  eleventyConfig.addFilter("postInLanguage", function(post, targetLang) {
-    if (!post || !post.data || !post.data.translationKey) return false;
-    const allPosts = this.ctx.collections[`posts_${targetLang}`] || [];
-    return allPosts.some(p => p.data.translationKey === post.data.translationKey);
-  });
-
   // Permalink computation for language directories
   eleventyConfig.addGlobalData("permalink", function() {
     return (data) => {
@@ -451,10 +418,6 @@ module.exports = function (eleventyConfig) {
 
   eleventyConfig.addFilter("postDate", date => {
     return `${date.getFullYear()}-${leftPadDate(date.getMonth() + 1)}-${leftPadDate(date.getDate())}`
-  });
-
-  eleventyConfig.addFilter("sneakPeakPost", function (data) {
-    return sneakPeak(data.content)
   });
 
   return {

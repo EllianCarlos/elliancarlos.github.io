@@ -362,6 +362,15 @@ grep_not "404.html" "language-select" "the dead language selector script is gone
 grep_not "404.html" "page-header-content" "the dead page header lookup is gone"
 grep_in "404.html" "strippedPath" "the language-prefix redirect survives"
 
+section "dead code is gone"
+if [ -f "$DIST/styles/style.css" ]; then bad "styles/style.css is deleted"; else pass "styles/style.css is deleted"; fi
+if [ -f "$DIST/styles/blog.css" ]; then bad "styles/blog.css is deleted"; else pass "styles/blog.css is deleted"; fi
+if [ -f "$DIST/scripts/search.js" ]; then bad "scripts/search.js is deleted"; else pass "scripts/search.js is deleted"; fi
+have "scripts/tty-search.js"
+have "scripts/tty-progress.js"
+have "scripts/tty-typewriter.js"
+have "scripts/tty-archive.js"
+
 printf '\n'
 if [ "$fails" -eq 0 ]; then
   printf 'check-build: all assertions passed\n'

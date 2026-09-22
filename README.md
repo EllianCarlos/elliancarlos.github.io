@@ -12,10 +12,11 @@ Personal website and blog of Ellian Carlos. The site is live at
 | Static site generator   | [Eleventy](https://www.11ty.dev/) 2.x                            |
 | Templates               | Nunjucks and Markdown                                            |
 | Package manager         | [Bun](https://bun.sh/)                                           |
-| Styles                  | [Pico CSS](https://picocss.com/) 2                               |
+| Styles                  | TTY design system (vendored, `src/styles/tty/`)                   |
 | Client-side search      | [FlexSearch](https://github.com/nextapps-de/flexsearch)          |
 | Development environment | Nix, [devenv](https://devenv.sh/), [direnv](https://direnv.net/) |
 | Hosting                 | Netlify                                                          |
+| Build check             | `scripts/check-build.sh` (assertions over `dist/`)                |
 
 ## Prerequisites
 
@@ -87,8 +88,11 @@ After setup, direnv loads the environment each time you enter the directory.
 The devenv shell also exposes `build` and `clean` as bare scripts. The
 `processes.dev.exec` process runs `bun run start`.
 
-The project has no test suite and no linter. To verify a change, run
-`bun run build`. Then inspect the output in `dist/`.
+The project has no unit test suite and no linter. Verification is
+`bun run build && ./scripts/check-build.sh` — an assertion harness that runs over the
+built `dist/` tree. The script never builds, so it cannot fight `bun run start`; stop the
+dev server before you build. Add an assertion to `scripts/check-build.sh` for every
+change you make — it is the only regression net this repository has.
 
 Prettier formats the source files. See `.prettierrc` for the configuration.
 
