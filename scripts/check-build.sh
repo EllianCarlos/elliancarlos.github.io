@@ -15,7 +15,7 @@ passes=0
 # must not vanish silently. EXPECTED_ASSERTIONS is the total `passes + fails`
 # this script produces today, counted (not guessed) after every change to the
 # assertion list. See the check at the bottom of the file.
-EXPECTED_ASSERTIONS=310
+EXPECTED_ASSERTIONS=312
 
 pass() { printf '  ok   %s\n' "$1"; passes=$((passes + 1)); }
 bad()  { printf '  FAIL %s\n' "$1"; fails=$((fails + 1)); }
@@ -177,8 +177,9 @@ grep_not "$contact" "example.com" "the placeholder contact domain is gone"
 # Numeric and hex character references are the two encodings most likely to creep
 # back, because they look like a clever fix. They are not: they invert.
 grep_not "$contact" "&#" "the contact page smuggles no character-reference encoding"
-# The mastodon row legitimately carries "/@elliancarlos", which this pattern cannot
-# match: it demands a dot-separated domain after the @.
+# The pattern demands a dot-separated domain after the @, so a bare handle such as
+# "/@elliancarlos" in a profile URL cannot match it. That mattered while the page
+# linked mastodon.social/@elliancarlos; it still guards the next handle-shaped URL.
 if [ -f "$DIST/$contact" ] \
   && grep -qE '[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.[A-Za-z]{2,}' "$DIST/$contact"; then
   bad "no plain address survives on the contact page"
@@ -202,9 +203,20 @@ if [ -n "$email_text" ] \
 else
   pass "the contact row does not parse as an address"
 fi
-# Six channels today. `at_least`, so adding a seventh is an ordinary authoring
-# action and only losing one turns CI red.
-count_at_least "$contact" 'class="tty-linklist__row"' 6 "the contact page lists every channel"
+# Five channels today: the address, git, work, academic cv, orcid. The mastodon row
+# is gone — the owner no longer uses the account. `at_least`, so adding a channel is
+# an ordinary authoring action and only losing one turns CI red.
+count_at_least "$contact" 'class="tty-linklist__row"' 5 "the contact page lists every channel"
+# The account is retired site-wide, not just unlinked from one page: the row, the
+# footer link, the seo.social key and the sameAs entry in the JSON-LD all went. A
+# leftover anywhere — including inside a schema block, which no row count can see —
+# would still advertise an address the owner has abandoned.
+mastodon_hits=$(grep -rliF --include='*.html' -e 'mastodon' "$DIST" | tr '\n' ' ')
+if [ -n "$mastodon_hits" ]; then
+  bad "no page links or names mastodon ($mastodon_hits)"
+else
+  pass "no page links or names mastodon"
+fi
 # The research curriculum is called "academic cv" on every page, from i18n
 # nav.academicCv. It was briefly "lattes" on the contact page and "cv" on the
 # homepage — one URL under three names. The sweep is site-wide, not per page,
@@ -367,6 +379,27 @@ count_at_least "index.html" 'class="tty-tabs__tab"' 5 "the four page tabs and th
 grep_in "index.html" 'href="/preprints/"' "the nav tab for preprints opens once the page exists"
 grep_in "index.html" 'data-tty-search-open hidden' "the search control stays hidden until a script can open it"
 grep_in "index.html" 'class="tty-foot"' "the new footer is present"
+# The footer's "elsewhere" row hand-writes a "·" between each pair of links, so the
+# separators must always number one fewer than the links. Removing a link and
+# forgetting its separator leaves a dangling "·"; this is how that shows up. Both
+# numbers come out of the built row, so adding or dropping a link is fine as long as
+# the pair stays consistent. The row is read newline-flattened, since its links wrap.
+# Two traps, both of which this assertion fell into before it worked:
+#   - `.*?` is lazy only in PCRE. In a basic-grep pattern `\?` just makes the
+#     preceding `.*` optional, so the match ran past this row and counted the next
+#     one's links too. Hence perl.
+#   - "elsewhere" is also the homepage link list's own label, and it appears first
+#     in the document. The anchor must carry the footer's own class, or the match
+#     starts in the wrong block entirely.
+foot_row=$(tr '\n' ' ' < "$DIST/index.html" \
+  | perl -ne 'print $1 if m{tty-foot__mark">elsewhere<(.*?)<span class="tty-spacer">}' || true)
+foot_links=$(printf '%s' "$foot_row" | grep -oF '</a>' | wc -l || true)
+foot_seps=$(printf '%s' "$foot_row" | grep -oF '·' | wc -l || true)
+if [ "$foot_links" -gt 0 ] && [ "$foot_seps" -eq $((foot_links - 1)) ]; then
+  pass "the footer separates its links without a dangling one ($foot_links links, $foot_seps separators)"
+else
+  bad "the footer separates its links without a dangling one ($foot_links links, $foot_seps separators)"
+fi
 grep_in "posts/index.html" 'aria-current="page"' "the active tab is marked on /posts/"
 grep_in "index.html" 'content="#0A0A09"' "the theme colour is the root surface"
 grep_not "index.html" "mobile-menu-toggle" "the old hamburger is gone"
@@ -872,10 +905,10 @@ grep_in "index.html" 'class="tty-linklist__key">resume<' "the elsewhere list car
 # This replaced `grep_in ... '__key">cv<'`, which pinned the label of one row — and
 # the owner then renamed that label to "academic cv" for consistency with the
 # contact page, so the assertion failed on a change it should never have noticed.
-# That is finding I3 in miniature. Seven rows today: git, work, social, orcid,
-# academic cv, resume, feed. `at_least`, so adding a channel is an ordinary
-# authoring action, and only losing one turns CI red.
-count_at_least "index.html" 'class="tty-linklist__row"' 7 "the elsewhere list keeps every row"
+# That is finding I3 in miniature. Six rows today: git, work, orcid, academic cv,
+# resume, feed — the mastodon row is gone with the account. `at_least`, so adding a
+# channel is an ordinary authoring action, and only losing one turns CI red.
+count_at_least "index.html" 'class="tty-linklist__row"' 6 "the elsewhere list keeps every row"
 grep_in "index.html" "Brazilian software engineer" "the biography text survives"
 grep_in "index.html" "I love languages" "the rest of the biography survives"
 grep_in "index.html" "other topics I like to discuss" "the closing biography sentence survives"

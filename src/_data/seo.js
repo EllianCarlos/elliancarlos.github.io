@@ -27,7 +27,11 @@ module.exports = {
   social: {
     github: "https://www.github.com/elliancarlos",
     linkedin: "https://www.linkedin.com/in/elliancarlos",
-    mastodon: "https://www.mastodon.social/@elliancarlos",
+    // No mastodon key: the account is not in use. An empty string would read as
+    // "not created yet", which is what the note above means, so the key is gone
+    // instead. structuredData.njk no longer lists it in sameAs either — leaving a
+    // dangling `seo.social.mastodon` there would rely on `| select()` silently
+    // dropping an undefined value.
     lattes: "https://lattes.cnpq.br/3423853440338718",
     orcid: "https://orcid.org/0009-0004-9135-8207",
     scholar: "",

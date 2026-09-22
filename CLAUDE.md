@@ -296,9 +296,16 @@ Do **not** add an `aria-label` carrying the plain address to make the row read b
 aloud. That puts the address back in the markup. A screen reader reads the words as
 written, which is verbose but unambiguous.
 
-The page lists six channels: the address, git, work, social, academic cv, orcid. Every one
-that leaves the site carries `target="_blank" rel="noreferrer noopener"`, and
-`check-build.sh` counts both sides so a seventh row cannot skip it.
+The page lists five channels: the address, git, work, academic cv, orcid. Every one that
+leaves the site carries `target="_blank" rel="noreferrer noopener"`, and `check-build.sh`
+counts both sides so a new row cannot skip it.
+
+**Mastodon is retired.** The account is out of use, so the row, the footer link, the
+`seo.social.mastodon` key and the `sameAs` entry in `structuredData.njk` are all gone — and
+with them the only `rel="me"` on the site. `check-build.sh` sweeps every built page for the
+word, because a leftover inside a JSON-LD block is invisible to any row count. To retire
+another profile, remove all four places; do not leave the `seo.social` key as an empty
+string, which that object's note reserves for an account not yet created.
 
 The research curriculum is called **"academic cv"** everywhere — never "lattes", never
 "cv". The label is `i18n[locale].nav.academicCv` at all three sites that link it (footer,
