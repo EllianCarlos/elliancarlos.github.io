@@ -22,7 +22,7 @@ repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 # must not vanish silently. EXPECTED_ASSERTIONS is the total `passes + fails`
 # this script produces today, counted (not guessed) after every change to the
 # assertion list. See the check at the bottom of the file.
-EXPECTED_ASSERTIONS=327
+EXPECTED_ASSERTIONS=328
 
 pass() { printf '  ok   %s\n' "$1"; passes=$((passes + 1)); }
 bad()  { printf '  FAIL %s\n' "$1"; fails=$((fails + 1)); }
@@ -245,6 +245,10 @@ og_ok() {
     bad "thumbnail $1 is 1200x630 and under ${OG_MAX_KB}KB (got ${got:-unreadable}, ${kb}KB)"
   fi
 }
+# Both paths must serve a valid card: /og/site.png is what the tags point at now,
+# and /og-image.png is kept alive for platforms holding a cached card that still
+# references it. If the legacy path 404s, those cards break entirely.
+og_ok "og/site.png"
 og_ok "og-image.png"
 
 # Every thumbnail, not just the default — one oversized file is enough to break the
@@ -321,16 +325,34 @@ else
   bad "twitter:image advertises the same images as og:image"
 fi
 
-# At least one post page must carry its OWN thumbnail, or posts.11tydata.js has
-# silently stopped resolving and every share falls back to the site default. Counted
-# across all post pages rather than naming one: naming a slug would turn CI red the
-# day that post is renamed, which is finding I3.
-own_og=$(grep -rlE '<meta property="og:image" content="[^"]*/og/[^"]*"' \
-  --include='index.html' "$DIST/posts" 2>/dev/null | wc -l)
-if [ "$own_og" -gt 0 ]; then
-  pass "post pages advertise their own thumbnails ($own_og pages)"
+# Each post page must advertise the thumbnail for ITS OWN slug.
+#
+# A looser version of this checked only for "/og/" in the URL, and the site default
+# moved to /og/site.png — which would have made it pass on the fallback and stop
+# testing anything. So compare the URL's basename against the directory's name: the
+# only two acceptable answers are "<slug>.png" (its own) and "site.png" (the
+# documented fallback). Anything else is a mis-wired slug, which no count can see.
+#
+# No slug is written down here, so renaming a post cannot turn CI red — that is I3.
+own_og=0
+wrong_og=""
+for dir in "$DIST"/posts/*/; do
+  slug=$(basename "$dir")
+  [ "$slug" = "tag" ] && continue
+  [ -f "$dir/index.html" ] || continue
+  url=$(grep -oE '<meta property="og:image" content="[^"]*"' "$dir/index.html" \
+    | head -1 | sed -E 's/.*content="([^"]*)".*/\1/')
+  base=${url##*/}
+  case "$base" in
+    "$slug.png") own_og=$((own_og + 1)) ;;
+    site.png) ;;
+    *) wrong_og="$wrong_og $slug->$base" ;;
+  esac
+done
+if [ "$own_og" -gt 0 ] && [ -z "$wrong_og" ]; then
+  pass "each post advertises the thumbnail for its own slug ($own_og posts)"
 else
-  bad "post pages advertise their own thumbnails (none do — has \`bun run images\` been run?)"
+  bad "each post advertises the thumbnail for its own slug (own=$own_og wrong:${wrong_og:-none})"
 fi
 
 section "the contact address and the outbound PDF"

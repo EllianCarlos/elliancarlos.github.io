@@ -400,6 +400,19 @@ glyphs is the ceiling for a 16px square; `>_e` and a stacked `>_` over `e` were 
 and both collapse, and the script says so. Centring comes from flex layout, never from a
 hand-tuned baseline offset — the first version used a fixed nudge and sat visibly low.
 
+The site default is **`/og/site.png`**, not `/og-image.png`. That old path served a
+different image for years, so every platform that had scraped it kept showing the stale
+picture after the bytes changed — LinkedIn and Facebook cache a card for days and only
+re-fetch when told. **Changing an image's contents under a URL that has been shared does
+not change what scrapers show.** Publish a new path instead. `/og-image.png` is still
+generated, with the current bytes, so any cached card pointing there resolves rather than
+404ing — a broken card is worse than a stale one.
+
+A consequence for assertions: the default now also lives under `/og/`, so a check for
+"`/og/` appears in a post's og:image" would pass on the fallback and test nothing. The
+assertion compares each post's og:image **basename against its own directory name**
+instead, accepting only `<slug>.png` or `site.png`.
+
 Thumbnails are **1200×630**, asserted per file, with a 400 KB budget. The image this replaced
 was 2848×1504 and **5.1 MB** — over the ceiling several scrapers enforce, so it may not have
 rendered at all on some platforms. `og:image:width`/`height` are declared in `layout.njk`;

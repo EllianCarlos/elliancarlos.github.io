@@ -389,18 +389,27 @@ console.log("thumbnails");
 // The site default: every page that is not a post, and any post whose thumbnail has
 // not been generated. The homepage's own terminal runs `whoami`, so this shows the
 // same command rather than a post's `cat title`.
-await render(
-  thumbElement({
-    windowName: "~",
-    command: "whoami",
-    title: "Ellian Carlos",
-    meta: "software engineer   ·   empirical software engineering   ·   linux kernel",
-  }),
-  W,
-  H,
-  join(PUBLIC, "og-image.png"),
-);
-console.log("  thumb og-image.png (site default)");
+const siteThumb = thumbElement({
+  windowName: "~",
+  command: "whoami",
+  title: "Ellian Carlos",
+  meta: "software engineer   ·   empirical software engineering   ·   linux kernel",
+});
+
+// The canonical default, at a URL no cache has ever held.
+//
+// /og-image.png carried the old 5.1 MB teal image for years. Replacing its CONTENTS
+// left every platform that had already scraped it showing the stale picture, because
+// LinkedIn and Facebook cache a card for days and only re-fetch when told to. A new
+// path sidesteps the entire problem: there is nothing cached to serve.
+await render(siteThumb, W, H, join(OG_DIR, "site.png"));
+console.log("  thumb og/site.png (site default)");
+
+// And the old path keeps working, with the NEW bytes. Deleting it would 404 for any
+// platform still holding a cached card that points there, which breaks the card
+// outright — worse than showing a stale image. 21 KB to avoid that.
+await render(siteThumb, W, H, join(PUBLIC, "og-image.png"));
+console.log("  thumb og-image.png (legacy path, same image)");
 
 const slugs = readdirSync(join(DIST, "posts"), { withFileTypes: true })
   .filter((d) => d.isDirectory() && d.name !== "tag")

@@ -1,7 +1,11 @@
 module.exports = {
   siteName: "Ellian Carlos",
   baseUrl: "https://elliancarlos.com.br",
-  defaultImage: "https://elliancarlos.com.br/og-image.png",
+  // /og/site.png, not /og-image.png. The old path served a different image for
+  // years, so every platform that scraped it has a cached card; changing the bytes
+  // under the same URL left the stale picture in place. A path with no cache
+  // history is the only reliable fix. The old URL still resolves, with these bytes.
+  defaultImage: "https://elliancarlos.com.br/og/site.png",
   author: {
     name: "Ellian Carlos",
     url: "https://elliancarlos.com.br",
