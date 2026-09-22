@@ -15,7 +15,7 @@ passes=0
 # must not vanish silently. EXPECTED_ASSERTIONS is the total `passes + fails`
 # this script produces today, counted (not guessed) after every change to the
 # assertion list. See the check at the bottom of the file.
-EXPECTED_ASSERTIONS=323
+EXPECTED_ASSERTIONS=326
 
 pass() { printf '  ok   %s\n' "$1"; passes=$((passes + 1)); }
 bad()  { printf '  FAIL %s\n' "$1"; fails=$((fails + 1)); }
@@ -260,6 +260,27 @@ if [ "$checked_og" -gt 0 ] && [ -z "$missing_og" ]; then
   pass "every og:image the site advertises exists in the build ($checked_og distinct)"
 else
   bad "every og:image the site advertises exists in the build (missing:${missing_og:-none checked})"
+fi
+
+# The declared size must equal the size actually shipped, or the tags lie to every
+# scraper that trusts them. The needles are fixed, but they are not a second source
+# of truth: the geometry assertions above read the real PNGs, so a thumbnail
+# generated at another size fails there first.
+grep_in "index.html" '<meta property="og:image:width" content="1200">' \
+  "the declared thumbnail width matches the files"
+grep_in "index.html" '<meta property="og:image:height" content="630">' \
+  "the declared thumbnail height matches the files"
+# Every page needs a non-empty alt: the card is an image, and a screen reader on a
+# platform that renders one has nothing else to read. Derived from the page title,
+# so this checks the template wired it, not what the title says.
+alt_missing=$(grep -rlE '<meta property="og:image:alt" content="(| — [^"]*)">' \
+  --include='*.html' "$DIST" | tr '\n' ' ')
+alt_n=$(grep -rl '<meta property="og:image:alt"' --include='*.html' "$DIST" | wc -l)
+html_n=$(find "$DIST" -name '*.html' | wc -l)
+if [ "$alt_n" -eq "$html_n" ] && [ -z "$alt_missing" ]; then
+  pass "every page gives its thumbnail an alt text ($alt_n pages)"
+else
+  bad "every page gives its thumbnail an alt text ($alt_n of $html_n; empty:${alt_missing:-none})"
 fi
 
 # A scraper that reads twitter:image instead of og:image must get the same picture.

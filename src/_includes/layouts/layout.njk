@@ -30,6 +30,18 @@ type: index
   <meta property="og:type" content="{{ ogType or 'website' }}">
   <meta property="og:url" content="{{ seo.baseUrl }}{{ page.url }}">
   <meta property="og:image" content="{{ ogImage or seo.defaultImage }}">
+  {#
+    Declaring the size lets a scraper lay the card out before it has finished
+    downloading the image, and LinkedIn in particular is more reliable with it.
+    The numbers are safe to hard-code because they are not a guess: every
+    thumbnail is produced at 1200x630 by scripts/make-images.mjs, and
+    check-build.sh asserts that geometry on the default AND on every post
+    thumbnail. If one is ever generated at another size, the suite fails before
+    these tags can start lying.
+  #}
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="{{ pageTitle }} — {{ seo.siteName }}">
   <meta property="og:locale" content="{{ locale or 'en' }}">
   <meta property="og:site_name" content="{{ seo.siteName }}">
 
