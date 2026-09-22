@@ -72,7 +72,10 @@ description: Thoughts on software engineering, tools, languages, and technology.
     {% call ttyc.terminal("~/posts") %}
       <div class="tty-term__line">
         <span class="tty-term__prompt" aria-hidden="true">$</span>
-        <span data-tty-type data-text="ellian posts --recent 3" data-speed="55">ellian posts --recent 3</span>
+        {# data-text and the element's own text must stay identical: the script
+           types data-text, and the text is what a reader without JavaScript
+           sees. check-build.sh compares the two. #}
+        <span data-tty-type data-text="elliancarlos posts --recent 3" data-speed="55">elliancarlos posts --recent 3</span>
       </div>
       <div class="tty-term__out" style="margin-top: 10px">
         {%- for post in posts.slice(0, 3) -%}
@@ -137,7 +140,12 @@ description: Thoughts on software engineering, tools, languages, and technology.
       </div>
       <div class="tty-linklist__row">
         <span class="tty-linklist__key">search</span>
-        <span>{{ i18n.en.blog.searchHint }}</span>
+        {# One i18n field with a named {key} slot, NOT one field per fragment: the
+           slot keeps the sentence translatable in any word order, and the key cap
+           is the same .tty-kbd the nav's keyhint uses. `safe` is sound here — the
+           string is this repository's own, and the only markup injected is the
+           literal below. #}
+        <span>{{ i18n.en.blog.searchHint | replace("{key}", '<kbd class="tty-kbd">/</kbd>') | safe }}</span>
       </div>
     </div>
   {% endcall %}

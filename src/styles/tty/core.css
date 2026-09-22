@@ -150,7 +150,11 @@
 /* ── KeyHint ────────────────────────────────────────────────────────────── */
 .tty-keyhint { display: inline-flex; align-items: center; gap: 6px; }
 .tty-keyhint__keys { display: inline-flex; gap: 3px; }
-.tty-keyhint kbd {
+/* `.tty-kbd` is the same key cap, for a key that sits inside a sentence rather
+   than in a keyhint's key group — the "press / anywhere" hint on /posts/. One
+   rule serves both, so a key never renders two ways on the same site. */
+.tty-keyhint kbd,
+.tty-kbd {
   display: inline-flex;
   align-items: center;
   justify-content: center;

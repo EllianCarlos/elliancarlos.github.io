@@ -30,6 +30,21 @@ you build. Inside the devenv shell, `check` does both steps. CI runs the same sc
 **Add an assertion to `scripts/check-build.sh` for every change you make.** It is the only
 regression net this repository has.
 
+Two rules for writing one, both learned from assertions that looked fine and tested
+nothing:
+
+- **Assert the relationship, never the copy.** Derive both sides from the build — a count
+  against a count, one element's text against another's. An assertion that names a post
+  title, a tag, a venue or a total turns CI red on an ordinary authoring turn.
+- **Flatten newlines before you count tags.** `grep` is line-based, so an opening tag
+  written across two lines matches neither `<a href="…"[^>]*>` nor the stricter pattern
+  beside it. It vanishes from *both* sides of a comparison, the totals still agree, and the
+  assertion silently stops watching the one tag it was written for. Pipe through
+  `tr '\n' ' '` first. This already happened once, to the footer's source link.
+
+Mutation-test every assertion you add: break the thing it guards, confirm the suite fails
+on that exact line, and restore. An assertion that never failed has not been tested.
+
 Formatting: Prettier with `printWidth: 80` and `proseWrap: "always"` (see `.prettierrc`).
 
 ## Design system (TTY)
@@ -47,7 +62,10 @@ All styling comes from the TTY design system. Read `src/styles/tty.css` first �
   the last one declared. Keep every `@import` line at the top of `tty.css`, above any rule —
   an `@import` after a style rule is ignored.
 - `src/styles/tty/core.css` — Button, Tag, Badge, KeyHint, Divider, Panel, Tabs, Input,
-  MenuList as `.tty-*` classes.
+  MenuList as `.tty-*` classes. One rule draws every key cap: `.tty-keyhint kbd,
+  .tty-kbd`. Use `.tty-kbd` for a key inside a sentence (the "press `/` anywhere" hint on
+  `/posts/`) and the `keyhint` macro for a key group. Never add a second key style — a key
+  must not render two ways on one site.
 - `src/styles/tty/content.css` — the post row, terminal window, foldout, caret and prose
   wrapper.
 - `src/styles/tty/layout.css` — the page shell, screen grids, and the per-screen blocks
@@ -186,6 +204,17 @@ The hero above the list is an eyebrow plus a headline, and they must say differe
 things: `blog.eyebrow` carries the descriptive sentence, `blog.headline` names the page.
 They once held the identical string, so the page printed one sentence twice.
 
+When a UI string needs markup inside it — a key cap, a link, emphasis — keep **one** i18n
+field and put a named slot in it, then `replace` the slot in the template. `blog.searchHint`
+is the example: `"press {key} anywhere"` becomes `press <kbd class="tty-kbd">/</kbd>
+anywhere`. A named slot is not the antipattern below: it survives any word order, so a
+translation can move it. Splitting the sentence into `searchHintBefore` and
+`searchHintAfter` is the antipattern, because it hard-codes English word order.
+
+The typewriter line on `/posts/` holds the same string twice, in `data-text` and as the
+element's own text — `tty-typewriter.js` types the attribute, and the text is what a reader
+without JavaScript sees. They must stay identical; `check-build.sh` compares them.
+
 **Never split a piece of prose across sibling data fields.** The headline used to be
 `heroLine1`, `heroLine2` and `heroLine3`, joined in the template by hard `<br>` tags.
 That forces the author to re-balance three strings after every edit, and the break points
@@ -266,6 +295,12 @@ decision rather than a quiet one.
 Do **not** add an `aria-label` carrying the plain address to make the row read better
 aloud. That puts the address back in the markup. A screen reader reads the words as
 written, which is verbose but unambiguous.
+
+The page lists six channels: the address, git, work, social, lattes, orcid. Every one that
+leaves the site carries `target="_blank" rel="noreferrer noopener"`, and `check-build.sh`
+counts both sides so a seventh row cannot skip it. The Lattes URL comes from
+`seo.social.lattes`, the same constant the footer's "academic cv" link uses, so the two
+cannot drift.
 
 `data-contact-email` is the assertion hook and carries no CSS. `check-build.sh` reads that
 element's text and asserts it says something AND that what it says does not parse as an

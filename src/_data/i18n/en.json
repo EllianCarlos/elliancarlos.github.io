@@ -30,7 +30,7 @@
     "recent": "recent",
     "feeds": "feeds",
     "feedsHint": "3 endpoints",
-    "searchHint": "press / anywhere",
+    "searchHint": "press {key} anywhere",
     "allPosts": "all posts",
     "postsTagged": "posts tagged",
     "noPostsWithTag": "No posts carry this tag.",

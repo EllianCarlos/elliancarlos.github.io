@@ -15,7 +15,7 @@ passes=0
 # must not vanish silently. EXPECTED_ASSERTIONS is the total `passes + fails`
 # this script produces today, counted (not guessed) after every change to the
 # assertion list. See the check at the bottom of the file.
-EXPECTED_ASSERTIONS=302
+EXPECTED_ASSERTIONS=307
 
 pass() { printf '  ok   %s\n' "$1"; passes=$((passes + 1)); }
 bad()  { printf '  FAIL %s\n' "$1"; fails=$((fails + 1)); }
@@ -202,16 +202,42 @@ if [ -n "$email_text" ] \
 else
   pass "the contact row does not parse as an address"
 fi
+# Six channels today: the address, git, work, social, lattes, orcid. `at_least`, so
+# adding a seventh is an ordinary authoring action and only losing one turns CI red.
+count_at_least "$contact" 'class="tty-linklist__row"' 6 "the contact page lists every channel"
+# Every channel that leaves the site must leave it safely. Both sides are counted
+# out of the page, so a new row cannot quietly skip the rel — and no URL is named,
+# so the owner can change any profile link.
+#
+# Both counts read a NEWLINE-FLATTENED copy of the page. grep is line-based, so an
+# opening tag written across two lines matches neither pattern — it drops out of
+# both sides, the totals still agree, and the assertion goes vacuous for exactly
+# the link it should be watching. That happened here: the footer's source link was
+# split over two lines and silently escaped the check.
+out_links=$(tr '\n' ' ' < "$DIST/$contact" \
+  | grep -oE '<a href="https?://[^"]*"[^>]*>' | wc -l || true)
+out_safe=$(tr '\n' ' ' < "$DIST/$contact" \
+  | grep -oE '<a href="https?://[^"]*" target="_blank" rel="[^"]*noreferrer[^"]*noopener[^"]*">' \
+  | wc -l || true)
+if [ "$out_links" -gt 0 ] && [ "$out_safe" -eq "$out_links" ]; then
+  pass "every outbound contact link opens safely ($out_links links)"
+else
+  bad "every outbound contact link opens safely ($out_safe of $out_links)"
+fi
 
 # The resume PDF is linked from the header, the footer and the homepage. It used to
 # open in a new tab from the header only, so the same file replaced the page from
 # the other two. Both sides of each count are derived from the build, so adding a
 # fourth link to the PDF cannot quietly escape the rule.
+# Newline-flattened, for the reason spelled out on the outbound-contact counts
+# above: a line-based grep cannot see an opening tag split across lines, and it
+# would drop that tag from both counts at once.
+flat_html() { find "$DIST" -name '*.html' -exec cat {} + 2>/dev/null | tr '\n' ' '; }
 resume_href='href="/Ellian_Carlos_Resume.pdf"'
-resume_links=$(grep -rhoF --include='*.html' -e "$resume_href" "$DIST" | wc -l || true)
-resume_blank=$(grep -rhoF --include='*.html' -e "$resume_href target=\"_blank\"" "$DIST" | wc -l || true)
-resume_safe=$(grep -rhoF --include='*.html' \
-  -e "$resume_href target=\"_blank\" rel=\"noreferrer noopener\"" "$DIST" | wc -l || true)
+resume_links=$(flat_html | grep -oF -e "$resume_href" | wc -l || true)
+resume_blank=$(flat_html | grep -oF -e "$resume_href target=\"_blank\"" | wc -l || true)
+resume_safe=$(flat_html \
+  | grep -oF -e "$resume_href target=\"_blank\" rel=\"noreferrer noopener\"" | wc -l || true)
 if [ "$resume_links" -gt 0 ] && [ "$resume_blank" -eq "$resume_links" ]; then
   pass "every link to the resume opens a new tab ($resume_links links)"
 else
@@ -717,6 +743,25 @@ grep_in "posts/index.html" 'tty-h1--hero' "the hero title is present"
 # string was the headline, word for word. The negative assertion now lives in
 # "the hero headline is one responsive field".
 grep_in "posts/index.html" 'class="tty-term"' "the terminal demo is present"
+# tty-typewriter.js types data-text into the element, so data-text and the
+# element's own text are two copies of one string: the text is what a reader
+# without JavaScript sees, and data-text is what everyone else watches appear. If
+# they drift, the line silently changes as it types. Neither copy is written down
+# here, so the command can be reworded freely.
+type_attr=$(grep -oE 'data-text="[^"]*"' "$DIST/posts/index.html" 2>/dev/null | head -1 \
+  | sed -E 's/^data-text="//; s/"$//')
+type_text=$(grep -oE '<span data-tty-type[^>]*>[^<]*</span>' "$DIST/posts/index.html" 2>/dev/null \
+  | head -1 | sed -E 's|<[^>]*>||g')
+if [ -n "$type_attr" ] && [ "$type_attr" = "$type_text" ]; then
+  pass "the typewriter types the same line it already shows"
+else
+  bad "the typewriter types the same line it already shows (attr='$type_attr' text='$type_text')"
+fi
+# The "press / anywhere" hint marks the key as a key. .tty-kbd is the same cap the
+# nav's keyhint uses, so a key never renders two ways on one site — which means the
+# markup assertion and the CSS assertion both have to hold.
+grep_in "posts/index.html" '<kbd class="tty-kbd">' "the search hint marks its key as a key"
+grep_in "styles/tty/core.css" ".tty-kbd {" "the standalone key cap has a rule to render with"
 grep_in "posts/index.html" 'data-tty-type' "the typewriter target is present"
 grep_in "posts/index.html" '/scripts/tty-typewriter.js' "the typewriter script is loaded"
 grep_in "posts/index.html" 'class="tty-postrow"' "post rows use the design system row"

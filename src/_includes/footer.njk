@@ -32,7 +32,8 @@
       <span class="tty-spacer"></span>
       <span class="tty-foot__meta">
         {{ i18n[locale].footer.copyleft }}
-        <a href="https://www.github.com/elliancarlos/elliancarlos.github.io">{{ i18n[locale].footer.source }}</a>
+        {# This was the one outbound link in the footer with no target and no rel. #}
+        <a href="https://www.github.com/elliancarlos/elliancarlos.github.io" target="_blank" rel="noreferrer noopener">{{ i18n[locale].footer.source }}</a>
       </span>
     </div>
     <div class="tty-foot__row tty-foot__row--quiet">
