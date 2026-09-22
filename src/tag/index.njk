@@ -1,33 +1,37 @@
 ---
 layout: layouts/layout.njk
-relative_path: ../..
 type: blog
 pagination:
   data: collections.tagPages
   size: 1
   alias: tagPage
 ---
-{% set postsInTag = collections['posts_' + tagPage.lang] | filterByTag(tagPage.tag) %}
-<p><a href="{% if locale == 'en' %}/posts/{% else %}/{{ locale }}/posts/{% endif %}">{{ i18n[locale].blog.allPosts }}</a></p>
-<h1>{{ i18n[locale].blog.postsTagged }} {{ tagPage.tag }}</h1>
-{% if postsInTag.length == 0 %}
-<p>{{ i18n[locale].blog.noPostsWithTag }}</p>
-{% else %}
-{% for post in postsInTag %}
-<article>
-  <h2 class="blog">
-    <a class="blog" href="{{ post.url }}">{{ post.data.title }}</a>
-  </h2>
-  <small>{{ post.data.place + " -" }} {{ post.data.date | postDate }} ( {{ post.data.language }} ) </small>
-  {% if post.data.tags and post.data.tags.length %}
-  <div class="post-tags">
-    {% for tag in post.data.tags %}
-    <a href="{% if locale == 'en' %}/posts/tag/{% else %}/{{ locale }}/posts/tag/{% endif %}{{ tag | tagSlug }}/" class="tag-pill">{{ tag }}</a>
-    {% endfor %}
+{% import "tty/core.njk" as tty %}
+{% import "tty/content.njk" as ttyc %}
+{#
+  One page per (language, tag) pair. `tagPage`, `permalink` and `locale` are
+  computed in src/tag/tag.11tydata.js — do not set them here.
+
+  Like /posts/archive/, this lists archived posts too and badges them. A tag page
+  is a record of what carries the tag, not a reading list.
+#}
+{%- set posts = collections['posts_' + tagPage.lang] | filterByTag(tagPage.tag) -%}
+{%- set idx = posts | postIndexes -%}
+<div class="tty-archive">
+  <div class="tty-archive__head">
+    <h1 class="tty-h1">{{ i18n[locale].blog.postsTagged }} {{ tagPage.tag }}</h1>
+    <span class="tty-archive__count">{{ posts.length | plural(i18n[locale].blog.post, i18n[locale].blog.count) }}</span>
+    <span class="tty-spacer"></span>
+    <a class="tty-btn tty-btn--sm" href="{{ '/posts/archive' | i18nUrl(locale) }}/">{{ i18n[locale].blog.archive }}</a>
+  </div>
+
+  {% if posts.length == 0 %}
+  <p class="tty-search__empty">{{ i18n[locale].blog.noPostsWithTag }}</p>
+  {% else %}
+  <div class="tty-archive__rows">
+    {%- for post in posts -%}
+      {{ ttyc.postrow(post, idx[post.url], post.data.archived) }}
+    {%- endfor -%}
   </div>
   {% endif %}
-  <br />
-  <p>{{ post | sneakPeakPost }}</p>
-</article>
-{% endfor %}
-{% endif %}
+</div>

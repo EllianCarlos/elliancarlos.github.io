@@ -278,6 +278,15 @@ grep_not "posts/index.html" '<h2 class="blog">' "the old Pico post headings are 
 count_at_least "posts/index.html" 'class="tty-term__path"' 3 "the terminal lists three recent slugs"
 count_at_least "posts/index.html" 'class="tty-postrow"' 13 "every active post is listed (13 today)"
 
+section "tag pages"
+have "posts/tag/linux/index.html"
+grep_in "posts/tag/linux/index.html" 'class="tty-postrow"' "tag pages use the design system row"
+grep_in "posts/tag/linux/index.html" 'class="tty-archive__head"' "tag pages reuse the archive head"
+grep_in "posts/tag/linux/index.html" "/posts/archive/" "a tag page links back to the archive"
+grep_in "posts/tag/japanese/index.html" '>1 post</span>' "a one-post tag page counts in the singular"
+grep_not "posts/tag/linux/index.html" 'class="tag-pill"' "the old tag pills are gone"
+grep_not "posts/tag/linux/index.html" '<h2 class="blog">' "the old Pico headings are gone"
+
 printf '\n'
 if [ "$fails" -eq 0 ]; then
   printf 'check-build: all assertions passed\n'
