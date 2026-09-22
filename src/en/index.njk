@@ -4,9 +4,52 @@ seoTitle: Ellian Carlos
 description: Software engineer at Amazon and CS master's candidate at USP, researching open source and the Linux kernel. Writing on tools, languages, and systems.
 layout: layouts/layout.njk
 ---
-<h1>About Me</h1>
+{% import "tty/core.njk" as tty %}
+{% import "tty/content.njk" as ttyc %}
+{%- set recent = collections.postsActive_en -%}
+
+{% macro rail() %}
+<div class="tty-rail">
+  {% call ttyc.terminal("whoami", "dots") %}
+    <div class="tty-term__line"><span class="tty-term__prompt" aria-hidden="true">$</span> <span>whoami</span></div>
+    <div class="tty-term__out">ellian</div>
+    <div class="tty-term__line" style="margin-top: 8px"><span class="tty-term__prompt" aria-hidden="true">$</span> <span>pwd</span></div>
+    <div class="tty-term__out">/brazil/sao-paulo</div>
+    <div class="tty-term__line" style="margin-top: 8px"><span class="tty-term__prompt" aria-hidden="true">$</span> <span>groups</span></div>
+    <div class="tty-term__out">amazon ime-usp</div>
+  {% endcall %}
+  <div>
+    {{ tty.divider(i18n.en.blog.recent) }}
+    <ul class="tty-menu tty-menu--dense" style="margin-top: 10px">
+      {%- for post in recent -%}
+      {%- if loop.index <= 4 -%}
+      <li>
+        <a class="tty-menu__item" href="{{ post.url }}">
+          <span class="tty-menu__cursor" aria-hidden="true">›</span>
+          <span class="tty-menu__label">{{ post.data.title }}</span>
+          <span class="tty-menu__hint">{{ post | readingTime }}</span>
+        </a>
+      </li>
+      {%- endif -%}
+      {%- endfor -%}
+    </ul>
+  </div>
+</div>
+{% endmacro %}
+
+<div class="tty-split tty-split--rail-wide">
+  <div>
+    <h1 class="tty-h1">{{ i18n.en.nav.about }}</h1>
+
+    <div class="tty-when-compact">
+      {% call ttyc.foldout(i18n.en.blog.recent, "4 posts") %}
+        {{ rail() }}
+      {% endcall %}
+    </div>
+
+    <div class="tty-prose" style="margin-top: 22px">
       <p>
-      Hi there, 👋! My name is Ellian Carlos. I'm a Brazilian software engineer and computer science master's candidate in USP. I'm also a husband to a loving wife and a son to loving parents!
+      Hi there! My name is Ellian Carlos. I'm a Brazilian software engineer and computer science master's candidate in USP. I'm also a husband to a loving wife and a son to loving parents!
       </p>
       <p>
       I'm a Software Development Engineer at Amazon, and I hold a bachelor's in Information Systems from the ICMC, an institute of the University of São Paulo.
@@ -22,17 +65,19 @@ layout: layouts/layout.njk
       I can't emphasize how much I like studying, I love to dive deep into technical details and to get lost into mathematical representations of the world and computers.
       I am curious about almost everything, also I don't have a specific type of learning, I like practical or theoretical things, readings, lectures or hands-on projects, everything is valid.
       </p>
-      <p> 
+      <p>
       I also love teaching, I would never be good student if it wasn't for the incredible teachers I had in my journey.
       As I see it, one of my main missions is to form other engineers, be it by teaching or creating an environment where innovation and excitement can guide new people into their learning journey.
       </p>
-    <h3>Currently</h3>
-    <p>
-    I'm pursuing my master's degree with a focus on Open Source development, while deepening my expertise in Rust and systems architecture and design. At Amazon, I'm contributing to governmental compliance solutions that enable the company's global expansion. I'm also exploring the potential of agentic AI to enhance development workflows and problem-solving approaches.
-    </p>
-    <h3> My Beliefs </h3>
-      <p> 
-      I believe that the world is built by people and for people. I believe that all education and knowledge should be free to all and with equal opportunity to access. 
+
+      <h2>Currently</h2>
+      <p>
+      I'm pursuing my master's degree with a focus on Open Source development, while deepening my expertise in Rust and systems architecture and design. At Amazon, I'm contributing to governmental compliance solutions that enable the company's global expansion. I'm also exploring the potential of agentic AI to enhance development workflows and problem-solving approaches.
+      </p>
+
+      <h2>My Beliefs</h2>
+      <p>
+      I believe that the world is built by people and for people. I believe that all education and knowledge should be free to all and with equal opportunity to access.
       I also believe that we all are keepers of the world and ourselves and we should honor that.
       </p>
       <p>
@@ -40,5 +85,50 @@ layout: layouts/layout.njk
       This implies a responsibility to be frugal with energy resources and to provide accessibility as a must in all our applications.
       </p>
       <p>
-      If you want to know my tools, opinions and other topics I like to discuss, you can <a href="/posts" class="button">Read my Blog!</a>.
+      If you want to know my tools, opinions and other topics I like to discuss, you can read my posts.
       </p>
+    </div>
+
+    <div style="margin-top: 26px">
+      {{ tty.btn(i18n.en.blog.readPosts, "/posts/", "primary") }}
+    </div>
+
+    <div style="margin-top: 34px">
+      {{ tty.divider(i18n.en.footer.elsewhere) }}
+      <div class="tty-linklist" style="margin-top: 14px">
+        <div class="tty-linklist__row">
+          <span class="tty-linklist__key">git</span>
+          <a href="{{ seo.social.github }}" target="_blank" rel="noreferrer noopener">github.com/elliancarlos</a>
+        </div>
+        <div class="tty-linklist__row">
+          <span class="tty-linklist__key">work</span>
+          <a href="{{ seo.social.linkedin }}" target="_blank" rel="noreferrer noopener">linkedin.com/in/elliancarlos</a>
+        </div>
+        <div class="tty-linklist__row">
+          <span class="tty-linklist__key">social</span>
+          <a href="{{ seo.social.mastodon }}" target="_blank" rel="me noreferrer noopener">mastodon.social/@elliancarlos</a>
+        </div>
+        <div class="tty-linklist__row">
+          <span class="tty-linklist__key">orcid</span>
+          <a href="{{ seo.social.orcid }}" target="_blank" rel="noreferrer noopener">orcid.org/0009-0004-9135-8207</a>
+        </div>
+        <div class="tty-linklist__row">
+          <span class="tty-linklist__key">cv</span>
+          <a href="{{ seo.social.lattes }}" target="_blank" rel="noreferrer noopener">{{ i18n.en.nav.academicCv }}</a>
+        </div>
+        <div class="tty-linklist__row">
+          <span class="tty-linklist__key">resume</span>
+          <a href="/Ellian_Carlos_Resume.pdf">Ellian_Carlos_Resume.pdf</a>
+        </div>
+        <div class="tty-linklist__row">
+          <span class="tty-linklist__key">feed</span>
+          <a href="/feed.xml">feed.xml</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <aside class="tty-rail--sticky tty-when-desktop">
+    {{ rail() }}
+  </aside>
+</div>

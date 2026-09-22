@@ -301,6 +301,56 @@ grep_in "preprints/index.html" 'aria-current="page"' "the preprints tab is marke
 grep_in "llms.txt" "/preprints/" "llms.txt points at the preprints page"
 grep_in "styles/tty/layout.css" ".tty-paper__title" "the paper row CSS is present"
 
+section "homepage"
+grep_in "index.html" 'class="tty-prose"' "the biography is inside the prose wrapper"
+grep_in "index.html" 'class="tty-term"' "the whoami terminal is present"
+grep_in "index.html" 'class="tty-linklist"' "the elsewhere list is present"
+grep_in "index.html" 'class="tty-menu' "the recent rail is present"
+grep_in "index.html" 'class="tty-linklist__key">resume<' "the elsewhere list carries the resume row"
+grep_in "index.html" 'class="tty-linklist__key">cv<' "the elsewhere list carries the academic cv row"
+grep_in "index.html" "Brazilian software engineer" "the biography text survives"
+grep_in "index.html" "I love languages" "the rest of the biography survives"
+grep_in "index.html" "other topics I like to discuss" "the closing biography sentence survives"
+grep_not "index.html" "👋" "the waving hand emoji is gone"
+grep_not "index.html" 'class="button"' "the old Pico button class is gone"
+grep_in "index.html" 'class="tty-btn tty-btn--primary"' "the blog call to action is a design system button"
+grep_in "index.html" "Read the posts" "the call to action names its destination"
+grep_not "index.html" "Read the archive" "the homepage does not borrow the archive label"
+
+# The resume and the academic cv are asserted through their `tty-linklist` rows, not through
+# their URLs. Task 5's footer already carries both URLs, so a URL assertion here would pass
+# before this task writes a line of markup.
+
+section "no emoji anywhere"
+# Byte patterns, not PCRE. `grep -P` reads `\x{1F300}` only in a UTF-8 locale: under
+# LC_ALL=C, GNU grep 3.8 exits 2 with "character code point value in \x{} or \o{} is too
+# large", and an `if` reads that exit status as "no emoji found". These three alternatives
+# are the UTF-8 lead bytes of the emoji planes (U+1F000-U+1FFFF), of the symbol and dingbat
+# blocks (U+2600-U+27BF), and of the emoji variation selector U+FE0F.
+EMOJI_BYTES=$'\xf0\x9f|\xe2[\x98-\x9e]|\xef\xb8\x8f'
+# Three code points of the design system's own glyph vocabulary sit inside those blocks.
+# Delete them before the scan so a sanctioned glyph cannot read as an emoji.
+strip_glyphs() { LC_ALL=C sed -e 's/✓//g' -e 's/✕//g' -e 's/⚿//g' "$1"; }
+has_emoji() { strip_glyphs "$1" | LC_ALL=C grep -qE "$EMOJI_BYTES"; }
+
+# The matcher tests itself, both ways. A broken matcher fails loudly instead of passing
+# every file in silence, which is what the `grep -P` form did.
+probe="$(mktemp)" || { bad "the emoji matcher cannot run: mktemp is missing"; probe=""; }
+if [ -n "$probe" ]; then
+  printf 'probe \xf0\x9f\x91\x8b and \xe2\x9c\x85 and \xef\xb8\x8f\n' > "$probe"
+  if has_emoji "$probe"; then pass "the emoji matcher detects an emoji"
+  else bad "the emoji matcher is broken: it cannot see a known emoji"; fi
+  printf 'glyphs \xe2\x96\xaa \xe2\x97\x8b \xe2\x97\x8f \xe2\x9c\x95 ascii\n' > "$probe"
+  if has_emoji "$probe"; then bad "the emoji matcher rejects the design system glyphs"
+  else pass "the emoji matcher accepts the design system glyphs"; fi
+  rm -f "$probe"
+fi
+
+for f in index.html 404.html posts/index.html posts/archive/index.html preprints/index.html contact/index.html; do
+  if [ ! -f "$DIST/$f" ]; then printf '  --   skip no emoji in %s (not built yet)\n' "$f"; continue; fi
+  if has_emoji "$DIST/$f" ; then bad "no emoji in $f"; else pass "no emoji in $f"; fi
+done
+
 printf '\n'
 if [ "$fails" -eq 0 ]; then
   printf 'check-build: all assertions passed\n'
