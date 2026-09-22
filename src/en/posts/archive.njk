@@ -65,8 +65,8 @@ description: Every post on this site, newest first, grouped by year and filterab
 
       <div class="tty-archive__years">
         {%- for group in groups -%}
-        <section class="tty-archive__year" id="y-{{ group.year }}">
-          {{ tty.divider(group.year) }}
+        <section class="tty-archive__year" id="y-{{ group.year }}" aria-labelledby="y-{{ group.year }}-label">
+          {{ tty.divider(group.year, "y-" + group.year + "-label") }}
           <div class="tty-archive__rows">
             {%- for post in group.posts -%}
               {{ ttyc.postrow(post, idx[post.url], post.data.archived) }}

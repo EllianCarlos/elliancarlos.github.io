@@ -10,7 +10,7 @@
 <a class="tty-postrow" href="{{ post.url }}">
   <div class="tty-postrow__index">{{ index }}</div>
   <div class="tty-postrow__body">
-    <h3 class="tty-postrow__title">{{ post.data.title }}</h3>
+    <h2 class="tty-postrow__title">{{ post.data.title }}</h2>
     {% if post.data.description %}<p class="tty-postrow__excerpt">{{ post.data.description }}</p>{% endif %}
     {% if post.data.tags and post.data.tags.length %}
     <div class="tty-postrow__tags">

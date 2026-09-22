@@ -21,8 +21,15 @@
 <span class="tty-keyhint{% if tone %} tty-keyhint--{{ tone }}{% endif %}"><span class="tty-keyhint__keys">{% for k in keys %}<kbd>{{ k }}</kbd>{% endfor %}</span>{% if label %}<span class="tty-keyhint__label">{{ label }}</span>{% endif %}</span>
 {%- endmacro %}
 
-{% macro divider(label) %}
-<div class="tty-divider"><span class="tty-divider__label">{{ label }}</span><span class="tty-divider__line"></span></div>
+{#
+  divider() is a rail/section label, not a heading — most callers use it for
+  things like "tags" or "by year" that are not document structure. `labelId`
+  is optional: pass it only where the label doubles as an accessible name for
+  a landmark (see posts/archive.njk's per-year <section>, which points
+  aria-labelledby at it instead of turning every divider into an <h2>).
+#}
+{% macro divider(label, labelId="") %}
+<div class="tty-divider"><span class="tty-divider__label"{% if labelId %} id="{{ labelId }}"{% endif %}>{{ label }}</span><span class="tty-divider__line"></span></div>
 {%- endmacro %}
 
 {#
