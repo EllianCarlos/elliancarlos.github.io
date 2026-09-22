@@ -3,19 +3,22 @@
   "version": "1.0.0",
   "description": "An Eleventy website built with bun",
   "scripts": {
-    "build": "eleventy",
+    "build": "eleventy && bun scripts/make-images.mjs && eleventy",
+    "build:pages-only": "eleventy",
+    "images": "bun scripts/make-images.mjs",
     "start": "eleventy --serve",
-    "clean": "rm -rf dist",
-    "images": "bun scripts/make-images.mjs"
+    "clean": "rm -rf dist"
   },
   "dependencies": {
     "@11ty/eleventy": "^2.0.1",
     "@11ty/eleventy-plugin-rss": "^1.2.0",
     "@11ty/eleventy-plugin-syntaxhighlight": "^4",
     "@quasibit/eleventy-plugin-sitemap": "^2.2.0",
+    "@resvg/resvg-js": "^2.6.2",
     "eleventy-plugin-i18n": "^0.1.3",
     "flexsearch": "^0.7.31",
-    "markdown-it-anchor": "^9.2.0"
+    "markdown-it-anchor": "^9.2.0",
+    "satori": "^0.33.5"
   },
   "devDependencies": {
     "@vscode/markdown-it-katex": "^1.1.2"

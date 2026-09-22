@@ -1,0 +1,35 @@
+# Netlify build configuration.
+#
+# This exists so the build that publishes elliancarlos.com.br is defined IN THE
+# REPOSITORY rather than in the Netlify dashboard. A setting in the UI cannot be
+# reviewed in a pull request, cannot be diffed, and is invisible to anyone reading
+# the code — and this build now has a step that is easy to leave out by accident.
+#
+# `bun run build` is three steps, not one (see package.json):
+#
+#   eleventy                        build the pages
+#   bun scripts/make-images.mjs     generate the icons and social thumbnails
+#   eleventy                        copy the new PNGs in, resolve per-post og:image
+#
+# The generator needs no system package. It renders with satori and
+# @resvg/resvg-js, both pinned in package.json with prebuilt linux-x64-gnu
+# binaries. An earlier version shelled out to `magick`, which would have FAILED
+# here: Netlify's build image installs Ubuntu's imagemagick, and that is
+# ImageMagick 6, whose CLI is `convert`/`identify` — `magick` is ImageMagick 7 only.
+#
+# It does fetch four font files on a cold build, pinned to commit shas rather than
+# a branch so a file move upstream cannot break a deploy. `.fonts-cache/` holds
+# them; Netlify's cache persists it between builds, so the fetch is a cold-start
+# cost, not a per-deploy one.
+#
+# If this file is removed, the dashboard's command takes over again — and if that
+# command is plain `eleventy` rather than `bun run build`, the site deploys with no
+# favicon and no share thumbnails.
+
+[build]
+  command = "bun run build"
+  publish = "dist"
+
+# Netlify reads public/_headers for cache-control, which the build copies to
+# dist/_headers. Headers are not duplicated here, so there is one place to change
+# them. See public/_headers.

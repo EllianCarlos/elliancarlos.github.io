@@ -1,49 +1,47 @@
 #!/usr/bin/env bun
 //
 // Generates the site's icons and social thumbnails in the TTY design system.
+// Runs as part of `bun run build` — see the "build" script in package.json.
 //
-//   bun run build && bun run images && bun run build
+// ── Why satori + resvg, and NOT ImageMagick ────────────────────────────────
 //
-// Why it is a separate step and not part of `bun run build`:
+// An earlier version shelled out to `magick`. That cannot ship, and the reason is
+// worth keeping: Netlify's build image installs Ubuntu's `imagemagick`, which is
+// ImageMagick **6**, whose CLI is `convert`/`identify`. The `magick` command only
+// exists in ImageMagick 7. GitHub's ubuntu runner is the same. So the build would
+// have failed on both hosts while working on a developer machine with IM7.
 //
-//   Rendering needs ImageMagick with freetype. CI's build job runs on a bare
-//   ubuntu-latest image and the devenv job declares only `git`, so a build that
-//   shelled out to `magick` would be fragile in both. The PNGs are committed
-//   assets instead. `check-build.sh` asserts that every og:image a page points at
-//   actually exists, so a broken path always fails; a post with no generated
-//   image falls back to the site default, so WRITING a post never fails.
+// Rewriting for IM6 was not the fix either: IM6 is gone from nixpkgs, so its exact
+// text-layout behaviour could not be verified anywhere before a production deploy.
 //
-// Why it reads dist/ rather than src/:
+// satori and @resvg/resvg-js are pinned in package.json and ship prebuilt binaries
+// (linux-x64-gnu covers Netlify and GitHub Actions). satori measures text from the
+// font file itself rather than asking the system for a font, so the output is
+// identical on every host. No system package, no fontconfig, nothing to detect.
 //
-//   Reading time comes from `readingTime` in .eleventy.js, which counts words in
-//   RENDERED html. Recomputing it from markdown here would give a different
-//   number and would drift. Reading the built page instead means a thumbnail can
-//   never disagree with the page it represents. Same source check-build.sh uses.
+// ── Why it reads dist/ ────────────────────────────────────────────────────
 //
-// Why execFileSync and an argv array, not a template-literal shell:
+// Reading time comes from the `readingTime` filter in .eleventy.js, which counts
+// words in RENDERED html. Recomputing it from markdown would give a different
+// number and drift. Reading the built page means a thumbnail can never disagree
+// with the page it represents — the same source check-build.sh reads.
 //
-//   Post titles here contain `#`, `-` and apostrophes ("LKD - #6 Notes on ..."),
-//   every one of which a shell would interpret. An argv array is passed straight
-//   to the binary, so no title can ever be re-parsed as syntax. The first version
-//   of this script used Bun's `$`, which also treats a newline inside the literal
-//   as a command separator — every multi-line invocation silently became several
-//   broken commands.
+// That is why `bun run build` runs eleventy TWICE: the first pass produces the
+// pages this reads, and the second pass copies the generated PNGs into dist/ and
+// lets posts.11tydata.js resolve each post's own ogImage.
 //
-// Run order matters: build, generate, build again. The second build copies the
-// new PNGs into dist/ and lets each post page pick up its own ogImage.
+// Nothing this writes is committed. og/ and the generated icons are gitignored.
 
-import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { execFileSync } from "node:child_process";
+import satori from "satori";
+import { Resvg } from "@resvg/resvg-js";
 
 const ROOT = new URL("..", import.meta.url).pathname.replace(/\/$/, "");
 const DIST = join(ROOT, "dist");
 const PUBLIC = join(ROOT, "public");
-// Root-level, not public/og: addPassthroughCopy("public") already copies that
-// whole tree to dist/public/, so thumbnails placed there would ship twice.
 const OG_DIR = join(ROOT, "og");
 const FONT_DIR = join(ROOT, ".fonts-cache");
-const TMP = join(FONT_DIR, "tmp");
 
 // ── Design system tokens ───────────────────────────────────────────────────
 // Read from src/styles/tty/tokens/colors.css. Those eight files are vendored
@@ -60,244 +58,269 @@ const C = {
   muted: "#8C8C84", // --text-muted    / --grey-700
 };
 
-// Fonts are fetched, not committed: 850 KB of binary in a repo that holds none
-// otherwise. Both families are OFL, so committing them would be legal — this is a
-// size and tidiness choice. .fonts-cache/ is gitignored.
-const FONTS = {
-  mark: {
+// URLs are pinned to a COMMIT, not a branch. On `main` a file move or rename would
+// break the build silently on the next deploy; a commit sha cannot move. The cache
+// directory is gitignored, and CI caches it so a deploy does not depend on the
+// fetch succeeding every time.
+const FONTS = [
+  {
+    family: "Silkscreen",
+    weight: 400,
+    style: "normal",
     file: "Silkscreen-Regular.ttf",
-    url: "https://raw.githubusercontent.com/google/fonts/main/ofl/silkscreen/Silkscreen-Regular.ttf",
+    url: "https://raw.githubusercontent.com/google/fonts/7e8d490955e9d2629cd3095e8dadd6fafe3c16b8/ofl/silkscreen/Silkscreen-Regular.ttf",
   },
-  body: {
+  {
+    family: "JetBrains Mono",
+    weight: 400,
+    style: "normal",
     file: "JetBrainsMono-Regular.ttf",
-    url: "https://raw.githubusercontent.com/JetBrains/JetBrainsMono/master/fonts/ttf/JetBrainsMono-Regular.ttf",
+    url: "https://raw.githubusercontent.com/JetBrains/JetBrainsMono/02bb50b082dad9ef8a0f33ac393839202b760223/fonts/ttf/JetBrainsMono-Regular.ttf",
   },
-  bold: {
+  {
+    family: "JetBrains Mono",
+    weight: 700,
+    style: "normal",
     file: "JetBrainsMono-Bold.ttf",
-    url: "https://raw.githubusercontent.com/JetBrains/JetBrainsMono/master/fonts/ttf/JetBrainsMono-Bold.ttf",
+    url: "https://raw.githubusercontent.com/JetBrains/JetBrainsMono/02bb50b082dad9ef8a0f33ac393839202b760223/fonts/ttf/JetBrainsMono-Bold.ttf",
   },
-  boldItalic: {
+  {
+    family: "JetBrains Mono",
+    weight: 700,
+    style: "italic",
     file: "JetBrainsMono-BoldItalic.ttf",
-    url: "https://raw.githubusercontent.com/JetBrains/JetBrainsMono/master/fonts/ttf/JetBrainsMono-BoldItalic.ttf",
+    url: "https://raw.githubusercontent.com/JetBrains/JetBrainsMono/02bb50b082dad9ef8a0f33ac393839202b760223/fonts/ttf/JetBrainsMono-BoldItalic.ttf",
   },
-};
+];
 
-const font = (k) => join(FONT_DIR, FONTS[k].file);
-
-// Every argument reaches the binary verbatim. Numbers are stringified here so a
-// caller can pass geometry as numbers without thinking about it.
-const magick = (args) =>
-  execFileSync("magick", args.map(String), { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
-
-async function ensureFonts() {
+async function loadFonts() {
   mkdirSync(FONT_DIR, { recursive: true });
-  for (const { file, url } of Object.values(FONTS)) {
-    const path = join(FONT_DIR, file);
-    if (existsSync(path)) continue;
-    process.stdout.write(`  fetching ${file}\n`);
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`${file}: HTTP ${res.status} from ${url}`);
-    await Bun.write(path, await res.arrayBuffer());
-  }
-  // A truncated download, or an html error page saved under a .ttf name, renders
-  // as blank or fallback glyphs instead of failing — silently wrong images, the
-  // worst outcome. Check the magic bytes of every font before drawing with it.
-  for (const { file } of Object.values(FONTS)) {
-    const head = readFileSync(join(FONT_DIR, file)).subarray(0, 4);
+  const out = [];
+  for (const f of FONTS) {
+    const path = join(FONT_DIR, f.file);
+    if (!existsSync(path)) {
+      process.stdout.write(`  fetching ${f.file}\n`);
+      const res = await fetch(f.url);
+      if (!res.ok) throw new Error(`${f.file}: HTTP ${res.status} from ${f.url}`);
+      writeFileSync(path, Buffer.from(await res.arrayBuffer()));
+    }
+    const data = readFileSync(path);
+    // A truncated download, or an html error page saved under a .ttf name, would
+    // render as fallback or blank glyphs instead of failing — silently wrong
+    // images, the worst outcome. Check the magic bytes before trusting the file.
     const sfnt = [0x00, 0x01, 0x00, 0x00];
     const otto = [0x4f, 0x54, 0x54, 0x4f];
-    const ok = [sfnt, otto].some((sig) => sig.every((b, i) => head[i] === b));
-    if (!ok) {
-      throw new Error(`${file} is not a TrueType/OpenType font — delete .fonts-cache/ and rerun`);
-    }
+    const ok = [sfnt, otto].some((sig) => sig.every((b, i) => data[i] === b));
+    if (!ok) throw new Error(`${f.file} is not TrueType/OpenType — delete .fonts-cache/ and rerun`);
+    out.push({ name: f.family, data, weight: f.weight, style: f.style });
   }
-}
-
-// ── Icons ─────────────────────────────────────────────────────────────────
-// A shell prompt and one lowercase `e`: `> e`. The prompt is upright Bold, the `e`
-// is Bold ITALIC, the way Euler's number is set. Two styles composed as two images,
-// not one string — a single -annotate can only carry one font.
-//
-// Silkscreen is not used even though it is the display font everywhere else: it is
-// caps-only, so a lowercase `e` comes out as a capital E.
-//
-// Two glyphs is the ceiling for a 16px square. `>_e` was tried and abandoned: three
-// glyphs leave about 5px each, and the underscore merges with the `e`'s baseline so
-// it reads as a face rather than a prompt. Stacking `>_` above the `e` makes the
-// prompt a speck. Do not re-add a third glyph without looking at 16px first.
-//
-// Centring is done by TRIMMING to the ink and centring that, never by nudging a
-// baseline offset. The first version used a fixed +28px nudge to compensate for the
-// font's ascender padding; it overshot, and the icon sat low. Ink-trimming makes
-// font metrics irrelevant.
-//
-// Every size is supersampled from 512px. A 16px glyph drawn directly loses its
-// counter to antialiasing and reads as a blob; `-level` restores the contrast the
-// downscale costs, and it is needed most at the smallest size.
-function renderIcons() {
-  const raw = (fontKey, text, out) => {
-    const tmp = join(TMP, "raw.png");
-    magick([
-      "-size", "1400x900", "xc:none",
-      "-font", font(fontKey), "-pointsize", 480, "-fill", C.yellow,
-      "-gravity", "center", "-annotate", "+0+0", text,
-      tmp,
-    ]);
-    magick([tmp, "-trim", "+repage", out]);
-  };
-
-  const prompt = join(TMP, "prompt-glyph.png");
-  const letter = join(TMP, "letter-glyph.png");
-  raw("bold", ">", prompt);
-  raw("boldItalic", "e", letter);
-
-  // The prompt is set shorter than the letter, as it is in a real terminal line.
-  magick([prompt, "-resize", "x220", prompt]);
-  magick([letter, "-resize", "x300", letter]);
-
-  // +smush joins them horizontally with a gap, ignoring their own canvas offsets.
-  const pair = join(TMP, "pair.png");
-  magick([prompt, letter, "-background", "none", "-gravity", "center", "+smush", 64, pair]);
-
-  // `-alpha remove` composites onto the root surface. Without it the square stays
-  // transparent and the glyph sits on whatever the browser paints behind a tab —
-  // which looked correct in a flattened JPEG preview and would have shipped wrong.
-  const master = join(TMP, "icon-master.png");
-  magick([
-    pair, "-resize", "420x420",
-    "-background", C.root, "-gravity", "center", "-extent", "512x512",
-    "-alpha", "remove", "-alpha", "off",
-    master,
-  ]);
-
-  const sizes = [
-    { px: 16, out: "favicon-16x16.png", level: "8%,92%" },
-    { px: 32, out: "favicon-32x32.png", level: "6%,94%" },
-    { px: 180, out: "apple-touch-icon.png", level: "0%,100%" },
-    { px: 512, out: "icon-512.png", level: "0%,100%" },
-  ];
-  for (const { px, out, level } of sizes) {
-    magick([
-      master, "-filter", "Lanczos", "-resize", `${px}x${px}`,
-      "-level", level, "-strip", join(PUBLIC, out),
-    ]);
-    process.stdout.write(`  icon  ${out} (${px}x${px})\n`);
-  }
-}
-
-// ── Thumbnails ────────────────────────────────────────────────────────────
-// 1200x630 is the Open Graph recommendation and the box every scraper crops to.
-// The image this replaced was 2848x1504 and 5.1 MB — over the ceiling several
-// scrapers enforce, so it may simply not have rendered on some platforms.
-const W = 1200;
-const H = 630;
-const PX = 64; // panel inset from the canvas
-const PY = 64;
-const PW = W - 2 * PX;
-const PH = H - 2 * PY;
-const BAR = 52; // title bar height
-const PAD = 24; // panel's inner padding
-
-// Descending sizes, first that fits wins: a short title is set large, a long one
-// steps down. Neither overflows, and no title has to be truncated.
-const TITLE_W = PW - 2 * PAD;
-const TITLE_H = 232;
-const TITLE_SIZES = [56, 50, 44, 38, 32];
-
-function titleLayer(text) {
-  const out = join(TMP, "title.png");
-  for (const ps of TITLE_SIZES) {
-    magick([
-      "-background", "none", "-fill", C.primary,
-      "-font", font("bold"), "-pointsize", ps,
-      "-size", `${TITLE_W}x`, "-gravity", "northwest", `caption:${text}`,
-      out,
-    ]);
-    const h = Number(magick([out, "-format", "%h", "info:"]).trim());
-    if (h <= TITLE_H) return out;
-  }
-  // Every size overflowed. Bound the box so the result crops instead of running
-  // over the panel: a slightly cropped thumbnail beats a generator that dies on
-  // one unusually long title.
-  magick([
-    "-background", "none", "-fill", C.primary,
-    "-font", font("bold"), "-pointsize", TITLE_SIZES.at(-1),
-    "-size", `${TITLE_W}x${TITLE_H}`, "-gravity", "northwest", `caption:${text}`,
-    out,
-  ]);
-  process.stdout.write(`        note: title needed cropping at the smallest size\n`);
   return out;
 }
 
-function renderThumb({ out, windowName, title, meta, command = "cat title" }) {
-  const dotY = PY + 20;
-  const dot = (i) => {
-    const x = PX + 22 + i * 20;
-    return `rectangle ${x},${dotY} ${x + 12},${dotY + 12}`;
-  };
+// satori returns SVG; resvg rasterises it. `fitTo` renders the VECTOR at the target
+// size rather than downscaling a bitmap, so a 16px icon stays crisp.
+function png(svg, width) {
+  return new Resvg(svg, {
+    fitTo: { mode: "width", value: width },
+    background: C.root,
+  })
+    .render()
+    .asPng();
+}
 
-  // Window chrome: the panel and its 1px rule, the bar's underline, three dots,
-  // and the window name centred — the same parts as .tty-term on the site.
-  const base = join(TMP, "base.png");
-  magick([
-    "-size", `${W}x${H}`, `xc:${C.root}`,
-    "-fill", C.panel, "-stroke", C.border, "-strokewidth", 1,
-    "-draw", `rectangle ${PX},${PY} ${PX + PW},${PY + PH}`,
-    "-stroke", "none",
-    "-fill", C.border, "-draw", `rectangle ${PX},${PY + BAR} ${PX + PW},${PY + BAR}`,
-    "-fill", C.red, "-draw", dot(0),
-    "-fill", C.yellow, "-draw", dot(1),
-    "-fill", C.green, "-draw", dot(2),
-    "-font", font("body"), "-pointsize", 20, "-fill", C.muted,
-    "-gravity", "north", "-annotate", `+0+${PY + 17}`, windowName,
-    base,
-  ]);
+// Plain element objects, not JSX: this file is .mjs and needs no build step of its
+// own. satori accepts the same shape React would produce.
+const el = (type, style, children) => ({ type, props: { style, children } });
 
-  // The prompt line. `$` is the one yellow character, as in every terminal block
-  // on the site; the command itself is muted.
-  const promptY = PY + 92;
-  const prompt = join(TMP, "prompt.png");
-  magick([
-    base, "-font", font("body"), "-pointsize", 22, "-gravity", "northwest",
-    "-fill", C.yellow, "-annotate", `+${PX + PAD}+${promptY}`, "$",
-    // 22px, not 16: JetBrains Mono's advance at 22pt is ~13px, so 16 left the
-    // command almost touching the prompt. The command carries no leading space —
-    // one would add another full advance and open too wide a gap.
-    "-fill", C.muted, "-annotate", `+${PX + PAD + 22}+${promptY}`, command,
-    prompt,
-  ]);
+// ── Icons ─────────────────────────────────────────────────────────────────
+// A shell prompt and one lowercase `e`: `> e`. The prompt is upright Bold, the `e`
+// is Bold ITALIC, the way Euler's number is set.
+//
+// Silkscreen is not used even though it is the display font everywhere else: it is
+// caps-only, so a lowercase `e` renders as a capital E.
+//
+// Two glyphs is the ceiling for a 16px square. `>_e` was tried and abandoned: three
+// glyphs leave about 5px each, and the underscore merges with the `e`'s baseline so
+// the whole thing reads as a face rather than a prompt. Stacking `>_` above the `e`
+// turns the prompt into a speck. Do not add a third glyph without looking at 16px.
+const ICON = 512;
+function iconElement() {
+  return el(
+    "div",
+    {
+      width: ICON,
+      height: ICON,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: C.root,
+      // The gap is what keeps the two glyphs apart at 16px, where the whole square
+      // is 16 pixels wide. At half this value they touched.
+      gap: 40,
+      fontFamily: "JetBrains Mono",
+      color: C.yellow,
+    },
+    [
+      // The prompt sits smaller than the letter, as it does on a real terminal line.
+      el("div", { display: "flex", fontSize: 200, fontWeight: 700 }, ">"),
+      el("div", { display: "flex", fontSize: 300, fontWeight: 700, fontStyle: "italic" }, "e"),
+    ],
+  );
+}
 
-  const composed = join(TMP, "composed.png");
-  magick([
-    prompt, titleLayer(title), "-geometry", `+${PX + PAD}+${PY + 136}`, "-composite",
-    composed,
-  ]);
+// ── Thumbnails ────────────────────────────────────────────────────────────
+// 1200x630 is the Open Graph box every scraper crops to. The image this replaced
+// was 2848x1504 and 5.1 MB — over the ceiling several scrapers enforce, so it may
+// not have rendered at all on some platforms.
+const W = 1200;
+const H = 630;
+const PAD = 24;
 
-  // The mark, then the caret measured to sit right after it. Hard-coding the
-  // caret's x detaches it from the word as soon as the mark or its size changes —
-  // which is exactly what happened in the first draft of this layout.
-  const markText = "elliancarlos";
-  const markPs = 22;
-  const markX = PX + PAD;
-  const markY = PY + PH - 46;
-  const markProbe = join(TMP, "mark.png");
-  magick([
-    "-background", "none", "-fill", C.primary,
-    "-font", font("mark"), "-pointsize", markPs, `label:${markText}`, markProbe,
-  ]);
-  const markW = Number(magick([markProbe, "-format", "%w", "info:"]).trim());
-  const caretX = markX + markW + 8;
+// JetBrains Mono is monospace, so its advance width is exactly 0.6em. That makes the
+// wrap deterministic arithmetic rather than a render-and-measure loop: pick the
+// largest size whose wrapped line count fits the box. A short title is set large, a
+// long one steps down, and neither overflows.
+const ADVANCE = 0.6;
+const TITLE_SIZES = [56, 50, 44, 38, 32];
+const TITLE_LINE_HEIGHT = 1.25;
+const TITLE_BOX_H = 250;
 
-  magick([
-    composed,
-    "-font", font("body"), "-pointsize", 22, "-fill", C.muted, "-gravity", "northwest",
-    "-annotate", `+${PX + PAD}+${PY + PH - 106}`, meta,
-    "-font", font("mark"), "-pointsize", markPs, "-fill", C.primary,
-    "-annotate", `+${markX}+${markY}`, markText,
-    "-fill", C.yellow, "-draw", `rectangle ${caretX},${markY - 2} ${caretX + 10},${markY + 20}`,
-    "-strip", "-define", "png:compression-level=9",
-    out,
-  ]);
+function wrapLines(text, fontSize, boxWidth) {
+  const perLine = Math.floor(boxWidth / (fontSize * ADVANCE));
+  const lines = [];
+  let line = "";
+  for (const word of text.split(/\s+/)) {
+    const candidate = line ? `${line} ${word}` : word;
+    if (candidate.length <= perLine || !line) {
+      line = candidate;
+    } else {
+      lines.push(line);
+      line = word;
+    }
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
+function fitTitle(text, boxWidth) {
+  for (const size of TITLE_SIZES) {
+    const lines = wrapLines(text, size, boxWidth);
+    if (lines.length * size * TITLE_LINE_HEIGHT <= TITLE_BOX_H) return { size, lines };
+  }
+  // Nothing fit. Clip rather than overflow the panel: a cropped thumbnail beats a
+  // build that dies on one unusually long title.
+  const size = TITLE_SIZES.at(-1);
+  const max = Math.floor(TITLE_BOX_H / (size * TITLE_LINE_HEIGHT));
+  process.stdout.write(`        note: title clipped to ${max} lines at ${size}px\n`);
+  return { size, lines: wrapLines(text, size, boxWidth).slice(0, max) };
+}
+
+const dot = (color) => el("div", { display: "flex", width: 12, height: 12, backgroundColor: color });
+
+function thumbElement({ windowName, command, title, meta }) {
+  const inner = W - 128; // panel width: 64px inset on each side
+  const { size, lines } = fitTitle(title, inner - 2 * PAD);
+
+  return el(
+    "div",
+    {
+      width: W,
+      height: H,
+      display: "flex",
+      padding: 64,
+      backgroundColor: C.root,
+      fontFamily: "JetBrains Mono",
+    },
+    [
+      // The terminal window: the same parts as .tty-term on the site.
+      el(
+        "div",
+        {
+          display: "flex",
+          flexDirection: "column",
+          width: "100%",
+          border: `1px solid ${C.border}`,
+          backgroundColor: C.panel,
+        },
+        [
+          // Title bar: three dots left, the window name centred.
+          el(
+            "div",
+            {
+              display: "flex",
+              alignItems: "center",
+              height: 52,
+              paddingLeft: PAD,
+              paddingRight: PAD,
+              borderBottom: `1px solid ${C.border}`,
+            },
+            [
+              el("div", { display: "flex", gap: 8 }, [dot(C.red), dot(C.yellow), dot(C.green)]),
+              el(
+                "div",
+                {
+                  display: "flex",
+                  flexGrow: 1,
+                  justifyContent: "center",
+                  fontSize: 20,
+                  color: C.muted,
+                  // The dots occupy the left, so pull the centred name back by their
+                  // width — otherwise it centres in the space LEFT OVER, not in the
+                  // panel, and sits visibly right of centre.
+                  marginRight: 52,
+                },
+                windowName,
+              ),
+            ],
+          ),
+          // Body: prompt, title, then the meta row and the mark pinned to the foot.
+          el(
+            "div",
+            {
+              display: "flex",
+              flexDirection: "column",
+              flexGrow: 1,
+              padding: PAD,
+              paddingTop: 28,
+            },
+            [
+              // `$` is the one yellow character, as in every terminal block on the site.
+              el("div", { display: "flex", fontSize: 22, gap: 9 }, [
+                el("div", { display: "flex", color: C.yellow }, "$"),
+                el("div", { display: "flex", color: C.muted }, command),
+              ]),
+              el(
+                "div",
+                {
+                  display: "flex",
+                  flexDirection: "column",
+                  marginTop: 22,
+                  fontSize: size,
+                  fontWeight: 700,
+                  lineHeight: TITLE_LINE_HEIGHT,
+                  color: C.primary,
+                },
+                lines.map((l) => el("div", { display: "flex" }, l)),
+              ),
+              // Pushes everything after it to the bottom of the panel.
+              el("div", { display: "flex", flexGrow: 1 }, ""),
+              el("div", { display: "flex", fontSize: 22, color: C.muted }, meta),
+              el("div", { display: "flex", alignItems: "center", gap: 8, marginTop: 20 }, [
+                el(
+                  "div",
+                  { display: "flex", fontFamily: "Silkscreen", fontSize: 22, color: C.primary },
+                  "elliancarlos",
+                ),
+                // The nav's caret. A box, not a glyph — Silkscreen carries no block
+                // character, and a box keeps its size tied to the text beside it.
+                el("div", { display: "flex", width: 10, height: 22, backgroundColor: C.yellow }, ""),
+              ]),
+            ],
+          ),
+        ],
+      ),
+    ],
+  );
 }
 
 // ── Reading the built pages ───────────────────────────────────────────────
@@ -328,7 +351,6 @@ function readPost(slug) {
     ? stripTags(block[1]).split("·").map((s) => s.trim()).filter(Boolean)
     : [];
   const dateAndTime = fields.filter((f) => !/posts$/.test(f));
-
   const tags = [...html.matchAll(/class="tty-tag"[^>]*>([^<]*)</g)].map((m) => decode(m[1]).trim());
 
   return {
@@ -340,31 +362,44 @@ function readPost(slug) {
 
 // ── Main ──────────────────────────────────────────────────────────────────
 if (!existsSync(DIST)) {
-  console.error("dist/ does not exist. Run `bun run build` first — this reads the built pages.");
+  console.error("dist/ does not exist. This reads the built pages — run eleventy first.");
   process.exit(1);
 }
 
-mkdirSync(TMP, { recursive: true });
 mkdirSync(OG_DIR, { recursive: true });
+const fonts = await loadFonts();
 
-console.log("fonts");
-await ensureFonts();
+const render = async (element, width, height, outPath, rasterWidth = width) => {
+  const svg = await satori(element, { width, height, fonts });
+  writeFileSync(outPath, png(svg, rasterWidth));
+};
 
 console.log("icons");
-renderIcons();
+for (const { px, out } of [
+  { px: 16, out: "favicon-16x16.png" },
+  { px: 32, out: "favicon-32x32.png" },
+  { px: 180, out: "apple-touch-icon.png" },
+  { px: 512, out: "icon-512.png" },
+]) {
+  await render(iconElement(), ICON, ICON, join(PUBLIC, out), px);
+  console.log(`  icon  ${out} (${px}x${px})`);
+}
 
 console.log("thumbnails");
-// The site default: every page that is not a post, and any post whose thumbnail
-// has not been generated yet.
-renderThumb({
-  out: join(PUBLIC, "og-image.png"),
-  windowName: "~",
-  // The homepage's own terminal runs `whoami`, so the site thumbnail shows the
-  // same command rather than a post's `cat title`.
-  command: "whoami",
-  title: "Ellian Carlos",
-  meta: "software engineer   ·   empirical software engineering   ·   linux kernel",
-});
+// The site default: every page that is not a post, and any post whose thumbnail has
+// not been generated. The homepage's own terminal runs `whoami`, so this shows the
+// same command rather than a post's `cat title`.
+await render(
+  thumbElement({
+    windowName: "~",
+    command: "whoami",
+    title: "Ellian Carlos",
+    meta: "software engineer   ·   empirical software engineering   ·   linux kernel",
+  }),
+  W,
+  H,
+  join(PUBLIC, "og-image.png"),
+);
 console.log("  thumb og-image.png (site default)");
 
 const slugs = readdirSync(join(DIST, "posts"), { withFileTypes: true })
@@ -379,16 +414,19 @@ for (const slug of slugs) {
     console.log(`  skip  ${slug} (no og:title — not a post page?)`);
     continue;
   }
-  renderThumb({
-    out: join(OG_DIR, `${slug}.png`),
-    windowName: `~/posts/${slug}`,
-    title: post.title,
-    meta: post.meta,
-  });
+  await render(
+    thumbElement({
+      windowName: `~/posts/${slug}`,
+      command: "cat title",
+      title: post.title,
+      meta: post.meta,
+    }),
+    W,
+    H,
+    join(OG_DIR, `${slug}.png`),
+  );
   made += 1;
   console.log(`  thumb og/${slug}.png`);
 }
 
-rmSync(TMP, { recursive: true, force: true });
 console.log(`\ndone: ${made} post thumbnails, 1 default, 4 icons`);
-console.log("now run `bun run build` again so the new files reach dist/");

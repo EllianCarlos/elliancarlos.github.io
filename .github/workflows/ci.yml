@@ -27,6 +27,19 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      # `bun run build` generates the icons and social thumbnails, which needs four
+      # font files. They are pinned to commit shas, so this cache key never has to
+      # change for correctness — it only saves the fetch. A cache miss costs one
+      # download; a font CDN outage with a warm cache costs nothing.
+      - name: Cache the generator's fonts
+        uses: actions/cache@v4
+        with:
+          path: .fonts-cache
+          key: fonts-${{ hashFiles('scripts/make-images.mjs') }}
+
+      # Three steps behind one command: eleventy, then the image generator, then
+      # eleventy again. Nothing here needs a system package — the generator renders
+      # with satori and @resvg/resvg-js from package.json.
       - name: Build the site
         run: bun run build
 
