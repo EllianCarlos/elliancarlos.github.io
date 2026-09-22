@@ -152,6 +152,31 @@ grep_in "index.html" 'content="#0A0A09"' "the theme colour is the root surface"
 grep_not "index.html" "mobile-menu-toggle" "the old hamburger is gone"
 grep_not "index.html" "page-header-content" "the old page header is gone"
 
+section "prose and code"
+have "styles/tty/prose.css"
+have "styles/tty/prism-tty.css"
+grep_in "styles/tty.css" '@import "tty/prose.css"' "the entry stylesheet imports prose.css"
+grep_in "styles/tty.css" '@import "tty/prism-tty.css"' "the entry stylesheet imports prism-tty.css"
+grep_in "styles/tty/prose.css" "scroll-margin-top" "heading anchors clear the sticky nav"
+grep_in "styles/tty/prose.css" "border-left: var(--border-w-thick) solid var(--yellow)" "the blockquote rule is a 2px yellow bar"
+grep_in "styles/tty/prose.css" ".tty-prose .katex-display" "display maths scrolls instead of overflowing"
+grep_in "styles/tty/prose.css" ".tty-prose h1 {" "a markdown h1 is styled"
+grep_in "styles/tty/prose.css" "text-transform: none" "inline code in a heading keeps its case"
+grep_in "styles/tty/prose.css" 'pre:not([class*="language-"])' "an unlabelled fence gets the code chrome"
+grep_in "styles/tty/prose.css" ':not(pre) > code:not([class*="language-"])' "the inline-code pill stops at a pre"
+grep_in "posts/how-linux-kernel-submissions-work/index.html" "<pre><code>" "the unlabelled fence is the case that rule covers"
+grep_in "styles/tty/prism-tty.css" "var(--syntax-keyword)" "syntax colours come from the tokens"
+grep_in "styles/tty/prism-tty.css" "div.code-toolbar > .toolbar" "the code toolbar is styled locally"
+grep_in "styles/tty/prism-tty.css" "order: -1" "the toolbar is a strip above the code"
+grep_not "styles/tty/prism-tty.css" "position: absolute" "no chrome floats over the first line of code"
+grep_in "styles/tty/prism-tty.css" "button:focus-visible" "the copy button keeps a focus ring"
+grep_in "styles/tty/prism-tty.css" "text-shadow: none" "the Prism theme text shadow is off"
+grep_not "styles/tty/prism-tty.css" "border-radius: 0.25rem" "code blocks are square"
+
+grep_in "posts/how-to-setup-lkd-notes/index.html" 'class="language-' "the post still ships highlighted code"
+grep_not "posts/how-to-setup-lkd-notes/index.html" "prism-toolbar.min.css" "the CDN toolbar stylesheet is gone"
+grep_in "posts/how-to-setup-lkd-notes/index.html" "prism-toolbar.min.js" "the toolbar script is still injected"
+
 printf '\n'
 if [ "$fails" -eq 0 ]; then
   printf 'check-build: all assertions passed\n'

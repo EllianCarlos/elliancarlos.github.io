@@ -21,3 +21,5 @@
 @import "tty/core.css";
 @import "tty/content.css";
 @import "tty/layout.css";
+@import "tty/prose.css";
+@import "tty/prism-tty.css";

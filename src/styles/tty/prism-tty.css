@@ -1,0 +1,152 @@
+/* Prism, mapped onto the TTY syntax tokens.
+   Replaces the prism-tomorrow CDN theme and the prism-toolbar CDN stylesheet.
+   The toolbar plugin's JavaScript only positions itself if these layout rules
+   exist, so they live here rather than on the CDN — that also keeps the CDN
+   from overriding our chrome, since .eleventy.js injects its block before
+   </body>. */
+
+pre[class*="language-"] {
+  margin: 0 0 var(--sp-6);
+  padding: 10px 12px;
+  font-family: var(--font-code);
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  tab-size: 2;
+  hyphens: none;
+  overflow: auto;
+  color: var(--text-secondary);
+  background: var(--surface-inset);
+  border: var(--border-w) solid var(--border-faint);
+  border-radius: var(--radius-none);
+  text-shadow: none;
+}
+code[class*="language-"] {
+  font-family: var(--font-code);
+  font-size: inherit;
+  line-height: inherit;
+  color: var(--text-secondary);
+  background: transparent;
+  text-shadow: none;
+  white-space: pre;
+}
+pre[class*="language-"]::selection,
+pre[class*="language-"] ::selection,
+code[class*="language-"]::selection,
+code[class*="language-"] ::selection {
+  background: var(--yellow);
+  color: var(--black-void);
+  text-shadow: none;
+}
+
+/* ── Token colours ──────────────────────────────────────────────────────── */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata { color: var(--syntax-comment); font-style: italic; }
+
+.token.punctuation,
+.token.operator,
+.token.entity { color: var(--syntax-punct); }
+
+.token.number,
+.token.boolean,
+.token.constant,
+.token.symbol { color: var(--syntax-number); }
+
+.token.string,
+.token.char,
+.token.attr-value,
+.token.inserted { color: var(--syntax-string); }
+
+.token.keyword,
+.token.atrule,
+.token.rule,
+.token.selector,
+.token.tag,
+.token.important { color: var(--syntax-keyword); }
+
+.token.function,
+.token.function-name,
+.token.class-name { color: var(--syntax-function); }
+
+.token.property,
+.token.attr-name,
+.token.builtin,
+.token.regex,
+.token.url { color: var(--cyan); }
+
+.token.variable,
+.token.parameter { color: var(--text-primary); }
+
+.token.deleted { color: var(--status-error); }
+
+.token.bold,
+.token.important { font-weight: var(--weight-bold); }
+.token.italic { font-style: italic; }
+.token.namespace { opacity: 0.7; }
+
+/* ── Toolbar: language badge and copy button ─────────────────────────────── */
+/* CodeBlock.jsx puts the label in a 26px strip above the code, inside the block
+   border. The system never floats chrome over content, so this is a strip, not an
+   overlay. prism-toolbar.js appends the toolbar *after* the `<pre>`, so the
+   container is a column flex box and the strip is pulled up with `order: -1`.
+   Nothing here is absolutely positioned, so nothing can cover line 1. */
+div.code-toolbar {
+  display: flex;
+  flex-direction: column;
+  margin: 0 0 var(--sp-6);
+  background: var(--surface-inset);
+  border: var(--border-w) solid var(--border-faint);
+}
+/* The container draws the frame now, so the inner pre gives its own back. */
+div.code-toolbar > pre[class*="language-"] {
+  margin: 0;
+  background: transparent;
+  border: 0;
+}
+div.code-toolbar > .toolbar {
+  order: -1;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  height: 26px;
+  padding: 0 10px;
+  background: var(--surface-raised);
+  border-bottom: var(--border-w) solid var(--border-faint);
+  opacity: 1;
+}
+/* show-language adds the first item and copy-to-clipboard the second. The
+   language takes CodeBlock's filename slot on the left; the button goes right. */
+div.code-toolbar > .toolbar > .toolbar-item { display: flex; align-items: center; }
+div.code-toolbar > .toolbar > .toolbar-item:first-child { margin-right: auto; }
+div.code-toolbar > .toolbar > .toolbar-item > a,
+div.code-toolbar > .toolbar > .toolbar-item > button,
+div.code-toolbar > .toolbar > .toolbar-item > span {
+  padding: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  color: var(--text-faint);
+  background: none;
+  border: 0;
+  border-radius: var(--radius-none);
+  cursor: pointer;
+  user-select: none;
+}
+div.code-toolbar > .toolbar > .toolbar-item > a:hover,
+div.code-toolbar > .toolbar > .toolbar-item > button:hover {
+  color: var(--yellow);
+}
+/* tokens/base.css drops the outline and draws focus with a box-shadow. Never set
+   `box-shadow: none` on these items — that wins on specificity and leaves the
+   Copy button with no keyboard focus indicator at all. */
+div.code-toolbar > .toolbar > .toolbar-item > a:focus-visible,
+div.code-toolbar > .toolbar > .toolbar-item > button:focus-visible {
+  color: var(--yellow);
+  box-shadow: var(--focus-ring);
+}
+/* The language badge is a label, not a control. CodeBlock.jsx sets it in accent. */
+div.code-toolbar > .toolbar > .toolbar-item > span {
+  color: var(--text-accent);
+  cursor: default;
+}

@@ -134,7 +134,6 @@ module.exports = function (eleventyConfig) {
 
   const PRISM_PLUGIN_BLOCK = `
 <script>window.Prism = window.Prism || {}; Prism.manual = true;</script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1/plugins/toolbar/prism-toolbar.min.css">
 <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-core.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/prismjs@1/plugins/toolbar/prism-toolbar.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/prismjs@1/plugins/show-language/prism-show-language.min.js"></script>

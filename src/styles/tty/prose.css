@@ -1,0 +1,233 @@
+/* Long-form reading inside .tty-prose.
+
+   The design system Post screen sets h1 and h2 in Silkscreen and leaves the
+   body plain. Three posts open sections with `# ` — 22 headings in all — and the
+   posts nest headings four deep. So h1 and h2 both keep Silkscreen in yellow,
+   h1 one step up the display scale, and h3 to h6 step down into JetBrains Mono.
+   tokens/base.css puts every h1-h6 in the pixel face and uppercases them, so
+   each of those rules has to switch the family and turn smoothing back on, and
+   one more rule has to put the case back for inline code inside a heading.
+
+   The system says there is no imagery, by design. That rule is about
+   decoration. These posts carry real figures — screenshots and plots — so a
+   figure gets a 1px rule and nothing else. */
+
+.tty-prose > :first-child { margin-top: 0; }
+.tty-prose > :last-child { margin-bottom: 0; }
+
+.tty-prose p { margin: 0 0 var(--sp-6); }
+.tty-prose strong { color: var(--text-primary); font-weight: var(--weight-bold); }
+.tty-prose em { font-style: italic; }
+
+/* ── Headings ───────────────────────────────────────────────────────────── */
+.tty-prose h1,
+.tty-prose h2,
+.tty-prose h3,
+.tty-prose h4,
+.tty-prose h5,
+.tty-prose h6 {
+  scroll-margin-top: calc(52px + var(--sp-4));
+}
+
+/* Three posts use `# ` for their section headings. With no rule here those fall
+   through to tokens/base.css and the UA default: 2em grey Silkscreen, which is
+   both larger and dimmer than the h2 under it. h1 gets the top of the display
+   scale so the hierarchy reads down. */
+.tty-prose h1 {
+  margin: var(--sp-12) 0 var(--sp-4);
+  font-family: var(--font-display);
+  font-size: var(--display-md);
+  line-height: var(--leading-tight);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--yellow);
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+}
+
+.tty-prose h2 {
+  margin: var(--sp-10) 0 var(--sp-4);
+  font-family: var(--font-display);
+  font-size: var(--display-sm);
+  line-height: var(--leading-tight);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--yellow);
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+}
+
+.tty-prose h3 {
+  margin: var(--sp-8) 0 var(--sp-3);
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-ui);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  font-smooth: auto;
+}
+
+.tty-prose h4,
+.tty-prose h5,
+.tty-prose h6 {
+  margin: var(--sp-6) 0 var(--sp-2);
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-ui);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  -webkit-font-smoothing: antialiased;
+  font-smooth: auto;
+}
+
+/* Every rule above uppercases the heading, and tokens/base.css uppercases h1-h6
+   anyway. Inline code in a heading is a case-sensitive name, so it must keep the
+   case the author typed. Five real cases exist today: `git blame`, `activate.sh`,
+   `guards`, `scoped_guard` and `null_blk`. Uppercasing them makes the page state
+   something false and gives a reader the wrong name to copy. The tracking has to
+   go too, or the name reads with gaps in it. */
+.tty-prose :is(h1, h2, h3, h4, h5, h6) code {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* ── Lists ──────────────────────────────────────────────────────────────── */
+.tty-prose ul,
+.tty-prose ol { margin: 0 0 var(--sp-6); padding-left: var(--sp-6); }
+.tty-prose li { margin: 0 0 var(--sp-2); }
+.tty-prose li > ul,
+.tty-prose li > ol { margin: var(--sp-2) 0 0; }
+.tty-prose ul { list-style: none; padding-left: var(--sp-5); }
+.tty-prose ul > li { position: relative; }
+/* A block marker on the cell grid, not a round bullet. U+25AA is outside the
+   latin subset tokens/fonts.css loads, so this glyph comes from the system
+   fallback, not from JetBrains Mono. Pin the size and the leading so fallback
+   metrics cannot move it off the first text line of the item. */
+.tty-prose ul > li::before {
+  content: "▪";
+  position: absolute;
+  left: calc(var(--sp-5) * -1);
+  font-family: var(--font-glyph);
+  font-size: 0.85em;
+  line-height: var(--leading-body);
+  color: var(--text-faint);
+}
+.tty-prose ol { list-style: decimal; }
+.tty-prose ol > li::marker { color: var(--text-faint); }
+
+/* ── Quote ──────────────────────────────────────────────────────────────── */
+.tty-prose blockquote {
+  margin: var(--sp-8) 0;
+  padding: 4px 0 4px 18px;
+  border-left: var(--border-w-thick) solid var(--yellow);
+  color: var(--text-primary);
+  font-size: var(--text-md);
+  line-height: 1.75;
+}
+.tty-prose blockquote > :last-child { margin-bottom: 0; }
+
+/* ── Rule ───────────────────────────────────────────────────────────────── */
+.tty-prose hr {
+  margin: var(--sp-10) 0;
+  border: 0;
+  border-top: var(--border-w) solid var(--border-faint);
+}
+
+/* ── Inline code ────────────────────────────────────────────────────────── */
+/* `:not(pre) >` keeps the pill off the `<code>` inside an unlabelled fence. That
+   `<code>` carries no class either, so the plain `code:not([class*="language-"])`
+   form matched it and drew a 0.9em bordered band over a 242-line git diff. Real
+   inline code always has a parent element inside .tty-prose — a p, li, td or
+   heading — so the guard never costs a match. */
+.tty-prose :not(pre) > code:not([class*="language-"]) {
+  padding: 1px 5px;
+  font-family: var(--font-code);
+  font-size: 0.9em;
+  color: var(--text-primary);
+  background: var(--surface-raised);
+  border: var(--border-w) solid var(--border-faint);
+}
+
+/* ── A fence with no language ────────────────────────────────────────────── */
+/* Four fences in two posts carry no info string, so the syntax highlight plugin
+   gives them no `language-*` class and every rule in prism-tty.css misses them.
+   This rule gives that case the same chrome as a labelled block. `overflow: auto`
+   is the part that must not be dropped: tokens/breakpoints.css ends with
+   `html, body { overflow-x: hidden }`, so a block with no scroller of its own has
+   its long lines clipped with no scrollbar anywhere — a 99-character diff line
+   and a 120-character `git send-email` command are both affected. */
+.tty-prose pre:not([class*="language-"]) {
+  margin: 0 0 var(--sp-6);
+  padding: 10px 12px;
+  font-family: var(--font-code);
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  tab-size: 2;
+  hyphens: none;
+  overflow: auto;
+  color: var(--text-secondary);
+  background: var(--surface-inset);
+  border: var(--border-w) solid var(--border-faint);
+  border-radius: var(--radius-none);
+}
+.tty-prose pre:not([class*="language-"]) > code {
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  white-space: pre;
+}
+
+/* ── Figures ────────────────────────────────────────────────────────────── */
+.tty-prose img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: var(--sp-8) auto;
+  border: var(--border-w) solid var(--border-faint);
+}
+
+/* ── Tables ─────────────────────────────────────────────────────────────── */
+.tty-prose table {
+  width: 100%;
+  margin: 0 0 var(--sp-6);
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+.tty-prose thead th {
+  height: 26px;
+  padding: 0 10px;
+  text-align: left;
+  font: var(--text-xs)/1 var(--font-display);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-faint);
+  background: var(--surface-raised);
+  border-bottom: var(--border-w) solid var(--border-default);
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+}
+.tty-prose tbody tr { height: var(--row-h); }
+.tty-prose tbody tr:nth-child(even) { background: var(--surface-raised); }
+.tty-prose tbody td {
+  padding: var(--sp-2) 10px;
+  border-bottom: var(--border-w) solid var(--border-faint);
+  color: var(--text-primary);
+}
+
+/* ── Maths ──────────────────────────────────────────────────────────────── */
+.tty-prose .katex { font-size: 1em; }
+.tty-prose .katex-display {
+  margin: var(--sp-6) 0;
+  padding: var(--sp-2) 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
