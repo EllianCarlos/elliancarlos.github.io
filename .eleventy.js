@@ -222,7 +222,7 @@ module.exports = function (eleventyConfig) {
     return pairs;
   });
 
-  // Search index per language: array of { id, title, url, description, contentExcerpt }
+  // Search index per language: array of { id, title, url, description, date, contentExcerpt }
   languages.forEach((lang) => {
     eleventyConfig.addCollection(`searchIndex_${lang}`, (collectionApi) => {
       const posts = collectionApi.getFilteredByGlob(`src/${lang}/posts/**/*.md`)
@@ -242,6 +242,9 @@ module.exports = function (eleventyConfig) {
           title: p.data.title || "",
           url: p.url || "",
           description: p.data.description || "",
+          date: p.data.date
+            ? `${p.data.date.getFullYear()}-${leftPadDate(p.data.date.getMonth() + 1)}-${leftPadDate(p.data.date.getDate())}`
+            : "",
           contentExcerpt: contentExcerptForSearch(rawContent),
         };
       });

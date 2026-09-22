@@ -189,6 +189,21 @@ grep_in "llms.txt" "Tools I use 2024" "the archived post stays in llms.txt"
 grep_in "search-index-en.json" "Tools I use 2024" "the archived post stays searchable"
 grep_in "sitemap.xml" "/posts/my-tools-2024/" "the archived post stays in the sitemap"
 
+section "search overlay"
+have "scripts/tty-search.js"
+grep_in "index.html" 'id="tty-search"' "the overlay is on every page"
+grep_in "index.html" 'id="tty-search-input"' "the query field is present"
+grep_in "index.html" 'id="tty-search-results"' "the result list is present"
+grep_in "index.html" 'aria-modal="true"' "the overlay is a modal dialog"
+grep_in "index.html" 'data-tty-search-close' "the overlay can be dismissed"
+grep_in "posts/index.html" 'id="tty-search"' "the overlay reaches the posts page"
+grep_not "posts/index.html" 'id="blog-search-input"' "the in-content search box is gone"
+grep_not "posts/index.html" 'id="blog-search-root"' "the old search root is gone"
+grep_not "posts/index.html" "/scripts/search.js" "the old search script is unlinked"
+grep_in "scripts/tty-search.js" "flexsearch.bundle.js" "FlexSearch still backs the query"
+grep_in "scripts/tty-search.js" "tty-menu__hint" "each result row carries its date"
+grep_in "search-index-en.json" '"date":' "the search index carries a date for every post"
+
 printf '\n'
 if [ "$fails" -eq 0 ]; then
   printf 'check-build: all assertions passed\n'

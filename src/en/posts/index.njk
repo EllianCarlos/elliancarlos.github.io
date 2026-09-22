@@ -5,14 +5,6 @@ type: blog
 title: Blog
 description: Thoughts on software engineering, tools, languages, and technology.
 ---
-<div id="blog-search-root" data-locale="en" data-no-results="{{ i18n.en.blog.noResults }}">
-  <div class="blog-search-in-content">
-    <input type="search" id="blog-search-input" name="q" placeholder="{{ i18n.en.blog.searchPlaceholder }}" aria-label="{{ i18n.en.blog.searchPlaceholder }}">
-  </div>
-  <div id="blog-search-results" hidden>
-    <div id="blog-search-results-list"></div>
-  </div>
-  <div id="blog-posts-list">
 {% for post in collections.postsActive_en %}
   <article>
     <h2 class="blog">
@@ -30,7 +22,3 @@ description: Thoughts on software engineering, tools, languages, and technology.
     <p>{{ post | sneakPeakPost }}</p>
   </article>
 {% endfor %}
-  </div>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/flexsearch@0.7.31/dist/flexsearch.bundle.js"></script>
-<script src="/scripts/search.js"></script>

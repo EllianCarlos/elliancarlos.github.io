@@ -1,0 +1,32 @@
+{% import "tty/core.njk" as tty %}
+{#
+  The `/` search overlay. It ships on every page, empty, and costs one hidden
+  <div> until the reader presses `/`. The index and FlexSearch load on first open.
+
+  The ids and data-* hooks here are a contract with /scripts/tty-search.js.
+  Do not rename them without changing that file.
+#}
+<div class="tty-search" id="tty-search" hidden
+     data-locale="{{ locale or 'en' }}"
+     data-s-result="{{ i18n[locale].search.result }}"
+     data-s-results="{{ i18n[locale].search.results }}"
+     data-s-none="{{ i18n[locale].search.noResults }}">
+  <div class="tty-search__scrim" data-tty-search-close></div>
+  <div class="tty-search__panel" role="dialog" aria-modal="true" aria-label="{{ i18n[locale].search.open }}">
+    <div class="tty-search__field">
+      <div class="tty-input tty-input--lg">
+        <span class="tty-input__prefix" aria-hidden="true">/</span>
+        <input id="tty-search-input" type="search" autocomplete="off" spellcheck="false"
+               placeholder="{{ i18n[locale].search.placeholder }}"
+               aria-label="{{ i18n[locale].search.open }}">
+      </div>
+    </div>
+    <ul class="tty-menu" id="tty-search-results"></ul>
+    <div class="tty-search__foot">
+      <span id="tty-search-count"></span>
+      <span class="tty-spacer"></span>
+      {{ tty.keyhint(["↵"], i18n[locale].search.openHint) }}
+      {{ tty.keyhint(["esc"], i18n[locale].search.closeHint) }}
+    </div>
+  </div>
+</div>
