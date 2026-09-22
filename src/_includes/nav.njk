@@ -26,7 +26,26 @@
   <nav class="tty-tabs" aria-label="Main">
     {%- for item in navItems -%}
       {%- if liveUrls.indexOf(" " + item.url + " ") >= 0 -%}
-      {%- set on = (page.url == item.url) or (item.url != "/" and page.url.indexOf(item.url) == 0) -%}
+      {#
+        Longest matching prefix wins. `/posts/` and `/posts/archive/` are both
+        prefixes of a page at `/posts/archive/`, so a plain prefix match marks
+        both tabs current at once — invalid, since aria-current="page" names
+        one page. Comparing this item's url length against every other live
+        item's match picks the single longest one.
+      #}
+      {%- set matches = (page.url == item.url) or (item.url != "/" and page.url.indexOf(item.url) == 0) -%}
+      {%- set on = false -%}
+      {%- if matches -%}
+        {%- set on = true -%}
+        {%- for other in navItems -%}
+          {%- if other.url != item.url and liveUrls.indexOf(" " + other.url + " ") >= 0 -%}
+            {%- set otherMatches = (page.url == other.url) or (other.url != "/" and page.url.indexOf(other.url) == 0) -%}
+            {%- if otherMatches and other.url.length > item.url.length -%}
+              {%- set on = false -%}
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
       <a class="tty-tabs__tab" href="{{ item.url }}"{% if on %} aria-current="page"{% endif %}>{{ item.label }}{% if item.count %}<span class="tty-tabs__count">({{ item.count }})</span>{% endif %}</a>
       {%- endif -%}
     {%- endfor -%}

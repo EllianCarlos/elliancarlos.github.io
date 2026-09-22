@@ -252,3 +252,40 @@ html { scrollbar-gutter: stable; }
 html:has(body.tty-search-open),
 html.tty-search-open { overflow: hidden; }
 body.tty-search-open { overflow: hidden; }
+
+/* ── Archive screen (ui_kits/blog/Archive.jsx) ──────────────────────────── */
+.tty-archive__head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: var(--sp-6);
+}
+.tty-archive__count { font-size: var(--text-xs); color: var(--text-faint); }
+.tty-archive__head .tty-tabs { border-bottom: 0; }
+
+.tty-archive__years { display: flex; flex-direction: column; gap: var(--sp-8); }
+/* The by-year rail jumps to these sections, so a year heading must clear the
+   52px sticky nav. Same arithmetic as the prose headings in prose.css — keep the
+   two in step. */
+.tty-archive__year {
+  display: flex;
+  flex-direction: column;
+  scroll-margin-top: calc(52px + var(--sp-4));
+}
+.tty-archive__year .tty-divider { margin-bottom: 12px; }
+.tty-archive__rows { display: flex; flex-direction: column; }
+
+/* Dense is a desktop density: Archive.jsx passes dense={!bp.compact}. The rail
+   macro renders one class for both layouts, so the compact row height is
+   corrected here instead of with a template branch. var(--row-h) is 44px on
+   touch and 32px for a fine pointer, which is what the component does. */
+@media (max-width: 1279.98px) {
+  .tty-archive .tty-menu--dense .tty-menu__item { min-height: var(--row-h); }
+}
+
+/* Oldest-first is a layout flip, not a re-sort: both the year list and the rows
+   inside each year reverse from one class on the root. The index numbers stay
+   attached to their post, so 001 sits at the top when oldest is chosen. */
+.tty-archive--oldest .tty-archive__years,
+.tty-archive--oldest .tty-archive__rows { flex-direction: column-reverse; }

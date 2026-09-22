@@ -1,0 +1,85 @@
+---
+layout: layouts/layout.njk
+type: blog
+title: Archive
+description: Every post on this site, newest first, grouped by year and filterable by tag.
+---
+{% import "tty/core.njk" as tty %}
+{% import "tty/content.njk" as ttyc %}
+{#
+  The archive is the one page that lists every post, archived included. /posts/
+  shows the active ones; this is the whole record.
+#}
+{%- set posts = collections.posts_en -%}
+{%- set tags = collections.tags_en -%}
+{%- set idx = posts | postIndexes -%}
+{%- set groups = posts | groupByYear -%}
+
+{% macro rail() %}
+<div class="tty-rail">
+  <div>
+    {{ tty.divider(i18n.en.blog.tags) }}
+    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px">
+      {%- for tag in tags -%}
+        {{ tty.tag(tag, "/posts/tag/" + (tag | tagSlug) + "/", (posts | filterByTag(tag)).length) }}
+      {%- endfor -%}
+    </div>
+  </div>
+  <div>
+    {{ tty.divider(i18n.en.blog.byYear) }}
+    <ul class="tty-menu tty-menu--dense" style="margin-top: 10px">
+      {%- for group in groups -%}
+      <li>
+        <a class="tty-menu__item" href="#y-{{ group.year }}">
+          <span class="tty-menu__cursor" aria-hidden="true">›</span>
+          <span class="tty-menu__label">{{ group.year }}</span>
+          <span class="tty-menu__hint">{{ group.posts.length }}</span>
+        </a>
+      </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</div>
+{% endmacro %}
+
+<div class="tty-archive" id="tty-archive">
+  <div class="tty-split tty-split--rail">
+    <div>
+      <div class="tty-archive__head">
+        <h1 class="tty-h1">{{ i18n.en.blog.archive }}</h1>
+        <span class="tty-archive__count">{{ posts.length | plural(i18n.en.blog.post, i18n.en.blog.count) }}</span>
+        <span class="tty-spacer"></span>
+        <div class="tty-tabs" role="tablist" aria-label="{{ i18n.en.blog.archive }}">
+          <button class="tty-tabs__tab" type="button" role="tab"
+                  data-tty-sort="newest" aria-selected="true">{{ i18n.en.blog.sortNewest }}</button>
+          <button class="tty-tabs__tab" type="button" role="tab"
+                  data-tty-sort="oldest" aria-selected="false">{{ i18n.en.blog.sortOldest }}</button>
+        </div>
+      </div>
+
+      <div class="tty-when-compact">
+        {% call ttyc.foldout(i18n.en.blog.filter, tags.length + " " + i18n.en.blog.tags) %}
+          {{ rail() }}
+        {% endcall %}
+      </div>
+
+      <div class="tty-archive__years">
+        {%- for group in groups -%}
+        <section class="tty-archive__year" id="y-{{ group.year }}">
+          {{ tty.divider(group.year) }}
+          <div class="tty-archive__rows">
+            {%- for post in group.posts -%}
+              {{ ttyc.postrow(post, idx[post.url], post.data.archived) }}
+            {%- endfor -%}
+          </div>
+        </section>
+        {%- endfor -%}
+      </div>
+    </div>
+
+    <aside class="tty-rail--sticky tty-when-desktop">
+      {{ rail() }}
+    </aside>
+  </div>
+</div>
+<script defer src="/scripts/tty-archive.js"></script>

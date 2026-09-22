@@ -312,6 +312,12 @@ module.exports = function (eleventyConfig) {
     return posts[(i + 1) % posts.length] || null;
   });
 
+  /* "1 post", "13 posts". The design system counts exactly: Site.jsx writes
+     `result{results.length === 1 ? "" : "s"}`, and tty-search.js does the same. */
+  eleventyConfig.addFilter("plural", (count, one, many) => {
+    return `${count} ${count === 1 ? one : many}`;
+  });
+
   // i18n URL filter
   eleventyConfig.addFilter("i18nUrl", function(url, lang) {
     if (!lang || lang === defaultLanguage) return url;

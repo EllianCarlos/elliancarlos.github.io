@@ -35,6 +35,12 @@ count_at_least() {
   if [ "$n" -ge "$3" ]; then pass "$4 ($n found)"; else bad "$4 (found $n, want $3+)"; fi
 }
 
+count_exactly() {
+  if [ ! -f "$DIST/$1" ]; then bad "$4 (file $1 is missing)"; return; fi
+  n=$(grep -oF -e "$2" "$DIST/$1" | wc -l || true)
+  if [ "$n" -eq "$3" ]; then pass "$4 ($n found)"; else bad "$4 (found $n, want exactly $3)"; fi
+}
+
 absent() {
   if [ -e "$DIST/$1" ]; then bad "$2 ($1 is present)"; else pass "$2"; fi
 }
@@ -203,6 +209,30 @@ grep_not "posts/index.html" "/scripts/search.js" "the old search script is unlin
 grep_in "scripts/tty-search.js" "flexsearch.bundle.js" "FlexSearch still backs the query"
 grep_in "scripts/tty-search.js" "tty-menu__hint" "each result row carries its date"
 grep_in "search-index-en.json" '"date":' "the search index carries a date for every post"
+
+section "archive view"
+have "posts/archive/index.html"
+have "scripts/tty-archive.js"
+grep_in "posts/archive/index.html" 'id="tty-archive"' "the archive root is present"
+grep_in "posts/archive/index.html" "Tools I use 2024" "the archive lists the archived post"
+grep_in "posts/archive/index.html" "Tools I&#39;ve been using - 2025" "the archive lists the active posts"
+grep_in "posts/archive/index.html" 'class="tty-badge tty-badge--outline tty-badge--warn"' "the archived row is badged"
+grep_in "posts/archive/index.html" 'data-tty-sort="oldest"' "the sort toggle is present"
+grep_in "posts/archive/index.html" 'id="y-2026"' "the year sections are anchored"
+grep_in "posts/archive/index.html" 'href="#y-2026"' "the by-year rail links to a year"
+grep_in "posts/archive/index.html" '/posts/tag/linux/' "the tag rail links to a tag page"
+grep_in "posts/archive/index.html" '<details class="tty-foldout">' "the compact filter foldout is present"
+grep_in "posts/archive/index.html" 'class="tty-rail--sticky tty-when-desktop"' "the desktop rail is present"
+grep_in "posts/archive/index.html" '/scripts/tty-archive.js' "the sort script is loaded"
+count_at_least "posts/archive/index.html" 'class="tty-postrow"' 14 "every post appears in the archive"
+grep_in "styles/tty/layout.css" ".tty-archive--oldest" "the sort flip CSS is present"
+grep_in "styles/tty/layout.css" "scroll-margin-top: calc(52px + var(--sp-4))" "the year anchors clear the sticky nav"
+grep_in "styles/tty/layout.css" ".tty-archive .tty-menu--dense .tty-menu__item" "the compact rail keeps the full row height"
+# Carried finding from Task 5's review: /posts/ and /posts/archive/ are both
+# live nav tabs, and /posts/archive/ is a URL prefix match for both. nav.njk
+# must pick the longest matching prefix so only one tab carries
+# aria-current="page" here — two would be an invalid ARIA state.
+count_exactly "posts/archive/index.html" 'aria-current="page"' 1 "exactly one nav tab is current on the archive page"
 
 printf '\n'
 if [ "$fails" -eq 0 ]; then
