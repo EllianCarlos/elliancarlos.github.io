@@ -9,8 +9,15 @@ set -uo pipefail
 
 DIST="${DIST:-dist}"
 fails=0
+passes=0
 
-pass() { printf '  ok   %s\n' "$1"; }
+# The suite's own tripwire (I8): a dropped, renamed or mistyped assertion call
+# must not vanish silently. EXPECTED_ASSERTIONS is the total `passes + fails`
+# this script produces today, counted (not guessed) after every change to the
+# assertion list. See the check at the bottom of the file.
+EXPECTED_ASSERTIONS=242
+
+pass() { printf '  ok   %s\n' "$1"; passes=$((passes + 1)); }
 bad()  { printf '  FAIL %s\n' "$1"; fails=$((fails + 1)); }
 
 section() { printf '\n== %s\n' "$1"; }
@@ -19,14 +26,28 @@ have() {
   if [ -f "$DIST/$1" ]; then pass "file $1"; else bad "file $1 is missing"; fi
 }
 
+# grep exit status: 0 = match found, 1 = no match (genuinely absent), 2 = error
+# (e.g. unreadable file). `if grep ...; then ... else ... fi` cannot tell 1
+# apart from 2, so an unreadable file used to read as "absent" — which made a
+# grep_not assertion PASS on an error. Capture the real status instead.
 grep_in() {
   if [ ! -f "$DIST/$1" ]; then bad "$3 (file $1 is missing)"; return; fi
-  if grep -qF -e "$2" "$DIST/$1"; then pass "$3"; else bad "$3"; fi
+  grep -qF -e "$2" "$DIST/$1"
+  case $? in
+    0) pass "$3" ;;
+    1) bad "$3" ;;
+    *) bad "$3 (grep error reading $1)" ;;
+  esac
 }
 
 grep_not() {
   if [ ! -f "$DIST/$1" ]; then bad "$3 (file $1 is missing)"; return; fi
-  if grep -qF -e "$2" "$DIST/$1"; then bad "$3"; else pass "$3"; fi
+  grep -qF -e "$2" "$DIST/$1"
+  case $? in
+    0) bad "$3" ;;
+    1) pass "$3" ;;
+    *) bad "$3 (grep error reading $1)" ;;
+  esac
 }
 
 count_at_least() {
@@ -43,6 +64,22 @@ count_exactly() {
 
 absent() {
   if [ -e "$DIST/$1" ]; then bad "$2 ($1 is present)"; else pass "$2"; fi
+}
+
+# I3: three ordinary authoring actions used to turn CI red, because these
+# assertions pinned a content count (13 active posts, "1 post", "1 paper")
+# instead of testing the grammar rule that produces that text. This derives
+# both the count AND the expected word (singular/plural, from the `plural`
+# filter's own convention: exactly 1 -> singular) from the built page itself,
+# so it stays correct as posts are archived or added, forever — not just at
+# today's counts.
+plural_count_assert() {
+  # $1 = file  $2 = row-class needle  $3 = singular word  $4 = plural word  $5 = label
+  if [ ! -f "$DIST/$1" ]; then bad "$5 (file $1 is missing)"; return; fi
+  n=$(grep -oF -e "$2" "$DIST/$1" | wc -l || true)
+  word="$4"
+  if [ "$n" -eq 1 ]; then word="$3"; fi
+  grep_in "$1" "${n} ${word}</span>" "$5 ($n $word)"
 }
 
 if [ ! -d "$DIST" ]; then
@@ -101,7 +138,21 @@ grep_in "styles/tty.css" '@import "tty/tokens/colors.css"' "the entry stylesheet
 have "styles/tty/webfonts.css"
 grep_in "styles/tty.css" '@import "tty/webfonts.css"' "the entry stylesheet loads the pinned display face"
 grep_in "styles/tty/webfonts.css" "silkscreen@5.3.0" "the display face is pinned to one version"
-grep_not "styles/tty/webfonts.css" "@latest" "no mutable font tag ships"
+# webfonts.css can, by construction, never contain "@latest" — it is the
+# pinned override. dist/styles/tty/tokens/fonts.css (vendored, unedited) SHIPS
+# silkscreen@latest twice; the site is only correct because tty.css imports
+# tokens/fonts.css before webfonts.css, so two identical @font-face rules
+# resolve to the last one declared and the pin wins. Test that ordering
+# invariant directly instead of grepping the wrong file for a string it can
+# never hold.
+fonts_import_line=$(grep -n -F '@import "tty/tokens/fonts.css"' "$DIST/styles/tty.css" | head -1 | cut -d: -f1)
+webfonts_import_line=$(grep -n -F '@import "tty/webfonts.css"' "$DIST/styles/tty.css" | head -1 | cut -d: -f1)
+if [ -n "${fonts_import_line:-}" ] && [ -n "${webfonts_import_line:-}" ] \
+  && [ "$fonts_import_line" -lt "$webfonts_import_line" ]; then
+  pass "tty.css imports tokens/fonts.css before webfonts.css, so the pinned rule wins"
+else
+  bad "tty.css imports tokens/fonts.css before webfonts.css, so the pinned rule wins"
+fi
 
 section "core components"
 have "styles/tty/core.css"
@@ -276,14 +327,33 @@ grep_in "posts/index.html" 'class="tty-panel__title"' "the feeds panel is presen
 grep_in "posts/index.html" "3 endpoints" "the feeds panel counts only its endpoints"
 grep_not "posts/index.html" '<h2 class="blog">' "the old Pico post headings are gone"
 count_at_least "posts/index.html" 'class="tty-term__path"' 3 "the terminal lists three recent slugs"
-count_at_least "posts/index.html" 'class="tty-postrow"' 13 "every active post is listed (13 today)"
+# I3: was pinned to 13, which failed CI the moment a second post was
+# archived. Derive the expected active count from the build itself instead:
+# every post page under posts/ (excluding the index, archive and tag
+# listings) minus however many of those carry the archived banner (the same
+# signal "the archived post shows a banner" trusts, in the post page section
+# below).
+all_post_pages=$(find "$DIST/posts" -mindepth 2 -maxdepth 2 -name index.html \
+  ! -path "$DIST/posts/archive/index.html" 2>/dev/null)
+total_posts=$(printf '%s\n' "$all_post_pages" | grep -c . || true)
+archived_posts=0
+if [ -n "$all_post_pages" ]; then
+  archived_posts=$(grep -lF 'class="tty-note tty-note--warn"' $all_post_pages 2>/dev/null | grep -c . || true)
+fi
+expected_active=$((total_posts - archived_posts))
+count_exactly "posts/index.html" 'class="tty-postrow"' "$expected_active" \
+  "every active post is listed ($expected_active active of $total_posts total)"
 
 section "tag pages"
 have "posts/tag/linux/index.html"
 grep_in "posts/tag/linux/index.html" 'class="tty-postrow"' "tag pages use the design system row"
 grep_in "posts/tag/linux/index.html" 'class="tty-archive__head"' "tag pages reuse the archive head"
 grep_in "posts/tag/linux/index.html" "/posts/archive/" "a tag page links back to the archive"
-grep_in "posts/tag/japanese/index.html" '>1 post</span>' "a one-post tag page counts in the singular"
+# I3: was pinned to the exact string "1 post", which failed CI the moment a
+# second japanese-tagged post was written. Derive both the count and the
+# expected singular/plural word from the page itself instead.
+plural_count_assert "posts/tag/japanese/index.html" 'class="tty-postrow"' "post" "posts" \
+  "the japanese tag page's count uses correct singular/plural grammar"
 grep_not "posts/tag/linux/index.html" 'class="tag-pill"' "the old tag pills are gone"
 grep_not "posts/tag/linux/index.html" '<h2 class="blog">' "the old Pico headings are gone"
 
@@ -296,7 +366,11 @@ grep_in "preprints/index.html" 'target="_blank"' "the row opens in a new tab"
 grep_in "preprints/index.html" 'rel="noreferrer noopener"' "the new tab is opened safely"
 grep_in "preprints/index.html" ".pdf" "the row links a PDF"
 grep_in "preprints/index.html" 'class="tty-paper"' "the paper row renders"
-grep_in "preprints/index.html" '>1 paper</span>' "the count reads the singular"
+# I3: was pinned to the exact string "1 paper", which failed CI the moment a
+# second preprint was added — a two-step authoring action preprints.js itself
+# documents. Derive both the count and the expected singular/plural word.
+plural_count_assert "preprints/index.html" 'class="tty-paper"' "paper" "papers" \
+  "the preprints count uses correct singular/plural grammar"
 grep_in "preprints/index.html" 'aria-current="page"' "the preprints tab is marked active"
 grep_in "llms.txt" "/preprints/" "llms.txt points at the preprints page"
 grep_in "styles/tty/layout.css" ".tty-paper__title" "the paper row CSS is present"
@@ -305,7 +379,11 @@ section "homepage"
 grep_in "index.html" 'class="tty-prose"' "the biography is inside the prose wrapper"
 grep_in "index.html" 'class="tty-term"' "the whoami terminal is present"
 grep_in "index.html" 'class="tty-linklist"' "the elsewhere list is present"
-grep_in "index.html" 'class="tty-menu' "the recent rail is present"
+# L17: 'class="tty-menu' alone is satisfied by the search overlay's
+# <ul class="tty-menu" id="tty-search-results"> (searchOverlay.njk), which
+# ships hidden on every page. Deleting the homepage's entire recent rail left
+# this green. Key the needle to the rail's own modifier class instead.
+grep_in "index.html" 'class="tty-menu tty-menu--dense"' "the recent rail is present"
 grep_in "index.html" 'class="tty-linklist__key">resume<' "the elsewhere list carries the resume row"
 grep_in "index.html" 'class="tty-linklist__key">cv<' "the elsewhere list carries the academic cv row"
 grep_in "index.html" "Brazilian software engineer" "the biography text survives"
@@ -355,7 +433,14 @@ section "contact and error pages"
 have "contact/index.html"
 grep_in "contact/index.html" 'class="tty-linklist"' "contact uses the key/value list"
 grep_in "contact/index.html" 'class="tty-h1"' "contact has a display title"
-grep_not "contact/index.html" "<ul>" "the old plain list is gone from contact"
+# L17 (same shape as the recent-rail fix above): searchOverlay.njk's
+# <ul class="tty-menu" id="tty-search-results"> ships on every page, so a
+# check keyed on bare "<ul>" is only correct today because that element
+# happens to carry a class. The old Pico contact markup was an unclassed
+# <ul><li>...</li></ul>; key the needle to "<li>" instead — the search
+# overlay never emits a static <li> (its rows are written by JS at runtime)
+# — so this stops depending on an accident of a shared, unrelated partial.
+grep_not "contact/index.html" "<li>" "the old plain list is gone from contact"
 grep_in "404.html" 'class="tty-h1"' "the 404 page has a display title"
 grep_in "404.html" 'class="tty-btn' "the 404 page offers a way home"
 grep_not "404.html" "language-select" "the dead language selector script is gone"
@@ -372,8 +457,23 @@ have "scripts/tty-typewriter.js"
 have "scripts/tty-archive.js"
 
 printf '\n'
+
+# I8: the tripwire. Without this, a dropped, renamed or mistyped assertion
+# call site vanishes with no signal — the suite still exits 0 and still
+# prints "all assertions passed", just with a smaller `ok` count nobody is
+# watching. This turns "fewer assertions ran than expected" into a hard,
+# loud failure on its own.
+total=$((passes + fails))
+if [ "$total" -ne "$EXPECTED_ASSERTIONS" ]; then
+  printf 'FAIL: expected %s assertions to run, but %s ran (passes=%s fails=%s)\n' \
+    "$EXPECTED_ASSERTIONS" "$total" "$passes" "$fails"
+  printf 'A section, a call site, or a whole assertion silently disappeared (or one was added\n'
+  printf 'without updating EXPECTED_ASSERTIONS at the top of this file).\n'
+  fails=$((fails + 1))
+fi
+
 if [ "$fails" -eq 0 ]; then
-  printf 'check-build: all assertions passed\n'
+  printf 'check-build: all %s assertions passed\n' "$passes"
   exit 0
 fi
 printf 'check-build: %s assertion(s) failed\n' "$fails"

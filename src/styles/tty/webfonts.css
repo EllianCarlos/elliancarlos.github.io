@@ -7,8 +7,9 @@
 
    5.3.0 is the fontsource version that mutable tag resolved to on 2026-09-21.
    Every other third-party reference on this site is pinned the same way:
-   katex@0.16.47, flexsearch@0.7.31. JetBrains Mono needs no override — the
-   token file already pins it at jetbrains-mono:vf@5.3.0. */
+   katex@0.16.47, flexsearch@0.7.31, prismjs@1.30.0 (.eleventy.js). JetBrains
+   Mono needs no override — the token file already pins it at
+   jetbrains-mono:vf@5.3.0. */
 @font-face {
   font-family: "Silkscreen";
   src: url("https://cdn.jsdelivr.net/fontsource/fonts/silkscreen@5.3.0/latin-400-normal.woff2") format("woff2");
