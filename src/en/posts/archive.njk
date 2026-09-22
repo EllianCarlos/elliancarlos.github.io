@@ -49,11 +49,18 @@ description: Every post on this site, newest first, grouped by year and filterab
         <h1 class="tty-h1">{{ i18n.en.blog.archive }}</h1>
         <span class="tty-archive__count">{{ posts.length | plural(i18n.en.blog.post, i18n.en.blog.count) }}</span>
         <span class="tty-spacer"></span>
-        <div class="tty-tabs" role="tablist" aria-label="{{ i18n.en.blog.archive }}">
-          <button class="tty-tabs__tab" type="button" role="tab"
-                  data-tty-sort="newest" aria-selected="true">{{ i18n.en.blog.sortNewest }}</button>
-          <button class="tty-tabs__tab" type="button" role="tab"
-                  data-tty-sort="oldest" aria-selected="false">{{ i18n.en.blog.sortOldest }}</button>
+        {#
+          This is a sort toggle, not a tab set switching between panels — it
+          has no aria-controls target and nothing here behaves like a
+          tabpanel, so it does not get role="tablist"/"tab". Consistent with
+          nav.njk's own use of .tty-tabs, which is plain links + aria-current.
+          aria-pressed is the correct state for a toggle button.
+        #}
+        <div class="tty-tabs" aria-label="{{ i18n.en.blog.archive }}">
+          <button class="tty-tabs__tab" type="button"
+                  data-tty-sort="newest" aria-pressed="true">{{ i18n.en.blog.sortNewest }}</button>
+          <button class="tty-tabs__tab" type="button"
+                  data-tty-sort="oldest" aria-pressed="false">{{ i18n.en.blog.sortOldest }}</button>
         </div>
       </div>
 

@@ -284,12 +284,6 @@ body.tty-search-open { overflow: hidden; }
   .tty-archive .tty-menu--dense .tty-menu__item { min-height: var(--row-h); }
 }
 
-/* Oldest-first is a layout flip, not a re-sort: both the year list and the rows
-   inside each year reverse from one class on the root. The index numbers stay
-   attached to their post, so 001 sits at the top when oldest is chosen. */
-.tty-archive--oldest .tty-archive__years,
-.tty-archive--oldest .tty-archive__rows { flex-direction: column-reverse; }
-
 /* ── Post screen (ui_kits/blog/Post.jsx) ────────────────────────────────── */
 .tty-post { display: flex; flex-direction: column; align-items: center; }
 /* 68ch must be counted in the reading face. The head, the body and the foot all

@@ -276,7 +276,12 @@ grep_in "posts/archive/index.html" '<details class="tty-foldout">' "the compact 
 grep_in "posts/archive/index.html" 'class="tty-rail--sticky tty-when-desktop"' "the desktop rail is present"
 grep_in "posts/archive/index.html" '/scripts/tty-archive.js' "the sort script is loaded"
 count_at_least "posts/archive/index.html" 'class="tty-postrow"' 14 "every post appears in the archive"
-grep_in "styles/tty/layout.css" ".tty-archive--oldest" "the sort flip CSS is present"
+# I4: the sort used to be a CSS-only flex-direction: column-reverse, which
+# per the Flexbox spec changes paint order only — not focus order — so Tab
+# walked the rows bottom-up after clicking "oldest" (WCAG 2.4.3). The fix
+# reorders the DOM instead (tty-archive.js), so this now guards against the
+# CSS-only flip coming back rather than asserting it exists.
+grep_not "styles/tty/layout.css" "column-reverse" "the sort toggle is not a CSS-only paint flip (focus order must match paint order)"
 grep_in "styles/tty/layout.css" "scroll-margin-top: calc(52px + var(--sp-4))" "the year anchors clear the sticky nav"
 grep_in "styles/tty/layout.css" ".tty-archive .tty-menu--dense .tty-menu__item" "the compact rail keeps the full row height"
 # Carried finding from Task 5's review: /posts/ and /posts/archive/ are both

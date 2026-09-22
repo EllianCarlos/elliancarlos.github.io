@@ -278,7 +278,8 @@
   border-bottom-color: var(--border-strong);
 }
 .tty-tabs__tab[aria-current="page"],
-.tty-tabs__tab[aria-selected="true"] {
+.tty-tabs__tab[aria-selected="true"],
+.tty-tabs__tab[aria-pressed="true"] {
   color: var(--yellow);
   border-bottom-color: var(--yellow);
 }
