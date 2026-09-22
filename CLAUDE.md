@@ -182,6 +182,19 @@ could find a post everywhere except the page that lists them.
 The `.tty-list__*` blocks in `layout.css` are shared by `/posts/`, every tag page and
 `/preprints/`. The name is `list`, not `archive`.
 
+The hero above the list is an eyebrow plus a headline, and they must say different
+things: `blog.eyebrow` carries the descriptive sentence, `blog.headline` names the page.
+They once held the identical string, so the page printed one sentence twice.
+
+**Never split a piece of prose across sibling data fields.** The headline used to be
+`heroLine1`, `heroLine2` and `heroLine3`, joined in the template by hard `<br>` tags.
+That forces the author to re-balance three strings after every edit, and the break points
+cannot follow the viewport. One field is the rule; `.tty-h1--hero` caps its measure in
+`ch` and sets `text-wrap: balance`, so the browser picks the breaks. `check-build.sh`
+guards all of this: no `<br>` on the listing page, both declarations read out of the
+`.tty-h1--hero` block, no `…Line<N>` key anywhere in `src/_data`, and the eyebrow's text
+compared against the headline's. None of those assertions names the copy itself.
+
 ### Preprints
 
 `/preprints/` lists papers from `src/_data/preprints.js`. Each row links straight to a PDF
@@ -222,7 +235,9 @@ modified: 2025-08-01  # optional; shows "updated on"
 - Build output goes to `dist/` (gitignored). Directory config in `.eleventy.js`:
   input `src`, includes `_includes`, data `_data`.
 - `sitemap.njk` generates `/sitemap.xml`; a `prettyPrintSitemap` transform inserts
-  newlines. Sitemap hostname is hardcoded to `https://www.elliancarlos.com.br`.
+  newlines. Sitemap hostname is hardcoded to `https://elliancarlos.com.br`. The
+  site canonicalises on the apex domain, with no `www`: `.eleventy.js`,
+  `src/_data/seo.js` and `CNAME` must all agree on it.
 
 ## Deployment
 

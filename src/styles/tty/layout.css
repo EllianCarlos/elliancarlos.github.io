@@ -165,12 +165,21 @@ body { overflow-x: clip; }
   -webkit-font-smoothing: none;
   font-smooth: never;
 }
+/* The hero headline is one string, not one string per line. `max-width` in `ch`
+   caps the measure against the headline's own font size, so it holds at every
+   step of the --display-xl clamp; `balance` then spreads the words evenly over
+   however many lines that measure allows. Together they replace the three
+   hand-split `heroLine` fields and their hard `<br>` tags.
+   `balance` is capped at a few lines by every engine that ships it, which is
+   the right ceiling for a headline. Where it is unsupported the text still
+   wraps at the same measure — only the line lengths are less even. */
 .tty-h1--hero {
+  max-width: 24ch;
   font-size: var(--display-xl);
   line-height: 1.05;
   letter-spacing: 0.04em;
+  text-wrap: balance;
 }
-.tty-h1--hero .tty-accent { color: var(--yellow); }
 .tty-h2 {
   margin: 0;
   font-family: var(--font-display);
@@ -425,18 +434,10 @@ html.tty-search-open { overflow: hidden; }
 }
 
 /* ── Hero (ui_kits/blog/Home.jsx) ───────────────────────────────────────── */
-/* The lead is body copy, not metadata: it is the first thing read on /posts/.
-   It was 15px --text-muted (5.85:1), a size and a weight of grey that belong on
-   a date stamp. It now reads one step below the prose size, in the same ink as
-   the prose. */
-.tty-hero__lead {
-  max-width: 52ch;
-  margin: 22px 0 0;
-  font-size: var(--text-lg);
-  line-height: 1.8;
-  color: var(--text-secondary);
-  text-wrap: pretty;
-}
+/* There was a `.tty-hero__lead` here. Its i18n string was the empty string, so
+   the hero shipped an empty <p> that contributed nothing but its own margins.
+   The rule and the element are both gone. To bring a sub-headline back, add the
+   string, the <p> and this rule together — never the element alone. */
 .tty-hero__actions {
   display: flex;
   gap: 10px;

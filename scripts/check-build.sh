@@ -15,7 +15,7 @@ passes=0
 # must not vanish silently. EXPECTED_ASSERTIONS is the total `passes + fails`
 # this script produces today, counted (not guessed) after every change to the
 # assertion list. See the check at the bottom of the file.
-EXPECTED_ASSERTIONS=290
+EXPECTED_ASSERTIONS=294
 
 pass() { printf '  ok   %s\n' "$1"; passes=$((passes + 1)); }
 bad()  { printf '  FAIL %s\n' "$1"; fails=$((fails + 1)); }
@@ -440,7 +440,65 @@ else
 fi
 grep_in "styles/tty/prism-tty.css" "font-size: var(--text-md)" "a code block is no longer the smallest text on the site"
 grep_in "styles/tty/content.css" "font-size: var(--text-md)" "a post row's description reads as body copy"
-grep_in "styles/tty/layout.css" "font-size: var(--text-lg)" "the hero lead reads one step under the prose"
+# The `.tty-hero__lead` assertion that stood here is gone with the rule: the lead
+# string was "" and the element shipped empty. --text-lg has no other reader in
+# layout.css, so keeping the needle would have asserted nothing.
+
+# The hero headline is one i18n field and the browser picks the line breaks. It
+# used to be three fields (`heroLine1..3`) welded together with hard `<br>` tags,
+# which is the defect these four assertions guard against coming back:
+#   - no `<br>` on the listing page at all. The hero was its only source; a post
+#     BODY may legitimately carry one, but no body is rendered on this page.
+#   - the headline caps its own measure and balances its own lines, read out of
+#     the `.tty-h1--hero` block itself so a declaration moved elsewhere cannot
+#     satisfy it.
+#   - no `heroLine`-shaped key survives in any language's strings.
+# No fragment of the headline's own words appears below: that is the owner's
+# copy, and pinning it would turn CI red on an ordinary wording change (I3).
+section "the hero headline is one responsive field"
+grep_not "posts/index.html" "<br" "the hero headline carries no hard line break"
+hero_block=$(awk '/^\.tty-h1--hero \{/{f=1} f{print; if (/^}/) exit}' \
+  "$DIST/styles/tty/layout.css" 2>/dev/null)
+for decl in "max-width:" "text-wrap: balance;"; do
+  if printf '%s\n' "$hero_block" | grep -qF "$decl"; then
+    pass "the hero headline block declares $decl"
+  else
+    bad "the hero headline block declares $decl"
+  fi
+done
+# The eyebrow above the headline used to repeat the headline word for word, so the
+# page printed the same sentence twice. Both elements are wanted; saying the same
+# thing twice is not. These two assertions read BOTH strings out of the built page
+# and compare them, so neither the sentence nor the page title is written down
+# here: the owner can rewrite either at will and only a real duplicate turns CI
+# red. That is the I3 rule — assert the relationship, never the copy.
+eyebrow_text=$(grep -oE '<p class="tty-eyebrow">[^<]*</p>' "$DIST/posts/index.html" 2>/dev/null \
+  | head -1 | sed -E 's|<[^>]*>||g' | tr -s '[:space:]' ' ' | sed -E 's/^ +| +$//g')
+hero_text=$(awk '/<h1 class="tty-h1 tty-h1--hero/{f=1} f{print; if (/<\/h1>/) exit}' \
+  "$DIST/posts/index.html" 2>/dev/null \
+  | sed -E 's|<[^>]*>||g' | tr -s '[:space:]' ' ' | sed -E 's/^ +| +$//g')
+if [ -n "$eyebrow_text" ]; then
+  pass "the listing hero carries an eyebrow above its headline"
+else
+  bad "the listing hero carries an eyebrow above its headline"
+fi
+if [ -n "$eyebrow_text" ] && [ "$eyebrow_text" = "$hero_text" ]; then
+  bad "the eyebrow and the headline do not say the same thing"
+else
+  pass "the eyebrow and the headline do not say the same thing"
+fi
+# Source-side, and for the same reason as the tty-tabs__count sweep above: the
+# i18n JSON never reaches dist/, so the only place a resurrected per-line key can
+# be caught is src/_data. `$repo_root` is resolved at line 369.
+# The sweep covers all four language files, not just en.json: a per-line split in
+# ja.json is the same defect and is far harder to spot by eye.
+heroline_hits=$(grep -rlE '"[A-Za-z]+[Ll]ine[0-9]+"[[:space:]]*:' \
+  "$repo_root/src/_data" | tr '\n' ' ')
+if [ -n "$heroline_hits" ]; then
+  bad "no per-line text key survives in src/_data ($heroline_hits)"
+else
+  pass "no per-line text key survives in src/_data"
+fi
 
 # There is one post collection and one post listing. The `archived: true` flag,
 # the `postsActive_<lang>` collection and the /posts/archive/ page are all gone:
@@ -594,7 +652,9 @@ fi
 section "posts landing page"
 have "scripts/tty-typewriter.js"
 grep_in "posts/index.html" 'tty-h1--hero' "the hero title is present"
-grep_in "posts/index.html" 'class="tty-eyebrow"' "the eyebrow is present"
+# The eyebrow assertion that stood here asserted the presence of a duplicate: its
+# string was the headline, word for word. The negative assertion now lives in
+# "the hero headline is one responsive field".
 grep_in "posts/index.html" 'class="tty-term"' "the terminal demo is present"
 grep_in "posts/index.html" 'data-tty-type' "the typewriter target is present"
 grep_in "posts/index.html" '/scripts/tty-typewriter.js' "the typewriter script is loaded"

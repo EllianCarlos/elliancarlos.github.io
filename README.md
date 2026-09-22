@@ -3,7 +3,7 @@
 [![Netlify Status](https://api.netlify.com/api/v1/badges/703975f3-d832-4bd3-8051-d6ca4f375a5a/deploy-status)](https://app.netlify.com/sites/serene-lollipop-e973ed/deploys)
 
 Personal website and blog of Ellian Carlos. The site is live at
-[elliancarlos.com.br](https://www.elliancarlos.com.br).
+[elliancarlos.com.br](https://elliancarlos.com.br).
 
 ## Stack
 

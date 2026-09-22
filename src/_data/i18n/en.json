@@ -21,11 +21,8 @@
     "closeHint": "close"
   },
   "blog": {
-    "eyebrow": "Notes on kernels, open source, and the tools I keep",
-    "heroLine1": "Notes from",
-    "heroLine2": "the kernel",
-    "heroLine3": "and the tools",
-    "lead": "Long-form notes on the Linux kernel, on how open source work concentrates in a few hands, and on the tools I keep on disk. Most of it started as a note to myself.",
+    "eyebrow": "Thoughts, notes, research work, development and recommendations",
+    "headline": "Posts",
     "readPosts": "Read the posts",
     "latestPost": "Latest post",
     "recent": "recent",

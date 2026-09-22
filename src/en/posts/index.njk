@@ -48,13 +48,22 @@ description: Thoughts on software engineering, tools, languages, and technology.
 
   <section class="tty-split">
     <div>
+      {#
+        The eyebrow carries the sentence; the headline names the page. They used
+        to carry the SAME sentence, so the page printed it twice — once small and
+        uppercase, once at display size.
+
+        The headline is also one field now, not three. It used to be `heroLine1`,
+        `heroLine2` and `heroLine3` welded together with hard `<br>` tags, which
+        made the author re-balance three strings by hand after every edit and at
+        every viewport. The break points are the browser's now: `.tty-h1--hero`
+        caps the measure in `ch` and sets `text-wrap: balance`, so any headline
+        written here re-flows on its own.
+      #}
       <p class="tty-eyebrow">{{ i18n.en.blog.eyebrow }}</p>
       <h1 class="tty-h1 tty-h1--hero tty-hero__title">
-        {{ i18n.en.blog.heroLine1 }}<br>
-        {{ i18n.en.blog.heroLine2 }}<br>
-        <span class="tty-accent">{{ i18n.en.blog.heroLine3 }}</span>
+        {{ i18n.en.blog.headline }}
       </h1>
-      <p class="tty-hero__lead">{{ i18n.en.blog.lead }}</p>
       <div class="tty-hero__actions">
         {{ tty.btn(i18n.en.blog.latestPost, posts[0].url, "primary") }}
       </div>
