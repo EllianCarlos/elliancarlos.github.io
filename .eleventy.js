@@ -244,6 +244,33 @@ module.exports = function (eleventyConfig) {
     return pairs;
   });
 
+  // The page list src/sitemap.njk hands to the sitemap plugin. It cannot hand
+  // over collections.all, because src/tag/index.njk is a paginated template and
+  // @quasibit/eleventy-plugin-sitemap replaces any item carrying
+  // `data.pagination` with one entry per `pagination.hrefs` entry (the plugin's
+  // own src/paginationItems.js). A tag page's real URL comes from the computed
+  // permalink in src/tag/tag.11tydata.js, which `hrefs` never sees, so every
+  // href for that template is its file-based URL, `/tag/` — a page this build
+  // never writes. The plugin then de-duplicated those into a single `/tag/`:
+  // sitemap.xml advertised a 404 and listed none of the real
+  // /posts/tag/<slug>/ pages.
+  //
+  // Copying each item into a plain object leaves `data.pagination` behind, so
+  // the plugin reads the URL Eleventy actually wrote. Paired with
+  // `addAllPagesToCollections` in src/tag/tag.11tydata.js, this is one entry per
+  // page the build writes, derived entirely from the build — a post that gains
+  // a new tag reaches the sitemap on the next build, with no URL list and no
+  // count written down anywhere.
+  eleventyConfig.addCollection("sitemapPages", (collectionApi) =>
+    collectionApi.getAll().map((item) => ({
+      url: item.url,
+      date: item.date,
+      // The plugin reads per-page overrides (`changefreq`, `priority`,
+      // `lastmod`, `ignore`) out of `data.sitemap`; keep them reachable.
+      data: { sitemap: item.data.sitemap },
+    }))
+  );
+
   // Search index per language: array of { id, title, url, description, date, contentExcerpt }
   languages.forEach((lang) => {
     eleventyConfig.addCollection(`searchIndex_${lang}`, (collectionApi) => {

@@ -15,7 +15,7 @@ passes=0
 # must not vanish silently. EXPECTED_ASSERTIONS is the total `passes + fails`
 # this script produces today, counted (not guessed) after every change to the
 # assertion list. See the check at the bottom of the file.
-EXPECTED_ASSERTIONS=286
+EXPECTED_ASSERTIONS=290
 
 pass() { printf '  ok   %s\n' "$1"; passes=$((passes + 1)); }
 bad()  { printf '  FAIL %s\n' "$1"; fails=$((fails + 1)); }
@@ -95,6 +95,42 @@ have "feed.xml"
 have "llms.txt"
 have "search-index-en.json"
 have "_headers"
+
+# sitemap.xml is the only complete list of this site's URLs a crawler reads, so
+# every URL in it must be a page the build wrote, and every page the build
+# writes belongs in it. Both halves used to be wrong for tag pages:
+# src/tag/index.njk is paginated, and the sitemap plugin rewrites a paginated
+# item's URL from `pagination.hrefs`, which never sees the computed permalink in
+# src/tag/tag.11tydata.js. One `/tag/` entry — a path the build never writes —
+# stood in for all the real /posts/tag/<slug>/ pages, and none of those appeared.
+#
+# No tag name and no count is written down here. Both sides of the comparison
+# are read out of the build, so writing a post with a brand-new tag can never
+# turn CI red — that was finding I3.
+section "sitemap coverage"
+# "/tag/</loc>" matches only a loc that ENDS in /tag/, which is the bad entry: a
+# real tag page's loc ends in its slug (".../posts/tag/linux/</loc>"), so it
+# cannot match. The needle carries no hostname either, so changing the sitemap
+# hostname in .eleventy.js cannot quietly make this assertion vacuous.
+grep_not "sitemap.xml" "/tag/</loc>" "the 404 /tag/ URL is not in the sitemap"
+count_at_least "sitemap.xml" "/posts/tag/" 1 "the sitemap lists tag pages"
+# One tag slug per line, from each side of the contract: the pages the build
+# actually wrote, and the URLs the sitemap advertises.
+built_tag_slugs=$(find "$DIST/posts/tag" -mindepth 2 -maxdepth 2 -name index.html 2>/dev/null \
+  | sed -E 's|.*/posts/tag/([^/]+)/index\.html$|\1|' | sort)
+sitemap_tag_slugs=$(grep -oE '<loc>[^<]*/posts/tag/[^/]+/</loc>' "$DIST/sitemap.xml" 2>/dev/null \
+  | sed -E 's|.*/posts/tag/([^/]+)/</loc>|\1|' | sort)
+built_tag_pages=$(printf '%s\n' "$built_tag_slugs" | grep -c . || true)
+count_exactly "sitemap.xml" "/posts/tag/" "$built_tag_pages" \
+  "every tag page the build wrote is in the sitemap ($built_tag_pages pages)"
+# The count alone cannot see a wrong URL, only a missing one: a slug built one
+# way and advertised another keeps both sides at the same total. Compare the
+# sets, so the sitemap has to name the directories the build really wrote.
+if [ "$built_tag_slugs" = "$sitemap_tag_slugs" ]; then
+  pass "the sitemap's tag URLs are the tag pages on disk, slug for slug"
+else
+  bad "the sitemap's tag URLs are the tag pages on disk, slug for slug"
+fi
 
 # Netlify and GitHub Pages serve dist/ as plain files. Nothing in the output may
 # post to a server, and no host may be asked to run code. `<form` matches real
