@@ -195,18 +195,6 @@ module.exports = function (eleventyConfig) {
     });
   });
 
-  // Posts that still belong on the /posts/ landing page.
-  // `archived: true` in a post's frontmatter drops it from here. The post keeps
-  // its URL and stays in the feed, the sitemap, llms.txt and the search index —
-  // only the landing page hides it, and /posts/archive/ marks it.
-  languages.forEach((lang) => {
-    eleventyConfig.addCollection(`postsActive_${lang}`, (collectionApi) => {
-      return collectionApi.getFilteredByGlob(`src/${lang}/posts/**/*.md`)
-        .filter((post) => post.data.archived !== true)
-        .sort((a, b) => b.data.date - a.data.date);
-    });
-  });
-
   // Map of language -> list of available HTML page URLs.
   // Consumed by languageRedirect.njk so we only auto-redirect when the
   // translated page actually exists, avoiding the /pt/pt/pt/... loop

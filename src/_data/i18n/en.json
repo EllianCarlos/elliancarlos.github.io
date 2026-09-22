@@ -26,7 +26,6 @@
     "heroLine2": "the kernel",
     "heroLine3": "and the tools",
     "lead": "Long-form notes on the Linux kernel, on how open source work concentrates in a few hands, and on the tools I keep on disk. Most of it started as a note to myself.",
-    "readArchive": "Read the archive",
     "readPosts": "Read the posts",
     "latestPost": "Latest post",
     "recent": "recent",
@@ -34,15 +33,11 @@
     "feedsHint": "3 endpoints",
     "searchHint": "press / anywhere",
     "allPosts": "all posts",
-    "archive": "archive",
     "postsTagged": "posts tagged",
     "noPostsWithTag": "No posts carry this tag.",
-    "tagged": "tagged",
     "byYear": "by year",
     "tags": "tags",
     "filter": "filter",
-    "sortNewest": "newest first",
-    "sortOldest": "oldest first",
     "post": "post",
     "count": "posts"
   },
@@ -50,10 +45,6 @@
     "translationWarning": {
       "title": "automatic translation",
       "message": "A language model translated this post from English. It may contain inaccuracies, or nuances lost in translation."
-    },
-    "archived": {
-      "title": "archived",
-      "message": "This post is no longer listed on the posts page. A newer post supersedes it. The text stays here unchanged."
     },
     "publishedOn": "published",
     "updatedOn": "updated",

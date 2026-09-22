@@ -4,7 +4,7 @@ type: blogPost
 ogType: article
 ---
 {% import "tty/core.njk" as tty %}
-{%- set siblings = collections['postsActive_' + (locale or 'en')] -%}
+{%- set siblings = collections['posts_' + (locale or 'en')] -%}
 {%- set next = siblings | nextPost(page.url) -%}
 <article class="tty-post">
   <header class="tty-post__head">
@@ -33,7 +33,6 @@ ogType: article
   </header>
 
   <div class="tty-post__body">
-    {% include "archivedBanner.njk" %}
     {% include "translationWarning.njk" %}
     <div class="tty-prose">
       {{ content | safe }}

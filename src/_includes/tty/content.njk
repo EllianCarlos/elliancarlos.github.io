@@ -6,7 +6,7 @@
   task lands.
 #}
 
-{% macro postrow(post, index, archived=false) %}
+{% macro postrow(post, index) %}
 <a class="tty-postrow" href="{{ post.url }}">
   <div class="tty-postrow__index">{{ index }}</div>
   <div class="tty-postrow__body">
@@ -21,7 +21,6 @@
   <div class="tty-postrow__meta">
     <time datetime="{{ post.date.toISOString() }}">{{ post.date | postDate }}</time>
     <span>{{ post | readingTime }}</span>
-    {% if archived %}<span class="tty-badge tty-badge--outline tty-badge--warn">archived</span>{% endif %}
   </div>
 </a>
 {%- endmacro %}

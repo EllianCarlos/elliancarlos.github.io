@@ -9,7 +9,11 @@ pre[class*="language-"] {
   margin: 0 0 var(--sp-6);
   padding: 10px 12px;
   font-family: var(--font-code);
-  font-size: var(--text-sm);
+  /* 13px was the smallest size on the site, and these posts are largely shell
+     transcripts and diffs. One step up, to the same size as a table cell. A
+     block wider than the column still scrolls — `overflow: auto` below — which
+     is what already happened to the two longest lines in the posts. */
+  font-size: var(--text-md);
   line-height: 1.7;
   tab-size: 2;
   hyphens: none;

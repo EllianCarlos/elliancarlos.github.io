@@ -8,14 +8,19 @@ description: Papers and preprints on open source development, knowledge concentr
   One row per paper, straight to the PDF in a new tab. The list comes from
   src/_data/preprints.js; the PDFs are copied from the repository-root
   preprints/ directory by a passthrough in .eleventy.js.
+
+  The venue sits in the body under the authors, not in the meta column: a
+  workshop-inside-a-conference name is long, and the meta column is `nowrap`.
+  `host` and `kind` are optional — a paper with neither prints exactly what it
+  printed before.
 #}
 <div class="tty-screen">
   <section>
-    <div class="tty-archive__head">
+    <div class="tty-list__head">
       <h1 class="tty-h1">{{ i18n.en.preprints.title }}</h1>
-      <span class="tty-archive__count">{{ preprints.length | plural(i18n.en.preprints.paper, i18n.en.preprints.papers) }}</span>
+      <span class="tty-list__count">{{ preprints.length | plural(i18n.en.preprints.paper, i18n.en.preprints.papers) }}</span>
       <span class="tty-spacer"></span>
-      <span class="tty-archive__count">{{ i18n.en.preprints.openHint }}</span>
+      <span class="tty-list__count">{{ i18n.en.preprints.openHint }}</span>
     </div>
 
     <p class="tty-prose tty-prose--md">{{ i18n.en.preprints.description }}</p>
@@ -27,9 +32,10 @@ description: Papers and preprints on open source development, knowledge concentr
         <div class="tty-paper__body">
           <h2 class="tty-paper__title">{{ paper.title }}</h2>
           <p class="tty-paper__authors">{{ paper.authors }}</p>
+          <p class="tty-paper__venue">{{ paper.venue }}{% if paper.host %} <span class="tty-paper__host">@ {{ paper.host }}</span>{% endif %}</p>
         </div>
         <div class="tty-paper__meta">
-          <span>{{ paper.venue }}</span>
+          {% if paper.kind %}{{ tty.badge(paper.kind, "", true) }}{% endif %}
           <time datetime="{{ paper.date }}">{{ paper.date }}</time>
           <span class="tty-paper__ext" aria-hidden="true">pdf →</span>
         </div>

@@ -6,8 +6,44 @@ description: Thoughts on software engineering, tools, languages, and technology.
 ---
 {% import "tty/core.njk" as tty %}
 {% import "tty/content.njk" as ttyc %}
-{%- set posts = collections.postsActive_en -%}
+{#
+  One page holds every post. There is no second listing: the hero sits on top of
+  the complete record, grouped by year and filterable by tag.
+
+  `posts_en` is the only post collection. A post never leaves this page.
+#}
+{%- set posts = collections.posts_en -%}
+{%- set tags = collections.tags_en -%}
 {%- set idx = posts | postIndexes -%}
+{%- set groups = posts | groupByYear -%}
+
+{% macro rail() %}
+<div class="tty-rail">
+  <div>
+    {{ tty.divider(i18n.en.blog.tags) }}
+    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px">
+      {%- for tag in tags -%}
+        {{ tty.tag(tag, "/posts/tag/" + (tag | tagSlug) + "/", (posts | filterByTag(tag)).length) }}
+      {%- endfor -%}
+    </div>
+  </div>
+  <div>
+    {{ tty.divider(i18n.en.blog.byYear) }}
+    <ul class="tty-menu tty-menu--dense" style="margin-top: 10px">
+      {%- for group in groups -%}
+      <li>
+        <a class="tty-menu__item" href="#y-{{ group.year }}">
+          <span class="tty-menu__cursor" aria-hidden="true">›</span>
+          <span class="tty-menu__label">{{ group.year }}</span>
+          <span class="tty-menu__hint">{{ group.posts.length }}</span>
+        </a>
+      </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</div>
+{% endmacro %}
+
 <div class="tty-screen">
 
   <section class="tty-split">
@@ -20,8 +56,7 @@ description: Thoughts on software engineering, tools, languages, and technology.
       </h1>
       <p class="tty-hero__lead">{{ i18n.en.blog.lead }}</p>
       <div class="tty-hero__actions">
-        {{ tty.btn(i18n.en.blog.readArchive, "/posts/archive/", "primary") }}
-        {{ tty.btn(i18n.en.blog.latestPost, posts[0].url) }}
+        {{ tty.btn(i18n.en.blog.latestPost, posts[0].url, "primary") }}
       </div>
     </div>
 
@@ -41,25 +76,41 @@ description: Thoughts on software engineering, tools, languages, and technology.
     {% endcall %}
   </section>
 
-  <section>
-    {{ tty.divider(i18n.en.blog.recent) }}
-    <div style="margin-top: 14px">
-      {%- for post in posts.slice(0, 4) -%}
-        {{ ttyc.postrow(post, idx[post.url]) }}
-      {%- endfor -%}
-    </div>
-  </section>
+  {#
+    The list is the page's second block, so its label is an h2 — the hero above
+    already owns the only h1.
+  #}
+  <div class="tty-split tty-split--rail">
+    <div>
+      <div class="tty-list__head">
+        <h2 class="tty-h2">{{ i18n.en.blog.allPosts }}</h2>
+        <span class="tty-list__count">{{ posts.length | plural(i18n.en.blog.post, i18n.en.blog.count) }}</span>
+      </div>
 
-  {% if posts.length > 4 %}
-  <section>
-    {{ tty.divider(i18n.en.blog.allPosts) }}
-    <div style="margin-top: 14px">
-      {%- for post in posts.slice(4) -%}
-        {{ ttyc.postrow(post, idx[post.url]) }}
-      {%- endfor -%}
+      <div class="tty-when-compact">
+        {% call ttyc.foldout(i18n.en.blog.filter, tags.length + " " + i18n.en.blog.tags) %}
+          {{ rail() }}
+        {% endcall %}
+      </div>
+
+      <div class="tty-list__years">
+        {%- for group in groups -%}
+        <section class="tty-list__year" id="y-{{ group.year }}" aria-labelledby="y-{{ group.year }}-label">
+          {{ tty.divider(group.year, "y-" + group.year + "-label") }}
+          <div class="tty-list__rows">
+            {%- for post in group.posts -%}
+              {{ ttyc.postrow(post, idx[post.url]) }}
+            {%- endfor -%}
+          </div>
+        </section>
+        {%- endfor -%}
+      </div>
     </div>
-  </section>
-  {% endif %}
+
+    <aside class="tty-rail--sticky tty-when-desktop">
+      {{ rail() }}
+    </aside>
+  </div>
 
   {% call tty.panel(i18n.en.blog.feeds, i18n.en.blog.feedsHint) %}
     <div class="tty-linklist">

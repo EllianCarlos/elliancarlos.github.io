@@ -1,8 +1,26 @@
 /* TTY page shell — ported from ui_kits/blog/Site.jsx plus the screen grids the
-   Home, Archive and About screens share. The search overlay lives here too,
+   Home, list and About screens share. The search overlay lives here too,
    because it is shell furniture, not a component. */
 
 :root {
+  /* Two glyphs outside the latin subset: the list markers in prose.css and the
+     search glyph on the nav control below. tokens/fonts.css loads only the latin
+     subset of JetBrains Mono, so `--font-glyph` alone hands them to an unknown
+     system face at an unknown advance and cap height. No web font is added: the
+     output stays static files with no new runtime dependency. This stack names
+     the faces that do carry the blocks, and every caller gives the glyph a fixed
+     one-character cell so a fallback advance cannot push it off the grid. */
+  --font-marker: "JetBrains Mono", "DejaVu Sans Mono", "Noto Sans Symbols 2",
+    "Segoe UI Symbol", "Apple Symbols", ui-monospace, monospace;
+
+  /* The long-form reading size. The vendored --text-lg tops out at 17px, which
+     is a UI size, not a reading size: the biography and every post body were
+     hard to read at it. This is the one size the prose wrapper and the post
+     column both use, so `68ch` resolves to the same width in both — see the
+     note on .tty-post__body below. 18px on a 360px phone, 20px from 1440px up,
+     fluid between, in the same shape as the vendored type scale. */
+  --tty-prose-size: clamp(18px, calc(0.185vw + 17.33px), 20px);
+
   /* 52px was hard-coded at four sites (.tty-nav's real height, the sticky
      rail's `top`, and two `scroll-margin-top` offsets whose only job is to
      clear the nav) plus a fifth in scripts/check-build.sh. A future height
@@ -78,18 +96,42 @@ body { overflow-x: clip; }
 .tty-nav > .tty-tabs { border-bottom: 0; align-self: stretch; }
 .tty-nav__search {
   flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
   min-height: var(--tap-min);
   padding: 0 4px;
   background: transparent;
   border: 0;
   cursor: pointer;
 }
+/* U+2315, in the fallback stack --font-marker names, on a fixed one-character
+   cell so a fallback advance cannot shift the key hint beside it. The glyph is
+   the design system's icon idiom: a Unicode character, never an SVG, never an
+   emoji. It tracks the key hint's own colour, so hover lights the whole control
+   rather than half of it. */
+.tty-nav__search-glyph {
+  flex: none;
+  width: 1ch;
+  font-family: var(--font-marker);
+  font-size: 18px;
+  line-height: 1;
+  text-align: center;
+  color: var(--text-muted);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.tty-nav__search:hover .tty-nav__search-glyph,
+.tty-nav__search:focus-visible .tty-nav__search-glyph { color: var(--yellow); }
 
 /* The wordmark alone is 150px at 18px Silkscreen; on a small phone the tab
-   strip needs the rest of the row, so the mark steps down instead of wrapping. */
+   strip needs the rest of the row, so the mark steps down instead of wrapping.
+   The `/` hint goes with it: there is no `/` key to press on a touch keyboard,
+   and the glyph alone still reads as search. The button keeps its aria-label,
+   so its accessible name does not change. */
 @media (max-width: 430px) {
   .tty-nav { gap: 10px; }
   .tty-nav__mark { font-size: var(--display-xs); letter-spacing: 0.08em; }
+  .tty-nav__search .tty-keyhint { display: none; }
 }
 
 /* ── Main column ────────────────────────────────────────────────────────── */
@@ -275,37 +317,41 @@ html.tty-search-open { overflow: hidden; }
    only needs to carry the class so `html:has(body.tty-search-open)` above has
    something to match — it must not carry its own overflow rule. */
 
-/* ── Archive screen (ui_kits/blog/Archive.jsx) ──────────────────────────── */
-.tty-archive__head {
+/* ── List screen (ui_kits/blog/Archive.jsx) ─────────────────────────────────
+   Three pages share these blocks: /posts/, every /posts/tag/<slug>/ page and
+   /preprints/. The name says `list`, not `archive`: there is no archive view —
+   /posts/ is the one complete record of every post. */
+.tty-list__head {
   display: flex;
   align-items: center;
   gap: 14px;
   flex-wrap: wrap;
   margin-bottom: var(--sp-6);
 }
-.tty-archive__count { font-size: var(--text-xs); color: var(--text-faint); }
-.tty-archive__head .tty-tabs { border-bottom: 0; }
+.tty-list__count { font-size: var(--text-xs); color: var(--text-faint); }
 
-.tty-archive__years { display: flex; flex-direction: column; gap: var(--sp-8); }
+.tty-list__years { display: flex; flex-direction: column; gap: var(--sp-8); }
 /* The by-year rail jumps to these sections, so a year heading must clear the
    sticky nav (--tty-nav-h). Same arithmetic as the prose headings in
    prose.css — keep the two in step. */
-.tty-archive__year {
+.tty-list__year {
   display: flex;
   flex-direction: column;
   scroll-margin-top: calc(var(--tty-nav-h) + var(--sp-4));
 }
-.tty-archive__year .tty-divider { margin-bottom: 12px; }
-.tty-archive__rows { display: flex; flex-direction: column; }
+.tty-list__year .tty-divider { margin-bottom: 12px; }
+.tty-list__rows { display: flex; flex-direction: column; }
 
 /* ── Post screen (ui_kits/blog/Post.jsx) ────────────────────────────────── */
 .tty-post { display: flex; flex-direction: column; align-items: center; }
-/* 68ch must be counted in the reading face. The head, the body and the foot all
-   carry --text-lg, so the three columns come out at the same width. Every child
-   sets its own font-size, so nothing else grows. */
+/* 68ch must be counted in the reading face, at the size the prose is actually
+   set in. The head, the body and the foot all carry --tty-prose-size — the same
+   size .tty-prose uses — so the three columns come out at the same width, and
+   that width really is 68 characters of body copy. Every child sets its own
+   font-size, so nothing else grows. */
 .tty-post__head,
 .tty-post__body,
-.tty-post__foot { width: 100%; max-width: var(--measure-prose); font-size: var(--text-lg); }
+.tty-post__foot { width: 100%; max-width: var(--measure-prose); font-size: var(--tty-prose-size); }
 /* One measure, not two: .tty-prose must not constrain this column again. */
 .tty-post__body .tty-prose { max-width: none; }
 
@@ -379,12 +425,16 @@ html.tty-search-open { overflow: hidden; }
 }
 
 /* ── Hero (ui_kits/blog/Home.jsx) ───────────────────────────────────────── */
+/* The lead is body copy, not metadata: it is the first thing read on /posts/.
+   It was 15px --text-muted (5.85:1), a size and a weight of grey that belong on
+   a date stamp. It now reads one step below the prose size, in the same ink as
+   the prose. */
 .tty-hero__lead {
   max-width: 52ch;
   margin: 22px 0 0;
-  font-size: var(--text-md);
+  font-size: var(--text-lg);
   line-height: 1.8;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   text-wrap: pretty;
 }
 .tty-hero__actions {
@@ -439,11 +489,24 @@ html.tty-search-open { overflow: hidden; }
 .tty-paper:hover .tty-paper__title { color: var(--yellow); }
 .tty-paper__authors {
   margin: 7px 0 0;
-  font-size: var(--text-sm);
+  font-size: var(--text-md);
   line-height: 1.6;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   text-wrap: pretty;
 }
+/* Where the paper was published. It is the row's second most important fact
+   after the title, so it gets the label treatment the design system uses for
+   real metadata — uppercase, tracked out — rather than being set as more body
+   copy. The host (the conference a workshop runs inside) is subordinate, so it
+   steps down one level of ink. */
+.tty-paper__venue {
+  margin: 8px 0 0;
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.tty-paper__host { color: var(--text-muted); }
 .tty-paper__meta {
   flex: none;
   display: flex;

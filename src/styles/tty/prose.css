@@ -27,7 +27,7 @@
 .tty-prose h5,
 .tty-prose h6 {
   /* --tty-nav-h is defined in layout.css, not the vendored token tree — see
-     the comment there. Keep this in step with .tty-archive__year's own
+     the comment there. Keep this in step with .tty-list__year's own
      scroll-margin-top in layout.css. */
   scroll-margin-top: calc(var(--tty-nav-h) + var(--sp-4));
 }
@@ -124,12 +124,15 @@
 .tty-prose ol > li::marker { color: var(--text-faint); }
 
 /* ── Quote ──────────────────────────────────────────────────────────────── */
+/* A quotation is not a footnote: it stays at the reading size it sits in, so
+   `1em`, not a fixed step off the type scale. It used to be pinned to --text-md
+   (15px), which made every quote smaller than the body around it. */
 .tty-prose blockquote {
   margin: var(--sp-8) 0;
   padding: 4px 0 4px 18px;
   border-left: var(--border-w-thick) solid var(--yellow);
   color: var(--text-primary);
-  font-size: var(--text-md);
+  font-size: 1em;
   line-height: 1.75;
 }
 .tty-prose blockquote > :last-child { margin-bottom: 0; }
@@ -168,7 +171,8 @@
   margin: 0 0 var(--sp-6);
   padding: 10px 12px;
   font-family: var(--font-code);
-  font-size: var(--text-sm);
+  /* Same size as a highlighted block — see the note in prism-tty.css. */
+  font-size: var(--text-md);
   line-height: 1.7;
   tab-size: 2;
   hyphens: none;
@@ -199,11 +203,15 @@
 }
 
 /* ── Tables ─────────────────────────────────────────────────────────────── */
+/* A table holds prose in this blog's posts — whole sentences in the first
+   column, not figures — so its cells read at a reading size. Every table is
+   already inside a .tty-scroll container, so the extra width costs nothing that
+   was not already handled. */
 .tty-prose table {
   width: 100%;
   margin: 0 0 var(--sp-6);
   border-collapse: collapse;
-  font-size: var(--text-sm);
+  font-size: var(--text-md);
 }
 .tty-prose thead th {
   height: 26px;
@@ -259,16 +267,11 @@
 .tty-scroll > table thead th { white-space: nowrap; }
 
 /* List markers. `▪` (U+25AA), `○` (U+25CB) and `●` (U+25CF) are Geometric
-   Shapes. tokens/fonts.css loads only the latin subset of JetBrains Mono, so
-   none of the three is in the web font, and `--font-glyph` alone hands them to
-   an unknown system face at an unknown advance and cap height. No web font is
-   added: the output stays static files with no new runtime dependency. Instead
-   the stack names the faces that do carry the block, and the marker gets a
-   fixed one-character cell so a fallback advance cannot push it off the grid. */
-.tty-prose {
-  --font-marker: "JetBrains Mono", "DejaVu Sans Mono", "Noto Sans Symbols 2",
-    "Segoe UI Symbol", "Apple Symbols", ui-monospace, monospace;
-}
+   Shapes, and none of the three is in the latin subset tokens/fonts.css loads.
+   `--font-marker` is the fallback stack that names the faces which do carry the
+   block; it is declared on `:root` in layout.css, because the nav's own search
+   glyph needs the same stack. The marker gets a fixed one-character cell so a
+   fallback advance cannot push it off the grid. */
 .tty-prose ul > li::before {
   font-family: var(--font-marker);
   font-size: 0.85em;

@@ -25,7 +25,7 @@
   divider() is a rail/section label, not a heading — most callers use it for
   things like "tags" or "by year" that are not document structure. `labelId`
   is optional: pass it only where the label doubles as an accessible name for
-  a landmark (see posts/archive.njk's per-year <section>, which points
+  a landmark (see posts/index.njk's per-year <section>, which points
   aria-labelledby at it instead of turning every divider into an <h2>).
 #}
 {% macro divider(label, labelId="") %}

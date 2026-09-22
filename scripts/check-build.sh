@@ -15,7 +15,7 @@ passes=0
 # must not vanish silently. EXPECTED_ASSERTIONS is the total `passes + fails`
 # this script produces today, counted (not guessed) after every change to the
 # assertion list. See the check at the bottom of the file.
-EXPECTED_ASSERTIONS=251
+EXPECTED_ASSERTIONS=274
 
 pass() { printf '  ok   %s\n' "$1"; passes=$((passes + 1)); }
 bad()  { printf '  FAIL %s\n' "$1"; fails=$((fails + 1)); }
@@ -67,12 +67,11 @@ absent() {
 }
 
 # I3: three ordinary authoring actions used to turn CI red, because these
-# assertions pinned a content count (13 active posts, "1 post", "1 paper")
-# instead of testing the grammar rule that produces that text. This derives
-# both the count AND the expected word (singular/plural, from the `plural`
-# filter's own convention: exactly 1 -> singular) from the built page itself,
-# so it stays correct as posts are archived or added, forever — not just at
-# today's counts.
+# assertions pinned a content count (13 posts, "1 post", "1 paper") instead of
+# testing the grammar rule that produces that text. This derives both the count
+# AND the expected word (singular/plural, from the `plural` filter's own
+# convention: exactly 1 -> singular) from the built page itself, so it stays
+# correct as posts and papers are added, forever — not just at today's counts.
 plural_count_assert() {
   # $1 = file  $2 = row-class needle  $3 = singular word  $4 = plural word  $5 = label
   if [ ! -f "$DIST/$1" ]; then bad "$5 (file $1 is missing)"; return; fi
@@ -240,17 +239,74 @@ grep_in "posts/how-to-setup-lkd-notes/index.html" 'class="language-' "the post s
 grep_not "posts/how-to-setup-lkd-notes/index.html" "prism-toolbar.min.css" "the CDN toolbar stylesheet is gone"
 grep_in "posts/how-to-setup-lkd-notes/index.html" "prism-toolbar.min.js" "the toolbar script is still injected"
 
-section "archive flag and data layer"
-grep_not "posts/index.html" "Tools I use 2024" "the archived post is off the posts landing page"
+# Long-form reading size and ink. The vendored type scale tops out at 17px for
+# --text-lg, which is a UI size: every post body and the whole biography were
+# set in it, and in --text-secondary (#B4B4AC, 9.5:1 on the root surface). Both
+# were raised. The floor is asserted, not merely the token's existence, because
+# "18px at the narrowest screen" is the requirement — a later edit that quietly
+# lowered it would leave every structural assertion below still green.
+section "reading size and contrast"
+grep_in "styles/tty/layout.css" "--tty-prose-size: clamp(18px," "the reading size starts at 18px on the narrowest screen"
+grep_in "styles/tty/layout.css" ", 20px)" "the reading size reaches 20px on a desktop"
+grep_in "styles/tty/content.css" "font-size: var(--tty-prose-size)" "the prose wrapper reads the reading size"
+# Scope to .tty-prose's own block: --text-primary and --text-secondary both
+# back other rules in this file, so a bare grep would pass without the fix.
+prose_block=$(awk '/^\.tty-prose \{/{f=1} f{print; if (/^}/) exit}' \
+  "$DIST/styles/tty/content.css" 2>/dev/null)
+if printf '%s\n' "$prose_block" | grep -qF 'color: var(--text-primary);'; then
+  pass "the prose body is set in the brightest ink (16.1:1, was 9.5:1)"
+else
+  bad "the prose body is set in the brightest ink (16.1:1, was 9.5:1)"
+fi
+if printf '%s\n' "$prose_block" | grep -qF 'var(--text-lg)'; then
+  bad "the prose body no longer reads the 17px UI size"
+else
+  pass "the prose body no longer reads the 17px UI size"
+fi
+# `.tty-prose .katex { font-size: 1em; }` carries the same string, so a bare
+# grep here would pass with the blockquote back at a fixed 15px. Scope it.
+quote_block=$(awk '/^\.tty-prose blockquote \{/{f=1} f{print; if (/^}/) exit}' \
+  "$DIST/styles/tty/prose.css" 2>/dev/null)
+if printf '%s\n' "$quote_block" | grep -qF 'font-size: 1em;'; then
+  pass "a blockquote stays at the size it sits in"
+else
+  bad "a blockquote stays at the size it sits in"
+fi
+grep_in "styles/tty/prism-tty.css" "font-size: var(--text-md)" "a code block is no longer the smallest text on the site"
+grep_in "styles/tty/content.css" "font-size: var(--text-md)" "a post row's description reads as body copy"
+grep_in "styles/tty/layout.css" "font-size: var(--text-lg)" "the hero lead reads one step under the prose"
+
+# There is one post collection and one post listing. The `archived: true` flag,
+# the `postsActive_<lang>` collection and the /posts/archive/ page are all gone:
+# a post is on /posts/ from the day it is written, and it never leaves.
+# The oldest post is the probe, because it is the one that used to be hidden.
+section "every post is on the posts page"
+grep_in "posts/index.html" "Tools I use 2024" "the oldest post is on the posts landing page"
 # These assertions read the built HTML, not the frontmatter. Nunjucks escapes the
 # apostrophe in "Tools I've been using - 2025" to `&#39;`, so grep the part of the
 # title that has no apostrophe in it. That stays correct if the escaping changes.
-grep_in "posts/index.html" "been using - 2025" "the active posts are still listed"
+grep_in "posts/index.html" "been using - 2025" "the newest posts are listed too"
 have "posts/my-tools-2024/index.html"
-grep_in "feed.xml" "Tools I use 2024" "the archived post stays in the feed"
-grep_in "llms.txt" "Tools I use 2024" "the archived post stays in llms.txt"
-grep_in "search-index-en.json" "Tools I use 2024" "the archived post stays searchable"
-grep_in "sitemap.xml" "/posts/my-tools-2024/" "the archived post stays in the sitemap"
+grep_in "feed.xml" "Tools I use 2024" "every post is in the feed"
+grep_in "llms.txt" "Tools I use 2024" "every post is in llms.txt"
+grep_in "search-index-en.json" "Tools I use 2024" "every post is searchable"
+grep_in "sitemap.xml" "/posts/my-tools-2024/" "every post is in the sitemap"
+# The feature is gone, not merely unused: the page, the script, the collection,
+# the banner and the badge must all be absent. A single surviving piece would
+# quietly resurrect a second listing.
+absent "posts/archive" "the archive page is gone"
+absent "scripts/tty-archive.js" "the archive sort script is gone"
+archive_class_hits=$(grep -rlF --include='*.html' --include='*.css' -e 'tty-archive' "$DIST" | tr '\n' ' ')
+if [ -n "$archive_class_hits" ]; then
+  bad "no tty-archive class survives anywhere in the output ($archive_class_hits)"
+else
+  pass "no tty-archive class survives anywhere in the output"
+fi
+grep_not "posts/index.html" '/posts/archive/' "nothing links to the removed archive page"
+grep_not "posts/my-tools-2024/index.html" 'class="tty-note tty-note--warn"' \
+  "the once-archived post no longer shows an archived banner"
+grep_not "posts/index.html" 'tty-badge--warn' "no row carries an archived badge"
+grep_in "styles/tty/layout.css" ".tty-list__year" "the year block is renamed for the one list that uses it"
 
 section "search overlay"
 have "scripts/tty-search.js"
@@ -274,28 +330,34 @@ grep_in "index.html" 'role="status"' "the result count region has a status role"
 grep_in "index.html" 'id="tty-search-results" role="listbox"' "the results are a real listbox"
 grep_in "index.html" 'role="combobox"' "the query field is a combobox"
 grep_in "index.html" 'aria-controls="tty-search-results"' "the combobox points at its listbox"
+# The search control carries a magnifier glyph beside the `/` key hint. It is a
+# Unicode character (U+2315) in a named fallback stack, never an SVG and never
+# an emoji — the design system's icon rule. The glyph is aria-hidden, so the
+# button's accessible name still comes from its aria-label alone.
+grep_in "index.html" 'class="tty-nav__search-glyph" aria-hidden="true">⌕' "the search control shows the magnifier glyph"
+grep_in "posts/index.html" 'class="tty-nav__search-glyph"' "the glyph reaches every page, like the control"
+grep_in "index.html" 'aria-label="Search posts"' "the search button keeps its accessible name"
+grep_in "styles/tty/layout.css" ".tty-nav__search-glyph" "the glyph has its own rule"
+grep_in "styles/tty/layout.css" "--font-marker:" "the glyph fallback stack is declared on :root"
+grep_in "styles/tty/prose.css" "var(--font-marker)" "the list markers still read the same stack"
+grep_not "index.html" "<svg" "the icon is a glyph, not an SVG"
 
-section "archive view"
-have "posts/archive/index.html"
-have "scripts/tty-archive.js"
-grep_in "posts/archive/index.html" 'id="tty-archive"' "the archive root is present"
-grep_in "posts/archive/index.html" "Tools I use 2024" "the archive lists the archived post"
-grep_in "posts/archive/index.html" "Tools I&#39;ve been using - 2025" "the archive lists the active posts"
-grep_in "posts/archive/index.html" 'class="tty-badge tty-badge--outline tty-badge--warn"' "the archived row is badged"
-grep_in "posts/archive/index.html" 'data-tty-sort="oldest"' "the sort toggle is present"
-grep_in "posts/archive/index.html" 'id="y-2026"' "the year sections are anchored"
-grep_in "posts/archive/index.html" 'href="#y-2026"' "the by-year rail links to a year"
-grep_in "posts/archive/index.html" '/posts/tag/linux/' "the tag rail links to a tag page"
-grep_in "posts/archive/index.html" '<details class="tty-foldout">' "the compact filter foldout is present"
-grep_in "posts/archive/index.html" 'class="tty-rail--sticky tty-when-desktop"' "the desktop rail is present"
-grep_in "posts/archive/index.html" '/scripts/tty-archive.js' "the sort script is loaded"
-count_at_least "posts/archive/index.html" 'class="tty-postrow"' 14 "every post appears in the archive"
-# I4: the sort used to be a CSS-only flex-direction: column-reverse, which
-# per the Flexbox spec changes paint order only — not focus order — so Tab
-# walked the rows bottom-up after clicking "oldest" (WCAG 2.4.3). The fix
-# reorders the DOM instead (tty-archive.js), so this now guards against the
-# CSS-only flip coming back rather than asserting it exists.
-grep_not "styles/tty/layout.css" "column-reverse" "the sort toggle is not a CSS-only paint flip (focus order must match paint order)"
+# The record the archive page used to hold now lives on /posts/ itself: the
+# complete list, numbered, grouped by year, with the tag rail beside it. These
+# are the assertions that used to point at /posts/archive/.
+section "the complete post record on /posts/"
+grep_in "posts/index.html" 'id="y-2026"' "the year sections are anchored"
+grep_in "posts/index.html" 'href="#y-2026"' "the by-year rail links to a year"
+grep_in "posts/index.html" '/posts/tag/linux/' "the tag rail links to a tag page"
+grep_in "posts/index.html" '<details class="tty-foldout">' "the compact filter foldout is present"
+grep_in "posts/index.html" 'class="tty-rail--sticky tty-when-desktop"' "the desktop rail is present"
+grep_in "posts/index.html" 'class="tty-list__years"' "the rows are grouped by year"
+grep_in "posts/index.html" 'class="tty-list__count"' "the list states how many posts it holds"
+# The hero owns the page's only h1; the list below it is a second-level block.
+# Two h1 elements on one page is a heading-structure defect, and this page is
+# the one place where a hero and a list head meet.
+count_exactly "posts/index.html" '<h1' 1 "the posts page has exactly one h1"
+grep_in "posts/index.html" 'class="tty-h2"' "the list head is an h2 under the hero"
 # +23: 52px was hard-coded at .tty-nav's height, the sticky rail's `top` and
 # the year anchors' `scroll-margin-top` (plus prose.css's own heading
 # scroll-margin-top and this file's old pinned string) -- a future nav-height
@@ -307,14 +369,16 @@ count_at_least "styles/tty/layout.css" "var(--tty-nav-h)" 3 \
 # `.tty-menu__item { min-height: var(--row-h) }` already applies below 1280px,
 # since core.css's own dense-specific rule is gated to min-width: 1280px,
 # mutually exclusive with this rule's old max-width: 1279.98px. Guard against
-# that dead rule coming back.
-grep_not "styles/tty/layout.css" ".tty-archive .tty-menu--dense .tty-menu__item" \
+# that dead rule coming back under the block's new name.
+grep_not "styles/tty/layout.css" ".tty-list .tty-menu--dense .tty-menu__item" \
   "the no-op compact-row override (L14) has not come back"
-# Carried finding from Task 5's review: /posts/ and /posts/archive/ are both
-# live nav tabs, and /posts/archive/ is a URL prefix match for both. nav.njk
-# must pick the longest matching prefix so only one tab carries
-# aria-current="page" here — two would be an invalid ARIA state.
-count_exactly "posts/archive/index.html" 'aria-current="page"' 1 "exactly one nav tab is current on the archive page"
+# `aria-current="page"` names one page, so at most one tab may carry it. nav.njk
+# relies on no tab URL being a prefix of another; a post page and a tag page are
+# both under /posts/, which makes them the cases that would break first.
+count_exactly "posts/my-tools-2025/index.html" 'aria-current="page"' 1 \
+  "exactly one nav tab is current on a post page"
+count_exactly "posts/tag/linux/index.html" 'aria-current="page"' 1 \
+  "exactly one nav tab is current on a tag page"
 
 section "post page"
 have "scripts/tty-progress.js"
@@ -327,9 +391,12 @@ grep_in "posts/my-tools-2025/index.html" '/posts/tag/' "tag links are present"
 grep_in "posts/my-tools-2025/index.html" '/scripts/tty-progress.js' "the progress script is loaded"
 grep_not "posts/my-tools-2025/index.html" 'class="post-meta"' "the old Pico meta row is gone"
 grep_not "posts/my-tools-2025/index.html" 'class="tag-pill"' "the old tag pills are gone"
-grep_in "posts/my-tools-2024/index.html" 'class="tty-note tty-note--warn"' "the archived post shows a banner"
-grep_not "posts/my-tools-2025/index.html" 'class="tty-note tty-note--warn"' "an active post shows no banner"
+grep_not "posts/my-tools-2025/index.html" 'class="tty-note tty-note--warn"' "a post shows no banner"
 grep_in "styles/tty/layout.css" ".tty-post__progress" "the post screen CSS is present"
+# The post column's `68ch` must be counted at the size the prose is set in, or
+# the measure is not 68 characters of anything. One token, read in both files.
+grep_in "styles/tty/layout.css" "max-width: var(--measure-prose); font-size: var(--tty-prose-size)" \
+  "the post column counts its measure in the reading size"
 
 section "markdown fidelity"
 grep_in "posts/notes-on-the-contribution-for-the-linux-kernel/index.html" '<div class="tty-scroll"><table>' "every table is wrapped in a scroller"
@@ -366,33 +433,27 @@ grep_in "posts/index.html" 'class="tty-term"' "the terminal demo is present"
 grep_in "posts/index.html" 'data-tty-type' "the typewriter target is present"
 grep_in "posts/index.html" '/scripts/tty-typewriter.js' "the typewriter script is loaded"
 grep_in "posts/index.html" 'class="tty-postrow"' "post rows use the design system row"
-grep_in "posts/index.html" '/posts/archive/' "the archive is linked from the hero"
 grep_in "posts/index.html" 'class="tty-panel__title"' "the feeds panel is present"
 grep_in "posts/index.html" "3 endpoints" "the feeds panel counts only its endpoints"
 grep_not "posts/index.html" '<h2 class="blog">' "the old Pico post headings are gone"
 count_at_least "posts/index.html" 'class="tty-term__path"' 3 "the terminal lists three recent slugs"
-# I3: was pinned to 13, which failed CI the moment a second post was
-# archived. Derive the expected active count from the build itself instead:
-# every post page under posts/ (excluding the index, archive and tag
-# listings) minus however many of those carry the archived banner (the same
-# signal "the archived post shows a banner" trusts, in the post page section
-# below).
-all_post_pages=$(find "$DIST/posts" -mindepth 2 -maxdepth 2 -name index.html \
-  ! -path "$DIST/posts/archive/index.html" 2>/dev/null)
+# I3: was pinned to 13, which failed CI the moment a post was hidden from this
+# page. Nothing is hidden from it any more, so the rule is simply: one row per
+# post page the build wrote. Derive the count from the build, never pin it.
+all_post_pages=$(find "$DIST/posts" -mindepth 2 -maxdepth 2 -name index.html 2>/dev/null)
 total_posts=$(printf '%s\n' "$all_post_pages" | grep -c . || true)
-archived_posts=0
-if [ -n "$all_post_pages" ]; then
-  archived_posts=$(grep -lF 'class="tty-note tty-note--warn"' $all_post_pages 2>/dev/null | grep -c . || true)
-fi
-expected_active=$((total_posts - archived_posts))
-count_exactly "posts/index.html" 'class="tty-postrow"' "$expected_active" \
-  "every active post is listed ($expected_active active of $total_posts total)"
+count_exactly "posts/index.html" 'class="tty-postrow"' "$total_posts" \
+  "every post the build wrote is listed ($total_posts posts)"
+# The nav tab counts the same collection the page lists, so the two must agree.
+# A mismatch means one of them started reading a filtered collection again.
+grep_in "posts/index.html" "tty-tabs__count\">($total_posts)" \
+  "the nav tab's count matches the number of rows on the page"
 
 section "tag pages"
 have "posts/tag/linux/index.html"
 grep_in "posts/tag/linux/index.html" 'class="tty-postrow"' "tag pages use the design system row"
-grep_in "posts/tag/linux/index.html" 'class="tty-archive__head"' "tag pages reuse the archive head"
-grep_in "posts/tag/linux/index.html" "/posts/archive/" "a tag page links back to the archive"
+grep_in "posts/tag/linux/index.html" 'class="tty-list__head"' "tag pages reuse the list head"
+grep_in "posts/tag/linux/index.html" 'href="/posts/"' "a tag page links back to the full list"
 # I3: was pinned to the exact string "1 post", which failed CI the moment a
 # second japanese-tagged post was written. Derive both the count and the
 # expected singular/plural word from the page itself instead.
@@ -418,6 +479,18 @@ plural_count_assert "preprints/index.html" 'class="tty-paper"' "paper" "papers" 
 grep_in "preprints/index.html" 'aria-current="page"' "the preprints tab is marked active"
 grep_in "llms.txt" "/preprints/" "llms.txt points at the preprints page"
 grep_in "styles/tty/layout.css" ".tty-paper__title" "the paper row CSS is present"
+# A paper states where it was published. `venue` is required; `host` (the
+# conference a workshop runs inside) and `kind` (short paper, poster) are
+# optional, and both must render when present — they are the whole point of the
+# two new fields, so a template that silently drops one must fail here.
+# These needles are template-owned markup, never the owner's data: the class
+# names and the `@ ` separator. Renaming a venue or a paper kind in
+# src/_data/preprints.js must never turn CI red — that was finding I3.
+grep_in "preprints/index.html" 'class="tty-paper__venue"' "the row states its venue"
+grep_in "preprints/index.html" 'class="tty-paper__host">@ ' "the optional host renders after the venue"
+grep_in "preprints/index.html" 'class="tty-badge tty-badge--outline"' "the optional paper kind renders as a tag"
+grep_in "styles/tty/layout.css" ".tty-paper__venue" "the venue line has its own rule"
+grep_in "styles/tty/layout.css" ".tty-paper__host" "the host steps down from the venue"
 
 section "homepage"
 grep_in "index.html" 'class="tty-prose"' "the biography is inside the prose wrapper"
@@ -468,7 +541,7 @@ if [ -n "$probe" ]; then
   rm -f "$probe"
 fi
 
-for f in index.html 404.html posts/index.html posts/archive/index.html preprints/index.html contact/index.html; do
+for f in index.html 404.html posts/index.html preprints/index.html contact/index.html; do
   if [ ! -f "$DIST/$f" ]; then printf '  --   skip no emoji in %s (not built yet)\n' "$f"; continue; fi
   if has_emoji "$DIST/$f" ; then bad "no emoji in $f"; else pass "no emoji in $f"; fi
 done
@@ -499,10 +572,19 @@ section "dead code is gone"
 if [ -f "$DIST/styles/style.css" ]; then bad "styles/style.css is deleted"; else pass "styles/style.css is deleted"; fi
 if [ -f "$DIST/styles/blog.css" ]; then bad "styles/blog.css is deleted"; else pass "styles/blog.css is deleted"; fi
 if [ -f "$DIST/scripts/search.js" ]; then bad "scripts/search.js is deleted"; else pass "scripts/search.js is deleted"; fi
+if [ -f "$DIST/scripts/tty-archive.js" ]; then bad "scripts/tty-archive.js is deleted"; else pass "scripts/tty-archive.js is deleted"; fi
 have "scripts/tty-search.js"
 have "scripts/tty-progress.js"
 have "scripts/tty-typewriter.js"
-have "scripts/tty-archive.js"
+# Three scripts, not four. Each one is browser code this suite cannot execute,
+# so the count is the guard: a fourth file here is an untested surface nobody
+# declared.
+script_count=$(find "$DIST/scripts" -name '*.js' | grep -c . || true)
+if [ "$script_count" -eq 3 ]; then
+  pass "the output ships exactly three scripts ($script_count)"
+else
+  bad "the output ships exactly three scripts (found $script_count)"
+fi
 
 printf '\n'
 

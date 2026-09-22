@@ -277,9 +277,13 @@
   color: var(--text-primary);
   border-bottom-color: var(--border-strong);
 }
-.tty-tabs__tab[aria-current="page"],
-.tty-tabs__tab[aria-selected="true"],
-.tty-tabs__tab[aria-pressed="true"] {
+/* `aria-current="page"` is the only state a tab in this site carries: the strip
+   is a set of links in nav.njk, never a widget. The ported design system also
+   styled `[aria-selected="true"]` (a real tab widget) and `[aria-pressed="true"]`
+   (a toggle button); no markup in this repository ever set either, and the one
+   caller that did — the archive page's sort toggle — is gone with the archive.
+   Add a selector back here when markup needs it, not before. */
+.tty-tabs__tab[aria-current="page"] {
   color: var(--yellow);
   border-bottom-color: var(--yellow);
 }
@@ -359,9 +363,9 @@
 /* Dense is a desktop density. `MenuList` is used as `dense={!bp.compact}` in both
    Archive.jsx and About.jsx, so the modifier must not reach a compact screen. The
    media query here is what enforces that, so a template can carry
-   `tty-menu--dense` at every width — which is what the archive rail and the
-   homepage rail do. Under 1280px the row falls back to `--row-h`: 44px for a
-   finger, 32px for a fine pointer. */
+   `tty-menu--dense` at every width — which is what the by-year rail on /posts/
+   and the homepage rail both do. Under 1280px the row falls back to `--row-h`:
+   44px for a finger, 32px for a fine pointer. */
 @media (min-width: 1280px) {
   .tty-menu--dense .tty-menu__item { min-height: var(--row-h-dense); }
 }

@@ -48,11 +48,14 @@
   transition: color var(--dur-fast) var(--ease-out);
 }
 .tty-postrow:hover .tty-postrow__title { color: var(--yellow); }
+/* The post's own description, and the only prose on /posts/ and on a tag page.
+   It was 13px --text-muted: the smallest size on the site, in the grey reserved
+   for dates and index numbers. It is body copy, so it reads as body copy. */
 .tty-postrow__excerpt {
   margin: 7px 0 0;
-  font-size: var(--text-sm);
+  font-size: var(--text-md);
   line-height: 1.6;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   text-wrap: pretty;
 }
 .tty-postrow__tags {
@@ -182,17 +185,28 @@
   animation: tty-wipe-up var(--dur-fast) var(--ease-step-4);
 }
 
-/* ── Prose wrapper ──────────────────────────────────────────────────────── */
+/* ── Prose wrapper ──────────────────────────────────────────────────────────
+   The reading size and the reading ink both come from here, and both were
+   raised: --text-lg tops out at 17px, which is a UI size, and --text-secondary
+   is #B4B4AC, 9.5:1 on the root surface — legible, but visibly grey against a
+   near-black page. Every post body and the whole biography are set in this one
+   rule, so this is where "bigger and brighter" lands.
+
+   --tty-prose-size is declared in layout.css, next to --tty-nav-h: the post
+   column in that file must read the same value, or `68ch` resolves to a
+   different width there than the text is actually set in. --text-primary is
+   #E8E8E3, 16.1:1 on the root surface. */
 .tty-prose {
   max-width: var(--measure-prose);
   font-family: var(--font-body);
-  font-size: var(--text-lg);
+  font-size: var(--tty-prose-size);
   line-height: var(--leading-body);
-  color: var(--text-secondary);
+  color: var(--text-primary);
   text-wrap: pretty;
 }
 .tty-prose--wide { max-width: var(--measure-wide); }
-.tty-prose--md { font-size: var(--text-md); }
+/* One step down, for a standfirst or a page description — not for a post body. */
+.tty-prose--md { font-size: var(--text-lg); }
 
 /* ── Figures break out of the reading measure ───────────────────────────────
    A plot is not body copy. `--measure-prose` is 68ch, which is about 694px at

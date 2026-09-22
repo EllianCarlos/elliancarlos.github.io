@@ -51,7 +51,12 @@ All styling comes from the TTY design system. Read `src/styles/tty.css` first �
 - `src/styles/tty/content.css` — the post row, terminal window, foldout, caret and prose
   wrapper.
 - `src/styles/tty/layout.css` — the page shell, screen grids, and the per-screen blocks
-  (post, hero, archive, paper row, search overlay).
+  (post, hero, list, paper row, search overlay). It also declares this site's own two
+  non-vendored tokens on `:root`: `--tty-nav-h` (the nav height, read at three sites here
+  and one in `prose.css`) and `--tty-prose-size` (the reading size, read by `.tty-prose` in
+  `content.css` and by the post column here — both must read it, or `68ch` resolves to a
+  width the text is not actually set in), plus `--font-marker`, the fallback stack for the
+  Unicode glyphs that the latin web-font subset does not carry.
 - `src/styles/tty/prose.css` — the Markdown body treatment.
 - `src/styles/tty/prism-tty.css` — Prism token colours and the code-block chrome. It owns
   the toolbar CSS that used to come from the CDN, because `.eleventy.js` injects its Prism
@@ -67,9 +72,21 @@ The rules that matter when you write new markup: two fonts, one accent colour
 stepped easing, no emoji, no SVG icons — Unicode glyphs only. Two layouts, not five:
 compact below 1280px and desktop at 1280px and up.
 
-Four scripts, each loaded only by the page that needs it except the first:
+An icon is a Unicode character in `--font-marker`, on a fixed `1ch` cell, and
+`aria-hidden`. Two live examples: the list markers in `prose.css` (`▪ ○ ●`) and the nav
+search glyph in `layout.css` (`⌕`, U+2315). Never reach for an SVG or an emoji, and never
+let a glyph carry meaning that no text also carries — the search button's name comes from
+its `aria-label`.
+
+Reading sizes: `--tty-prose-size` (18px to 20px) is the body size for every post and for
+the biography. The vendored `--text-lg` tops out at 17px, which is a UI size — do not set
+body copy in it. Code blocks, tables and post-row descriptions read `--text-md` (15px).
+`--text-sm` and `--text-xs` are for metadata only: dates, index numbers, labels.
+
+Three scripts, each loaded only by the page that needs it except the first:
 `tty-search.js` (the `/` overlay, on every page), `tty-progress.js` (post pages),
-`tty-typewriter.js` (`/posts/`), `tty-archive.js` (`/posts/archive/`).
+`tty-typewriter.js` (`/posts/`). `check-build.sh` asserts the count, because each script
+is browser code the suite cannot execute.
 
 ## Architecture
 
@@ -147,17 +164,23 @@ be revisited if this schema gets another pass.
 - **Heading anchors**: `markdown-it-anchor` with a custom `slugifyHeading` (must match
   the TOC slug logic in `.eleventy.js`).
 
-### Archived posts
+### One post listing
 
-A post with `archived: true` in its frontmatter leaves the `/posts/` landing page and
-nothing else. It keeps its URL, stays in `feed.xml`, `sitemap.xml`, `llms.txt` and the
-search index, shows a banner on its own page, and appears on `/posts/archive/` with an
-`ARCHIVED` badge. The `postsActive_<lang>` collection is the filtered one; `posts_<lang>`
-is still everything.
+`/posts/` is the whole record. A post appears there the day it is written and never
+leaves: there is one post collection (`posts_<lang>`), one listing, and no way to hide a
+post from it. The page is the hero, then every post numbered and grouped by year, with a
+tag rail that links to the existing `/posts/tag/<slug>/` pages — an `<aside>` at 1280px and
+up, a `<details>` foldout below it, both from the same macro.
 
-`/posts/archive/` is the full record: every post, numbered, grouped by year, with a tag
-rail that links to the existing `/posts/tag/<slug>/` pages and a sort toggle that is a CSS
-flip rather than a re-sort.
+There used to be a second listing at `/posts/archive/`, reached by an `archived: true`
+frontmatter flag that dropped a post from `/posts/`. Both are gone, along with
+`postsActive_<lang>`, `tty-archive.js` and the sort toggle. Do not reintroduce a
+per-post visibility flag without also deciding what the feed, the sitemap, `llms.txt` and
+the search index do with it — the old flag touched none of them, which is why a reader
+could find a post everywhere except the page that lists them.
+
+The `.tty-list__*` blocks in `layout.css` are shared by `/posts/`, every tag page and
+`/preprints/`. The name is `list`, not `archive`.
 
 ### Preprints
 
@@ -165,6 +188,13 @@ flip rather than a re-sort.
 in a new tab. The PDFs live in `preprints/` at the repository root and reach `dist/` through
 a passthrough copy. Adding a paper is two steps: drop the PDF in `preprints/`, add an entry
 to the data file.
+
+Each entry needs `title`, `authors`, `venue`, `date` and `pdf`, and takes two optional
+fields: `host`, the conference an accepted workshop paper runs inside (the row prints
+`<venue> @ <host>`), and `kind`, a short category label — "short paper", "poster" — that
+renders as a tag beside the date. Leave a key out to omit it. The data file documents all
+seven fields; `check-build.sh` keys its assertions to the template's own class names and
+separator, never to a venue or a kind, so renaming either never turns CI red.
 
 ### Post frontmatter
 
@@ -180,7 +210,6 @@ translationKey: my-post   # links translations across languages; inert while i18
 description: "..."    # used for SEO + search index
 tags: [tools]
 modified: 2025-08-01  # optional; shows "updated on"
-archived: true        # optional; drops the post from /posts/ only, see "Archived posts"
 ---
 ```
 

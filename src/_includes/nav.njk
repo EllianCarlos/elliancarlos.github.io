@@ -7,17 +7,22 @@
   `resume` and `academic cv` are not tabs — they are external documents, and they
   live in the footer and in the Elsewhere list on the homepage.
 
-  A tab renders only when the build writes its page. `/preprints/` arrives in
-  Task 13, so until then the strip shows three tabs and no task ships a nav link
-  that 404s. The gate is one string: `collections.all | join(" ", "url")` is every
-  URL the build writes, space delimited, and `indexOf` looks one up. Nunjucks'
-  `join` filter takes an attribute name as its third argument.
+  A tab renders only when the build writes its page. The gate is one string:
+  `collections.all | join(" ", "url")` is every URL the build writes, space
+  delimited, and `indexOf` looks one up. Nunjucks' `join` filter takes an
+  attribute name as its third argument.
+
+  `aria-current="page"` names exactly one page, so at most one tab may carry it.
+  A plain prefix match gives that for free here, because no tab URL is a prefix
+  of another tab URL — `/` is compared for equality only, and `/posts/`,
+  `/preprints/` and `/contact/` share no prefix. Keep that true when adding a
+  tab: a nested tab (`/posts/drafts/`, say) would mark two tabs current at once
+  and would need a longest-match rule instead.
 #}
 {% set liveUrls = " " + (collections.all | join(" ", "url")) + " " %}
 {% set navItems = [
   { url: "/", label: i18n[locale].nav.about },
-  { url: "/posts/", label: i18n[locale].nav.posts },
-  { url: "/posts/archive/", label: i18n[locale].blog.archive, count: collections.posts_en.length },
+  { url: "/posts/", label: i18n[locale].nav.posts, count: collections.posts_en.length },
   { url: "/preprints/", label: i18n[locale].nav.preprints },
   { url: "/contact/", label: i18n[locale].nav.contact }
 ] %}
@@ -26,26 +31,7 @@
   <nav class="tty-tabs" aria-label="Main">
     {%- for item in navItems -%}
       {%- if liveUrls.indexOf(" " + item.url + " ") >= 0 -%}
-      {#
-        Longest matching prefix wins. `/posts/` and `/posts/archive/` are both
-        prefixes of a page at `/posts/archive/`, so a plain prefix match marks
-        both tabs current at once — invalid, since aria-current="page" names
-        one page. Comparing this item's url length against every other live
-        item's match picks the single longest one.
-      #}
-      {%- set matches = (page.url == item.url) or (item.url != "/" and page.url.indexOf(item.url) == 0) -%}
-      {%- set on = false -%}
-      {%- if matches -%}
-        {%- set on = true -%}
-        {%- for other in navItems -%}
-          {%- if other.url != item.url and liveUrls.indexOf(" " + other.url + " ") >= 0 -%}
-            {%- set otherMatches = (page.url == other.url) or (other.url != "/" and page.url.indexOf(other.url) == 0) -%}
-            {%- if otherMatches and other.url.length > item.url.length -%}
-              {%- set on = false -%}
-            {%- endif -%}
-          {%- endif -%}
-        {%- endfor -%}
-      {%- endif -%}
+      {%- set on = (page.url == item.url) or (item.url != "/" and page.url.indexOf(item.url) == 0) -%}
       <a class="tty-tabs__tab" href="{{ item.url }}"{% if on %} aria-current="page"{% endif %}>{{ item.label }}{% if item.count %}<span class="tty-tabs__count">({{ item.count }})</span>{% endif %}</a>
       {%- endif -%}
     {%- endfor -%}
@@ -57,9 +43,16 @@
     nothing and no page advertises a `/` binding that is not installed. With
     JavaScript off the control stays hidden, and every post stays reachable from
     /posts/, sitemap.xml and feed.xml.
+
+    The glyph is U+2315, the design system's own way of naming a thing: a
+    Unicode character in a fallback stack, never an SVG icon and never an emoji.
+    `aria-hidden` keeps it out of the accessible name, which the button's
+    `aria-label` already carries. Below 430px the key hint hides and the glyph
+    stands alone — `/` means nothing on a touch keyboard.
   #}
   <button class="tty-nav__search" type="button" data-tty-search-open hidden
           aria-label="{{ i18n[locale].search.open }}" aria-controls="tty-search" aria-expanded="false">
+    <span class="tty-nav__search-glyph" aria-hidden="true">⌕</span>
     {{ tty.keyhint(["/"], "search") }}
   </button>
 </header>
