@@ -174,16 +174,19 @@ function iconElement() {
 // not have rendered at all on some platforms.
 const W = 1200;
 const H = 630;
-const PAD = 24;
+const PAD = 28;
+// Outer margin around the terminal window. Kept small so the text can be large:
+// feeds show the card at roughly 500px wide, which shrinks everything by more than half.
+const MARGIN = 44;
 
 // JetBrains Mono is monospace, so its advance width is exactly 0.6em. That makes the
 // wrap deterministic arithmetic rather than a render-and-measure loop: pick the
 // largest size whose wrapped line count fits the box. A short title is set large, a
 // long one steps down, and neither overflows.
 const ADVANCE = 0.6;
-const TITLE_SIZES = [56, 50, 44, 38, 32];
+const TITLE_SIZES = [84, 76, 68, 60, 52, 46];
 const TITLE_LINE_HEIGHT = 1.25;
-const TITLE_BOX_H = 250;
+const TITLE_BOX_H = 264;
 
 function wrapLines(text, fontSize, boxWidth) {
   const perLine = Math.floor(boxWidth / (fontSize * ADVANCE));
@@ -215,11 +218,24 @@ function fitTitle(text, boxWidth) {
   return { size, lines: wrapLines(text, size, boxWidth).slice(0, max) };
 }
 
-const dot = (color) => el("div", { display: "flex", width: 12, height: 12, backgroundColor: color });
+// Secondary text size (window name, command, meta, mark). At 22px it showed as about
+// 9px in a feed, too small to read.
+const SMALL = 30;
+const META_SIZES = [SMALL, 28, 26, 24];
+
+// Largest meta size whose single line fits the panel. Monospace, so this is arithmetic.
+function fitMeta(text, boxWidth) {
+  return META_SIZES.find((s) => text.length * s * ADVANCE <= boxWidth) ?? META_SIZES.at(-1);
+}
+
+const DOT = 16;
+const DOT_GAP = 10;
+const dot = (color) => el("div", { display: "flex", width: DOT, height: DOT, backgroundColor: color });
 
 function thumbElement({ windowName, command, title, meta }) {
-  const inner = W - 128; // panel width: 64px inset on each side
+  const inner = W - 2 * MARGIN; // panel width
   const { size, lines } = fitTitle(title, inner - 2 * PAD);
+  const metaSize = fitMeta(meta, inner - 2 * PAD);
 
   return el(
     "div",
@@ -227,7 +243,7 @@ function thumbElement({ windowName, command, title, meta }) {
       width: W,
       height: H,
       display: "flex",
-      padding: 64,
+      padding: MARGIN,
       backgroundColor: C.root,
       fontFamily: "JetBrains Mono",
     },
@@ -249,25 +265,25 @@ function thumbElement({ windowName, command, title, meta }) {
             {
               display: "flex",
               alignItems: "center",
-              height: 52,
+              height: 68,
               paddingLeft: PAD,
               paddingRight: PAD,
               borderBottom: `1px solid ${C.border}`,
             },
             [
-              el("div", { display: "flex", gap: 8 }, [dot(C.red), dot(C.yellow), dot(C.green)]),
+              el("div", { display: "flex", gap: DOT_GAP }, [dot(C.red), dot(C.yellow), dot(C.green)]),
               el(
                 "div",
                 {
                   display: "flex",
                   flexGrow: 1,
                   justifyContent: "center",
-                  fontSize: 20,
+                  fontSize: 26,
                   color: C.muted,
                   // The dots occupy the left, so pull the centred name back by their
                   // width — otherwise it centres in the space LEFT OVER, not in the
                   // panel, and sits visibly right of centre.
-                  marginRight: 52,
+                  marginRight: 3 * DOT + 2 * DOT_GAP,
                 },
                 windowName,
               ),
@@ -285,7 +301,7 @@ function thumbElement({ windowName, command, title, meta }) {
             },
             [
               // `$` is the one yellow character, as in every terminal block on the site.
-              el("div", { display: "flex", fontSize: 22, gap: 9 }, [
+              el("div", { display: "flex", fontSize: SMALL, gap: 12 }, [
                 el("div", { display: "flex", color: C.yellow }, "$"),
                 el("div", { display: "flex", color: C.muted }, command),
               ]),
@@ -294,7 +310,7 @@ function thumbElement({ windowName, command, title, meta }) {
                 {
                   display: "flex",
                   flexDirection: "column",
-                  marginTop: 22,
+                  marginTop: 18,
                   fontSize: size,
                   fontWeight: 700,
                   lineHeight: TITLE_LINE_HEIGHT,
@@ -304,16 +320,16 @@ function thumbElement({ windowName, command, title, meta }) {
               ),
               // Pushes everything after it to the bottom of the panel.
               el("div", { display: "flex", flexGrow: 1 }, ""),
-              el("div", { display: "flex", fontSize: 22, color: C.muted }, meta),
-              el("div", { display: "flex", alignItems: "center", gap: 8, marginTop: 20 }, [
+              el("div", { display: "flex", fontSize: metaSize, color: C.muted }, meta),
+              el("div", { display: "flex", alignItems: "center", gap: 10, marginTop: 18 }, [
                 el(
                   "div",
-                  { display: "flex", fontFamily: "Silkscreen", fontSize: 22, color: C.primary },
+                  { display: "flex", fontFamily: "Silkscreen", fontSize: SMALL, color: C.primary },
                   "elliancarlos",
                 ),
                 // The nav's caret. A box, not a glyph — Silkscreen carries no block
                 // character, and a box keeps its size tied to the text beside it.
-                el("div", { display: "flex", width: 10, height: 22, backgroundColor: C.yellow }, ""),
+                el("div", { display: "flex", width: 14, height: SMALL, backgroundColor: C.yellow }, ""),
               ]),
             ],
           ),
@@ -356,7 +372,7 @@ function readPost(slug) {
   return {
     slug,
     title: decode(title[1]),
-    meta: [...dateAndTime, tags.slice(0, 3).join(", ")].filter(Boolean).join("   ·   "),
+    meta: [...dateAndTime, tags.slice(0, 3).join(", ")].filter(Boolean).join("  ·  "),
   };
 }
 
@@ -393,7 +409,7 @@ const siteThumb = thumbElement({
   windowName: "~",
   command: "whoami",
   title: "Ellian Carlos",
-  meta: "software engineer   ·   empirical software engineering   ·   linux kernel",
+  meta: "software engineer  ·  empirical software engineering  ·  linux kernel",
 });
 
 // The canonical default, at a URL no cache has ever held.
