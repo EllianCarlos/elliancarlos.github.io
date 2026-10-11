@@ -14,7 +14,7 @@ layout: layouts/layout.njk
     <div class="tty-term__line"><span class="tty-term__prompt" aria-hidden="true">$</span> <span>whoami</span></div>
     <div class="tty-term__out">elliancarlos</div>
     <div class="tty-term__line" style="margin-top: 8px"><span class="tty-term__prompt" aria-hidden="true">$</span> <span>pwd</span></div>
-    <div class="tty-term__out">/brazil/sao-paulo</div>
+    <div class="tty-term__out">/latam/brazil</div>
     <div class="tty-term__line" style="margin-top: 8px"><span class="tty-term__prompt" aria-hidden="true">$</span> <span>groups</span></div>
     <div class="tty-term__out">amazon ime-usp</div>
   {% endcall %}
@@ -53,7 +53,7 @@ layout: layouts/layout.njk
       </p>
       <p>
       I'm a Software Development Engineer at Amazon, and I hold a bachelor's in Information Systems from the ICMC, an institute of the University of São Paulo.
-      My role extends beyond coding; I am a Problem Solver and Teacher, most of my work is to disambiguate problems, remove blockers and enable technical solutions to take form.
+      I consider myself a Problem Solver and Teacher, most of my work is to disambiguate problems, remove blockers and enable technical solutions to take form.
       I write a lot of documents to enable leadership and S-teams of our engineering teams, operate on an excellence level and impact the customer experience.
       </p>
       <p>
@@ -97,6 +97,13 @@ layout: layouts/layout.njk
       {{ tty.divider(i18n.en.footer.elsewhere) }}
       <div class="tty-linklist" style="margin-top: 14px">
         <div class="tty-linklist__row">
+          <span class="tty-linklist__key">resume</span>
+          {# The visible text already ends in .pdf, so the accessible name adds
+             only the new-tab fact — saying "PDF" twice reads badly aloud. #}
+          <a href="/Ellian_Carlos_Resume.pdf" target="_blank" rel="noreferrer noopener"
+             aria-label="Ellian_Carlos_Resume.pdf {{ i18n.en.nav.opensNewTab }}">Ellian_Carlos_Resume.pdf</a>
+        </div>
+        <div class="tty-linklist__row">
           {# "github", not "git": this row links a forge account, and git is a
              different thing entirely — a version control system with no account
              to link. Same key on the contact page. #}
@@ -104,7 +111,7 @@ layout: layouts/layout.njk
           <a href="{{ seo.social.github }}" target="_blank" rel="noreferrer noopener">github.com/elliancarlos</a>
         </div>
         <div class="tty-linklist__row">
-          <span class="tty-linklist__key">work</span>
+          <span class="tty-linklist__key">LinkedIn</span>
           <a href="{{ seo.social.linkedin }}" target="_blank" rel="noreferrer noopener">linkedin.com/in/elliancarlos</a>
         </div>
         <div class="tty-linklist__row">
@@ -119,13 +126,6 @@ layout: layouts/layout.njk
         <div class="tty-linklist__row">
           <span class="tty-linklist__key">{{ i18n.en.nav.academicCv }}</span>
           <a href="{{ seo.social.lattes }}" target="_blank" rel="noreferrer noopener">lattes.cnpq.br/3423853440338718</a>
-        </div>
-        <div class="tty-linklist__row">
-          <span class="tty-linklist__key">resume</span>
-          {# The visible text already ends in .pdf, so the accessible name adds
-             only the new-tab fact — saying "PDF" twice reads badly aloud. #}
-          <a href="/Ellian_Carlos_Resume.pdf" target="_blank" rel="noreferrer noopener"
-             aria-label="Ellian_Carlos_Resume.pdf {{ i18n.en.nav.opensNewTab }}">Ellian_Carlos_Resume.pdf</a>
         </div>
         <div class="tty-linklist__row">
           <span class="tty-linklist__key">feed</span>

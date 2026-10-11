@@ -50,7 +50,7 @@
     "description": "Papers I have written or co-written. Each row opens the PDF in a new tab.",
     "paper": "paper",
     "papers": "papers",
-    "openHint": "each row opens a pdf"
+    "openHint": ""
   },
   "contact": {
     "title": "contact",
