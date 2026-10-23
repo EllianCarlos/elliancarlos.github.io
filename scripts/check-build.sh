@@ -18,11 +18,28 @@ passes=0
 # defined before the first section, not beside its first use.
 repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 
+# dist/share/ holds standalone HTML pages (share/ at the repository root) that
+# carry none of the site's layout. Every site-wide sweep below walks "$DIST", so
+# they run on a copy of dist/ without share/; the share section at the bottom
+# reads the real tree through real_dist. One exclusion here, instead of one per
+# sweep, so a new sweep cannot forget it.
+real_dist="$DIST"
+if [ -d "$DIST/share" ]; then
+  site_view=$(mktemp -d)
+  trap 'rm -r "$site_view"' EXIT
+  for entry in "$DIST"/* "$DIST"/.[!.]*; do
+    [ -e "$entry" ] || continue
+    [ "$(basename -- "$entry")" = share ] && continue
+    cp -R "$entry" "$site_view/"
+  done
+  DIST="$site_view"
+fi
+
 # The suite's own tripwire (I8): a dropped, renamed or mistyped assertion call
 # must not vanish silently. EXPECTED_ASSERTIONS is the total `passes + fails`
 # this script produces today, counted (not guessed) after every change to the
 # assertion list. See the check at the bottom of the file.
-EXPECTED_ASSERTIONS=337
+EXPECTED_ASSERTIONS=339
 
 pass() { printf '  ok   %s\n' "$1"; passes=$((passes + 1)); }
 bad()  { printf '  FAIL %s\n' "$1"; fails=$((fails + 1)); }
@@ -1305,6 +1322,29 @@ if [ "$script_count" -eq 3 ]; then
   pass "the output ships exactly three scripts ($script_count)"
 else
   bad "the output ships exactly three scripts (found $script_count)"
+fi
+
+section "shared standalone pages"
+# share/ is copied verbatim, so the build tree must equal the source tree byte
+# for byte. With no share/ in the repository, there must be no dist/share/.
+if [ -d "$repo_root/share" ]; then
+  if diff -rq "$repo_root/share" "$real_dist/share" >/dev/null 2>&1; then
+    pass "dist/share/ is a verbatim copy of share/"
+  else
+    bad "dist/share/ is a verbatim copy of share/"
+  fi
+elif [ -e "$real_dist/share" ]; then
+  bad "dist/share/ exists only when share/ does"
+else
+  pass "dist/share/ exists only when share/ does"
+fi
+# The noindex rule must sit inside the /share/* block of _headers, not anywhere
+# in the file: read the block from its path line to the next blank line.
+if awk '$0 == "/share/*" {b=1; next} /^[[:space:]]*$/ {b=0} b && /X-Robots-Tag: noindex/ {f=1} END {exit !f}' \
+  "$real_dist/_headers"; then
+  pass "_headers marks /share/* noindex"
+else
+  bad "_headers marks /share/* noindex"
 fi
 
 printf '\n'
