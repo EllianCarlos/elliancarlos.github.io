@@ -28,6 +28,19 @@
 module.exports = [
   {
     title:
+      "Token on Me: A Token-Level Dataset of Company Authorship in FLOSS Codebases",
+    authors:
+      "Ellian Carlos Costa, Arthur Pilone, David Tadokoro, Paulo Meirelles",
+    venue: "preprint",
+    kind: "data paper",
+    // Submitted to the MSR 2027 Data and Tool Showcase Track; not accepted, and
+    // notification is due 2027-01-05, so `venue` stays "preprint" until then.
+    // `date` is the submission deadline (2026-11-10), not a presentation day.
+    date: "2026-11-10",
+    pdf: "/preprints/Token_on_Me_A_Token_Level_Dataset_of_Company_Authorship_in_FLOSS_Codebases.pdf",
+  },
+  {
+    title:
       "Corporate Truck Factor: Firm-Level Knowledge Concentration in Linux Kernel Subsystems",
     authors:
       "Ellian Carlos Costa, Gabriel Braga Lagrotaria, Ricardo Hideki Hangai Kojo, Arthur Pilone, Paulo Meirelles",

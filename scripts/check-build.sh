@@ -22,7 +22,7 @@ repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 # must not vanish silently. EXPECTED_ASSERTIONS is the total `passes + fails`
 # this script produces today, counted (not guessed) after every change to the
 # assertion list. See the check at the bottom of the file.
-EXPECTED_ASSERTIONS=337
+EXPECTED_ASSERTIONS=339
 
 pass() { printf '  ok   %s\n' "$1"; passes=$((passes + 1)); }
 bad()  { printf '  FAIL %s\n' "$1"; fails=$((fails + 1)); }
@@ -1206,6 +1206,26 @@ grep_in "preprints/index.html" 'class="tty-paper__host">@ ' "the optional host r
 grep_in "preprints/index.html" 'class="tty-badge tty-badge--outline"' "the optional paper kind renders as a tag"
 grep_in "styles/tty/layout.css" ".tty-paper__venue" "the venue line has its own rule"
 grep_in "styles/tty/layout.css" ".tty-paper__host" "the host steps down from the venue"
+# Relationship assertions: every entry in preprints.js is a row, and every row's
+# PDF resolves in dist/. Both sides come from the build; no title is named.
+# Newlines are flattened first so a tag split across lines is still counted.
+entry_count=$(grep -c '^    pdf:' src/_data/preprints.js 2>/dev/null || echo 0)
+row_count=$(tr '\n' ' ' < "$DIST/preprints/index.html" 2>/dev/null | grep -oE '<a class="tty-paper"' | wc -l)
+if [ "$entry_count" -gt 0 ] && [ "$entry_count" -eq "$row_count" ]; then
+  pass "every preprints.js entry renders as a row ($row_count)"
+else
+  bad "every preprints.js entry renders as a row (entries $entry_count, rows $row_count)"
+fi
+pdf_missing=0
+for href in $(tr '\n' ' ' < "$DIST/preprints/index.html" 2>/dev/null \
+  | grep -oE '<a class="tty-paper" href="[^"]*"' | sed -E 's/.*href="([^"]*)"/\1/'); do
+  [ -f "$DIST$href" ] || { pdf_missing=1; printf '  missing %s\n' "$href"; }
+done
+if [ "$pdf_missing" -eq 0 ] && [ "$row_count" -gt 0 ]; then
+  pass "every preprint row's PDF exists in dist/"
+else
+  bad "every preprint row's PDF exists in dist/"
+fi
 
 section "homepage"
 grep_in "index.html" 'class="tty-prose"' "the biography is inside the prose wrapper"
