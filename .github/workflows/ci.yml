@@ -52,7 +52,7 @@ jobs:
 
       # There is no test suite. The build output is the proof.
       - name: Check the build output
-        run: ./scripts/check-build.sh
+        run: bash scripts/check-build.sh
 
       - uses: actions/upload-artifact@v7
         with:
