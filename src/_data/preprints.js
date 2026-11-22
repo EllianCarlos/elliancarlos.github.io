@@ -1,13 +1,13 @@
 /**
  * Papers listed at /preprints/. Newest first — the template does not sort.
  *
- * Required fields, all strings:
+ * Required fields, all strings (except `date`, see below):
  *   title    the paper title, as printed on the PDF
  *   authors  the full author list, in the printed order, separated by ", "
  *   venue    where the paper was published: the workshop, conference or journal
  *            that accepted it, with its year — or "preprint" if nothing has
  *            accepted it yet
- *   date     YYYY-MM-DD. The day the paper was PRESENTED at `venue` — not the
+ *   date     (optional, omit until presented) YYYY-MM-DD. The day the paper was PRESENTED at `venue` — not the
  *            day this entry was written, and not the camera-ready date. For a
  *            workshop, that is the workshop's own day, which is often one day
  *            inside a longer `host` conference. Take it from the venue's own
@@ -35,8 +35,8 @@ module.exports = [
     kind: "data paper",
     // Submitted to the MSR 2027 Data and Tool Showcase Track; not accepted, and
     // notification is due 2027-01-05, so `venue` stays "preprint" until then.
-    // `date` is the submission deadline (2026-11-10), not a presentation day.
-    date: "2026-11-10",
+    // No `date`: nothing has been presented yet. Add the presentation day from
+    // the venue's programme once the paper is accepted.
     pdf: "/preprints/Token_on_Me_A_Token_Level_Dataset_of_Company_Authorship_in_FLOSS_Codebases.pdf",
   },
   {

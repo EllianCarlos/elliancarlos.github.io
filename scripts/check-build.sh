@@ -39,7 +39,7 @@ fi
 # must not vanish silently. EXPECTED_ASSERTIONS is the total `passes + fails`
 # this script produces today, counted (not guessed) after every change to the
 # assertion list. See the check at the bottom of the file.
-EXPECTED_ASSERTIONS=341
+EXPECTED_ASSERTIONS=342
 
 pass() { printf '  ok   %s\n' "$1"; passes=$((passes + 1)); }
 bad()  { printf '  FAIL %s\n' "$1"; fails=$((fails + 1)); }
@@ -1242,6 +1242,15 @@ if [ "$pdf_missing" -eq 0 ] && [ "$row_count" -gt 0 ]; then
   pass "every preprint row's PDF exists in dist/"
 else
   bad "every preprint row's PDF exists in dist/"
+fi
+
+# A row prints a date only when its entry has one: dated entries == <time> tags.
+date_entries=$(grep -c '^    date:' src/_data/preprints.js 2>/dev/null || echo 0)
+time_tags=$(tr '\n' ' ' < "$DIST/preprints/index.html" 2>/dev/null | grep -oE '<time datetime=' | wc -l)
+if [ "$date_entries" -eq "$time_tags" ]; then
+  pass "a preprint row shows a date exactly when its entry has one ($time_tags)"
+else
+  bad "a preprint row shows a date exactly when its entry has one (entries $date_entries, tags $time_tags)"
 fi
 
 section "homepage"
